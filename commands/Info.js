@@ -17,7 +17,7 @@ class Info extends command{
                 fields: [
                     {
                         name: "Author",
-                        value: "Bean#8888"
+                        value: "bean#8888"
                     },
                     {
                         name: "Guilds",

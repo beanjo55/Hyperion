@@ -223,7 +223,7 @@ Hyperion.on("messageCreate", async (msg) => {
 
     let contentClean = msg.content.replace(/<@!/g, "<@");
     if((contentClean.startsWith(Hyperion.user.mention) || msg.content.startsWith(prefix))){
-        console.log(prefix);
+        //console.log(prefix);
         let args = null;
         let cmdLabel = "";
         if(contentClean.startsWith(Hyperion.user.mention)){

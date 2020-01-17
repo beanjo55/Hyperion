@@ -51,6 +51,7 @@ class Whois extends command{
                     memb = await msg.channel.guild.getRESTMember(uID);
                 } else{
                     msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
+                    return;
                 }
             }
         }
