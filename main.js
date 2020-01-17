@@ -178,7 +178,7 @@ function checkRequiredGuilds(cmd, msg){
 
 
 
-Hyperion.on("messageCreate", (msg) => {
+Hyperion.on("messageCreate", async (msg) => {
 
     if(msg.channel.type === 1){
         if(msg.author.id === Hyperion.user.id){return;}
@@ -208,7 +208,9 @@ Hyperion.on("messageCreate", (msg) => {
         return guilds.prefix[0];
     });*/
 
-    let prefix = "%";
+    const aprefix = await Hyperion.guildModel.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
+
+    let prefix = aprefix.prefix[0];
 
     if(msg.author.bot){
         return;
