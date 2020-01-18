@@ -17,6 +17,7 @@ class Avatar extends command{
     memb = resolveUser(msg, args[0]);
     if(!memb){
         msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
+        return;
     }
     const data = {
         embed: {

@@ -46,6 +46,7 @@ class Whois extends command{
         memb = resolveUser(msg, args[0]);
         if(!memb){
             msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
+            return;
         }
         const jat = new Date(memb.joinedAt);
         const cat = new Date(memb.createdAt);
