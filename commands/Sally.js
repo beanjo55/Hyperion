@@ -10,6 +10,8 @@ class Sally extends command{
         this.name = "sally";
         this.id = this.name;
         this.helpInfo = "Shows Sally, a cute chocolate lab";
+        this.commandType = "fun";
+
     }
     async execute(msg){
         const randomInt = Math.floor(Math.random(0, sallys.length) * sallys.length);

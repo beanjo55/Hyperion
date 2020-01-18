@@ -18,6 +18,7 @@ class Owo extends command{
         this.name = "owoify";
         this.id = this.name;
         this.helpInfo = "owoifies some text, has 3 levels (owo, uwu, and uvu), put the level as the first word";
+        this.commandType = "fun";
 
     }
     async execute(msg, args){

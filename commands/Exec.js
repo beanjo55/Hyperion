@@ -25,6 +25,7 @@ class Exec extends command{
         this.alwaysEnabled = true;
         this.requiredUsers = ["253233185800847361"];
         this.id = this.name;
+        this.commandType = "developer";
     }
     async execute (msg, args) {
         if(msg.author.id !== config.owner){

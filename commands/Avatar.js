@@ -7,7 +7,8 @@ class Avatar extends command{
         this.name = "avatar";
         this.aliases = ["av"];
         this.id = this.name;
-        this.helpInfo = "shows your or another user's avatar"
+        this.helpInfo = "shows your or another user's avatar";
+        this.commandType = "info";
     }
     async execute (msg, args){
         let memb = null;

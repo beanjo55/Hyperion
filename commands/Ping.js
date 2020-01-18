@@ -11,6 +11,7 @@ class Ping extends command{
         this.alwaysEnabled = true;
         this.id = this.name;
         this.helpInfo = "You should know this, but checks the bot's latency";
+        this.commandType = "info";
     }
     async execute (msg)  {
         //hi

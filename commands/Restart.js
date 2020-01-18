@@ -13,6 +13,8 @@ class Restart extends command{
         this.alwaysEnabled = true;
         this.id = this.name;
         this.requiredUsers = ["253233185800847361"];
+        this.commandType = "internal";
+
     }
     async execute (msg, args) {
         if(msg.author.id !== config.owner){

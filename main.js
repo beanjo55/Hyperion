@@ -14,8 +14,7 @@ const Hyperion = new Eris(config.token, {
 
 const { command } = require("./command.js");
 
-Hyperion.commands = [];
-Hyperion.Ccommands = new Eris.Collection(command);
+Hyperion.commands = new Eris.Collection(command);
 mongoose.connect('mongodb://localhost/Hyperion', {useNewUrlParser: true});
 
 const db = mongoose.connection;
@@ -155,7 +154,7 @@ const load = () => {
             console.log(filepath);
             const cmd = require(filepath);
             const newCmd = new cmd.cmd();
-            Hyperion.commands.push(newCmd);
+            Hyperion.commands.add(newCmd);
         });
     });
 }
@@ -166,7 +165,7 @@ Hyperion.on("ready", () => { // When the bot is ready
 });
 
 
-exports.commands = Hyperion.commands;
+
 
 function checkRequiredUsers(cmd, msg){
     return cmd.requiredUsers.includes(msg.author.id);

@@ -8,6 +8,8 @@ class Info extends command{
         this.name = "info";
         this.id = this.name;
         this.helpInfo = "Shows some bot info"
+        this.commandType = "info";
+
     }
     async execute(msg, args, Hyperion){
         const data = {

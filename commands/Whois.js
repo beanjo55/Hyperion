@@ -37,6 +37,8 @@ class Whois extends command{
         this.aliases = ["w", "userinfo"];
         this.id = this.name;
         this.helpInfo = "Gets information about yourself or another user";
+        this.commandType = "info";
+
     }
     async execute(msg, args){
         let memb = null;

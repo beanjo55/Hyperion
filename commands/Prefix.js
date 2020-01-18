@@ -10,6 +10,7 @@ class Prefix extends command{
         this.helpInfo = "Changes the server prefix";
 
         this.requiredPerms = ["manageGuild"];
+        this.commandType = "manager";
     }
     async execute(msg, args, Hyperion){
         if(args.length === 0){
@@ -17,12 +18,12 @@ class Prefix extends command{
             let prefix = aprefix.prefix[0];
             msg.channel.createMessage(`the prefix is \`${prefix}\``);
             return;
-        }else{
-            let newPrefix = args[0];
-            await Hyperion.guildModel.updateOne({ 'guildID': msg.channel.guild.id }, { 'prefix': newPrefix});
-            msg.channel.createMessage(`Prefix changed to \`${args[0]}\``);
-            return;
         }
+        let newPrefix = args[0];
+        await Hyperion.guildModel.updateOne({ 'guildID': msg.channel.guild.id }, { 'prefix': newPrefix});
+        msg.channel.createMessage(`Prefix changed to \`${args[0]}\``);
+        return;
     }
 }
+
 exports.cmd = Prefix;
