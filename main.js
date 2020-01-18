@@ -23,7 +23,7 @@ db.once('open', function() {
   console.log("db connected");
 });
 
-const { Guild } = require('./guild.js');
+const { Guild } = require('./Models/guild.js');
 
 Hyperion.db = db;
 //exports.Hyperion = Hyperion;
