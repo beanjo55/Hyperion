@@ -41,27 +41,11 @@ class Whois extends command{
 
     }
     async execute(msg, args){
-        let memb = null;
-        if(args.length != 0){
-            if(msg.mentions.length != 0){
-                memb = await msg.channel.guild.getRESTMember(msg.mentions[0].id);
-            }
-            else{
-                let uIDt = args[0].match(/^\d+$/);
-                if(uIDt !== null){
-                    let uID = uIDt[0];
-                    memb = await msg.channel.guild.getRESTMember(uID);
-                } else{
-                    memb = resolveUser(msg, args[0]);
-                    if(!memb){
-                        msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
-                        return;
-                    }
-                }
-            }
-        }
-        else{
-            memb = msg.member;
+        let memb = undefined;
+        
+        memb = resolveUser(msg, args[0]);
+        if(!memb){
+            msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
         }
         const jat = new Date(memb.joinedAt);
         const cat = new Date(memb.createdAt);

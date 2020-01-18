@@ -12,28 +12,11 @@ class Avatar extends command{
         this.commandType = "info";
     }
     async execute (msg, args){
-        let memb = null;
-    if(args.length != 0){
+    let memb = undefined;
         
-        if(msg.mentions.length != 0){
-            memb = await msg.channel.guild.getRESTMember(msg.mentions[0].id);
-        }
-        else{
-            let uIDt = args[0].match(/^\d+$/);
-            if(uIDt !== null){
-                let uID = uIDt[0];
-                memb = await msg.channel.guild.getRESTMember(uID);
-            } else{
-                memb = resolveUser(msg, args[0]);
-                    if(!memb){
-                        msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
-                        return;
-                    }
-            }
-        }
-    }
-    else{
-        memb = msg.member;
+    memb = resolveUser(msg, args[0]);
+    if(!memb){
+        msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
     }
     const data = {
         embed: {
