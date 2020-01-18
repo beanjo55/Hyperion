@@ -1,4 +1,5 @@
 const { command } = require('../command.js');
+const { resolveUser } = require("../util.js");
 
 
 class Avatar extends command{
@@ -23,7 +24,11 @@ class Avatar extends command{
                 let uID = uIDt[0];
                 memb = await msg.channel.guild.getRESTMember(uID);
             } else{
-                msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
+                memb = resolveUser(msg, args[0]);
+                    if(!memb){
+                        msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
+                        return;
+                    }
             }
         }
     }

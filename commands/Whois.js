@@ -1,6 +1,6 @@
 
 const { command } = require('../command.js');
-const { sortRoles } = require("../util.js");
+const { sortRoles, resolveUser } = require("../util.js");
 //const { Hyperion } = require("../main.js");
 
 
@@ -52,8 +52,11 @@ class Whois extends command{
                     let uID = uIDt[0];
                     memb = await msg.channel.guild.getRESTMember(uID);
                 } else{
-                    msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
-                    return;
+                    memb = resolveUser(msg, args[0]);
+                    if(!memb){
+                        msg.channel.createMessage("I'm not sure who that is, try a user ID or mention them");
+                        return;
+                    }
                 }
             }
         }
