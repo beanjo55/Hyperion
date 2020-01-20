@@ -14,6 +14,9 @@ class Prefix extends command{
     }
     async execute(msg, args, Hyperion){
         let newPrefix = args[0];
+        if(newPrefix === null || newPrefix === undefined){
+            return;
+        }
         await Hyperion.guildModel.updateOne({ 'guildID': msg.channel.guild.id }, { 'prefix': newPrefix});
         msg.channel.createMessage(`Prefix changed to \`${args[0]}\``);
         return;

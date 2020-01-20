@@ -15,7 +15,7 @@ const Hyperion = new Eris(config.token, {
 const { command } = require("./command.js");
 
 Hyperion.commands = new Eris.Collection(command);
-mongoose.connect('mongodb://localhost/Hyperion', {useNewUrlParser: true});
+mongoose.connect(config.dbPath, {useNewUrlParser: true, useUnifiedTopology: true});
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -200,6 +200,12 @@ Hyperion.on("messageCreate", async (msg) => {
         return;
         
     }
+
+    const registered = await Hyperion.guildModel.exists({ guildID: msg.channel.guild.id});
+    if(!registered){
+        await Hyperion.registerGuild(msg.channel.guild);
+    }
+
     /*
     let prefix = Hyperion.guildModel.findOne({'guildID': msg.channel.guild.id}, 'prefix', function(err, guilds){
         if(err){
@@ -212,9 +218,9 @@ Hyperion.on("messageCreate", async (msg) => {
     });*/
 
     const aprefix = await Hyperion.guildModel.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
-
+    //console.log(aprefix)
     let prefix = aprefix.prefix[0];
-
+    //let prefix = "<"
     if(msg.author.bot){
         return;
     }
@@ -318,9 +324,9 @@ Hyperion.on("messageCreate", async (msg) => {
 
 
     }
-    if((msg.author.id === "253233185800847361") && (msg.content.startsWith("$h"))){
+    if((msg.author.id === "253233185800847361") && (msg.content.startsWith(config.devPrefix))){
 
-        prefix = "$h";
+        prefix = config.devPrefix;
 
         if(msg.author.bot){
             return;
@@ -442,6 +448,9 @@ Hyperion.on("debug", (msg, id) =>{
     }
 });*/
 
+if(config.build === "dev"){
+    console.log(" \n Development \n ");
+}
 
 
 load();
