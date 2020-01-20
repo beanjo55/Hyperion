@@ -200,6 +200,12 @@ Hyperion.on("messageCreate", async (msg) => {
         return;
         
     }
+
+    const registered = await Hyperion.guildModel.exists({ guildID: msg.channel.guild.id});
+    if(!registered){
+        await Hyperion.registerGuild(msg.channel.guild);
+    }
+
     /*
     let prefix = Hyperion.guildModel.findOne({'guildID': msg.channel.guild.id}, 'prefix', function(err, guilds){
         if(err){
@@ -212,9 +218,9 @@ Hyperion.on("messageCreate", async (msg) => {
     });*/
 
     const aprefix = await Hyperion.guildModel.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
-
+    //console.log(aprefix)
     let prefix = aprefix.prefix[0];
-
+    //let prefix = "<"
     if(msg.author.bot){
         return;
     }
@@ -442,6 +448,9 @@ Hyperion.on("debug", (msg, id) =>{
     }
 });*/
 
+if(config.build === "dev"){
+    console.log(" \n Development \n ");
+}
 
 
 load();
