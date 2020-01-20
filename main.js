@@ -162,6 +162,10 @@ const load = () => {
 
 Hyperion.on("ready", () => { // When the bot is ready
     console.log("Ready!"); // Log "Ready!"
+    Hyperion.editStatus("online", {
+        name: `%help | ${Hyperion.guilds.size} servers`,
+        type: 0
+    });
 });
 
 
@@ -264,6 +268,14 @@ Hyperion.on("messageCreate", async (msg) => {
                 return;
             }
         }
+
+        if(cmdLabel === "prefix" && args.length === 0){
+            const aprefix = await Hyperion.guildModel.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
+            let prefix = aprefix.prefix[0];
+            msg.channel.createMessage(`the prefix is \`${prefix}\``);
+            return;
+        }
+        
         const found = Hyperion.commands.find(com => (com.name === cmdLabel) || (com.aliases.includes(cmdLabel)));
         if(found != undefined){
 
@@ -374,6 +386,10 @@ Hyperion.on("messageCreate", async (msg) => {
 Hyperion.on("guildCreate", (guild) => {
     //console.log(guild);
     registerGuild(guild);
+    Hyperion.editStatus("online", {
+        name: `%help | ${Hyperion.guilds.size} servers`,
+        type: 0
+    });
 
 });
 Hyperion.on("warn", (info, sID) => {
