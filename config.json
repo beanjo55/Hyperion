@@ -1,8 +1,8 @@
 {
-    "token": "NjMzMDU2NjQ1MTk0MzE3ODI1.Xa3uYw.Nfw7lWctEM_iw4jYi-HKxAYMcRs",
+    "token": "NjUxMjkyNTcyOTc4OTA1MTAy.XhJR0Q.1-bOX3Fr75E9R2I5ym4cqYP885k",
     "owner": "253233185800847361",
-    "prefix": "!!!",
-    "devPrefix": "$",
+    "devPrefix": "$r",
+    "dbPath" : "mongodb://localhost/Relay",
     "blacklist": ["636961976089575426"],
     "aresp": {
         "trigger": "sup",
