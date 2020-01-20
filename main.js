@@ -15,7 +15,7 @@ const Hyperion = new Eris(config.token, {
 const { command } = require("./command.js");
 
 Hyperion.commands = new Eris.Collection(command);
-mongoose.connect('mongodb://localhost/Hyperion', {useNewUrlParser: true});
+mongoose.connect(config.dbPath, {useNewUrlParser: true, useUnifiedTopology: true});
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -275,7 +275,7 @@ Hyperion.on("messageCreate", async (msg) => {
             msg.channel.createMessage(`the prefix is \`${prefix}\``);
             return;
         }
-        
+
         const found = Hyperion.commands.find(com => (com.name === cmdLabel) || (com.aliases.includes(cmdLabel)));
         if(found != undefined){
 
@@ -318,9 +318,9 @@ Hyperion.on("messageCreate", async (msg) => {
 
 
     }
-    if((msg.author.id === "253233185800847361") && (msg.content.startsWith("$h"))){
+    if((msg.author.id === "253233185800847361") && (msg.content.startsWith(config.devPrefix))){
 
-        prefix = "$h";
+        prefix = config.devPrefix;
 
         if(msg.author.bot){
             return;

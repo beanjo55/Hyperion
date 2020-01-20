@@ -2,7 +2,8 @@
     "token": "NjMzMDU2NjQ1MTk0MzE3ODI1.Xa3uYw.Nfw7lWctEM_iw4jYi-HKxAYMcRs",
     "owner": "253233185800847361",
     "prefix": "!!!",
-    "devPrefix": "$",
+    "devPrefix": "$h",
+    "dbPath": "mongodb://localhost/Hyperion",
     "blacklist": ["636961976089575426"],
     "aresp": {
         "trigger": "sup",
