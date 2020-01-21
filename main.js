@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 
+const GBL = require('gblapi.js');
 
 
 const fs = require("fs");
@@ -27,7 +28,7 @@ const { Guild } = require('./Models/guild.js');
 
 Hyperion.db = db;
 //exports.Hyperion = Hyperion;
-
+const Glenn = new GBL('633056645194317825', config.glenn);
 
 
 /*
@@ -166,6 +167,11 @@ Hyperion.on("ready", () => { // When the bot is ready
         name: `%help | ${Hyperion.guilds.size} servers`,
         type: 0
     });
+
+    if(config.build !== "dev"){
+        glennPush();
+    }
+
 });
 
 
@@ -396,7 +402,9 @@ Hyperion.on("guildCreate", (guild) => {
         name: `%help | ${Hyperion.guilds.size} servers`,
         type: 0
     });
-
+    if(config.build !== "dev"){
+        glennPush();
+    }
 });
 Hyperion.on("warn", (info, sID) => {
     console.warn("warning on shard " + sID);
@@ -420,6 +428,10 @@ function registerGuild(guild){
 }
 Hyperion.registerGuild = registerGuild;
 Hyperion.guildModel = Guild;
+
+function glennPush(){
+    Glenn.updateStats(Hyperion.guilds.size, 0);
+}
 /*
 Hyperion.on("error", (err, id) => {
     console.log("error on shard: " + id);
