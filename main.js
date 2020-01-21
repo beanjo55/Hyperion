@@ -431,6 +431,7 @@ Hyperion.guildModel = Guild;
 
 function glennPush(){
     Glenn.updateStats(Hyperion.guilds.size, 0);
+    console.log(`pushed ${Hyperion.guilds.size} guilds to GBL`);
 }
 /*
 Hyperion.on("error", (err, id) => {
