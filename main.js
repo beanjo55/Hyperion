@@ -430,7 +430,8 @@ Hyperion.registerGuild = registerGuild;
 Hyperion.guildModel = Guild;
 
 function glennPush(){
-    Glenn.updateStats(Hyperion.guilds.size, 0);
+    Glenn.updateStats(Hyperion.guilds.size, Hyperion.shards.size);
+    console.log(`pushed ${Hyperion.guilds.size} guilds to GBL`);
 }
 /*
 Hyperion.on("error", (err, id) => {
