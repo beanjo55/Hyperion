@@ -23,7 +23,7 @@ class Restart extends command{
         if(args.length > 0){
             if(args[0] === "Hyperion"){
                 msg.channel.createMessage("restarting Hyperion");
-                exec("pm2 restart main");
+                exec("pm2 restart Hyperion");
                 return;
             }
 
@@ -34,7 +34,7 @@ class Restart extends command{
             }
         }
         msg.channel.createMessage("Going down for a restart, give me a minute");
-        exec("pm2 restart main");
+        exec("pm2 restart Hyperion");
         return;
     }
 
