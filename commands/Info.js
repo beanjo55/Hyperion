@@ -31,7 +31,7 @@ class Info extends command{
                     },
                     {
                         name: "Invite",
-                        value: "[Invite me here!](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&scope=bot)"
+                        value: "[Invite me here!](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&permissions=939912310&scope=bot)"
                     },
                     {
                         name: "Support",

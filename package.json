@@ -11,8 +11,9 @@
     "gblapi.js": "^1.3.13",
     "mongoose": "^5.8.3",
     "node-fetch": "^2.6.0",
-    "owoify-js": "^1.0.6",
+    "owoify-js": "^1.0.7",
     "pm2": "^4.2.1",
+    "pretty-ms": "^5.1.0",
     "zlib-sync": "^0.1.6"
   },
   "devDependencies": {
