@@ -31,8 +31,6 @@ class Exec extends command{
         if(msg.author.id !== config.owner){
             return;
         }
-    
-    
         exec(args.join(' '), (error, stdout) => {
             const outputType = error || stdout;
             let output = outputType;
@@ -43,15 +41,7 @@ class Exec extends command{
             }
             output = (output.length > 1980 ? output.substr(0, 1977) + '...' : output);
             return msg.channel.createMessage('```' + output + '```');
-        
-            
         });
-
-
     }
-
-
-
-
 }
 exports.cmd = Exec;

@@ -25,11 +25,16 @@ db.once('open', function() {
 });
 
 const { Guild } = require('./Models/guild.js');
+const { premiumModel } = require("./Models/premium.js");
 
 Hyperion.db = db;
 //exports.Hyperion = Hyperion;
 const Glenn = new GBL('633056645194317825', config.glenn);
-
+const models = {
+    guild: Guild,
+    premium: premiumModel
+};
+Hyperion.models = models;
 
 /*
 Hyperion.registerCommand("role", async (msg, args) =>{
@@ -223,7 +228,7 @@ Hyperion.on("messageCreate", async (msg) => {
         return guilds.prefix[0];
     });*/
 
-    const aprefix = await Hyperion.guildModel.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
+    const aprefix = await Hyperion.models.guild.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
     //console.log(aprefix)
     let prefix = aprefix.prefix[0];
     //let prefix = "<"
@@ -310,9 +315,19 @@ Hyperion.on("messageCreate", async (msg) => {
 
             if(found.requiredPerms.length != 0){
                 let canRun = false;
+                const modRoles = await Hyperion.models.guild.findOne({'guildID': msg.channel.guild.id}, 'modRoles').exec();
+                if(modRoles.length > 0){
+                    modRoles.forEach(mrole =>{
+                        if(msg.member.roles.includes(mrole)){
+                            canRun = true;
+                        }
+                    });
+                }
                 found.requiredPerms.forEach((perm) => {
-                    if(msg.member.permission.has(perm)){
-                        canRun = true;
+                    if(perm !== "mod"){
+                        if(msg.member.permission.has(perm)){
+                            canRun = true;
+                        }
                     }
                 });
                 if(canRun == false){

@@ -17,7 +17,7 @@ class Prefix extends command{
         if(newPrefix === null || newPrefix === undefined){
             return;
         }
-        await Hyperion.guildModel.updateOne({ 'guildID': msg.channel.guild.id }, { 'prefix': newPrefix});
+        await Hyperion.models.guild.updateOne({ 'guildID': msg.channel.guild.id }, { 'prefix': newPrefix});
         msg.channel.createMessage(`Prefix changed to \`${args[0]}\``);
         return;
     }
