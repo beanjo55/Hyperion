@@ -36,6 +36,13 @@ const models = {
 };
 Hyperion.models = models;
 
+const constants = {
+    build: config.build,
+    defaultColor: 15234850,
+    defaultColorHex: "#e87722"
+};
+Hyperion.constants = constants;
+
 /*
 Hyperion.registerCommand("role", async (msg, args) =>{
     const userPerms = await msg.channel.guild.getRESTMember(msg.author.id);
@@ -427,21 +434,63 @@ Hyperion.on("warn", (info, sID) => {
 
 });
 const defualtPrefix = `%`
-function registerGuild(guild){
-    let newGuild = new Guild(
+async function registerGuild(guild){
+    let newGuild = new Hyperion.models.guild(
         {
             guildID: guild.id,
             prefix: defualtPrefix,
         }
     );
-    newGuild.save(function (err) {
+    await newGuild.save(function (err) {
         if(err){
             console.log(`failed to save new guild: ${guild.id}`)
         }
-    })
+    });
+
+    if(Hyperion.constants.build === "dev" || Hyperion.constants.build === "premium"){
+        await registerActivation(guild);
+    }
 
 }
+
+async function registerActivation(guild){
+    let defaultActivated = false;
+    let activator = "";
+    if(guild.ownerID === config.owner){
+        defaultActivated = true;
+        activator = config.owner;
+    }
+    let activation = new Hyperion.models.premium(
+        {
+            guildId: guild.id,
+            activated: defaultActivated,
+            activatorID: activator,
+        }
+    );
+    await activation.save(function (err) {
+        if(err){
+            console.log(`failed to save new activation status on ${Hyperion.constants.build}: ${guild.id}`)
+        }
+    });
+}
+
+async function checkActivation(guild){
+    const registered = await Hyperion.models.premium.exists({ guildID: guild.id});
+    if(!registered){
+        await registerActivation(guild);
+    }
+
+    const activated = await Hyperion.models.premium.findOne({'guildID': guild.id}, 'activated').exec();
+    if(!activated && (guild.ownerID !== config.owner)){
+        let leaveDate = new Date();
+        await Hyperion.createMessage("671452952770248724", `${Hyperion.user.username} left ${guild.name} (${guild.id}), owned by ${guild.ownerID} at ${leaveDate.toUTCString()}`);
+        await guild.leave();
+    }
+
+}
+
 Hyperion.registerGuild = registerGuild;
+Hyperion.registerPremium = registerActivation;
 Hyperion.guildModel = Guild;
 
 function glennPush(){

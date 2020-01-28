@@ -2,9 +2,9 @@ const { Schema, model } = require('mongoose');
 
 const premiumschema = new Schema({
 
-    guildId: {type: String, required: true, index: true},
-    activated: {type: Boolean, required: true},
-    activatorID: {type: String, required: true}
+    guildId: { type: String, required: true, index: true, default: "" },
+    activated: { type: Boolean, required: true, default: false },
+    activatorID: { type: String, default: "" }
 
 
 
