@@ -18,6 +18,7 @@
     "pako": "^1.0.10",
     "pm2": "^4.2.3",
     "pretty-ms": "^5.1.0",
+    "sobriquet": "^2.0.1",
     "zlib-sync": "^0.1.6"
   },
   "devDependencies": {

@@ -481,7 +481,7 @@ async function checkActivation(guild){
     }
 
     const activated = await Hyperion.models.premium.findOne({'guildID': guild.id}, 'activated').exec();
-    if(!activated && (guild.ownerID !== config.owner)){
+    if(!activated.activated && (guild.ownerID !== config.owner)){
         let leaveDate = new Date();
         await Hyperion.createMessage("671452952770248724", `${Hyperion.user.username} left ${guild.name} (${guild.id}), owned by ${guild.ownerID} at ${leaveDate.toUTCString()}`);
         await guild.leave();

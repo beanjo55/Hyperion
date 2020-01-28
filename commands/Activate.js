@@ -19,8 +19,9 @@ class activate extends command{
 
         //make sure user is valid
         const userid = args[1];
+        let usr = undefined;
         try{
-            const usr = Hyperion.getRESTUser(userid)
+            usr = await Hyperion.getRESTUser(userid)
         }
         catch(err){
             return msg.channel.createMessage("Invalid user entered");
@@ -30,7 +31,8 @@ class activate extends command{
         const registered = await Hyperion.models.premium.exists({guildId: guildid});
         if(registered){
             const registration = await Hyperion.models.premium.findOne({'guildId': guildid}, 'activated').exec();
-            if(registration){
+
+            if(registration.activated){
                 return msg.channel.createMessage("Guild has already been activated");
             }else{
                 Hyperion.models.premium.updateOne({ 'guildId': guildid}, {'activated': true, 'activator': userid});
