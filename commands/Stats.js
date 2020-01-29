@@ -19,6 +19,7 @@ class Stats extends command{
         .setTitle("Hyperion stats")
         .setColor("#e87722")
         .setTimestamp()
+        .addField("Commands", `${Hyperion.commands.size} commands`, true)
         .addField("Guilds", `${Hyperion.guilds.size} Guilds`, true)
         .addField("Users", `${Hyperion.users.size} Users`, true)
         .addField("CPU Usage", `${os.loadavg()[0]}`, true)
