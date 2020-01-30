@@ -36,6 +36,7 @@ const models = {
 };
 Hyperion.models = models;
 
+const {handler} = require("./commandHandler/CommandHandler.js");
 const constants = {
     build: config.build,
     defaultColor: 15234850,
@@ -44,6 +45,7 @@ const constants = {
 };
 Hyperion.constants = constants;
 Hyperion.blacklist = config.blacklist;
+Hyperion.handler = handler;
 
 /*
 Hyperion.registerCommand("role", async (msg, args) =>{
@@ -355,7 +357,7 @@ Hyperion.on("messageCreate", async (msg) => {
 
     }
     if((msg.author.id === "253233185800847361") && (msg.content.startsWith(config.devPrefix))){
-
+        Hyperion.handler.handle(msg, Hyperion);
         prefix = config.devPrefix;
 
         if(msg.author.bot){

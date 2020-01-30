@@ -15,7 +15,7 @@ class Ping extends command{
     }
     async execute (msg)  {
         //hi
-        msg.channel.createMessage("pong").then(pingmsg =>{
+        return await msg.channel.createMessage("pong").then(pingmsg =>{
             return pingmsg.edit(`${pingmsg.content} \`${pingmsg.timestamp - msg.timestamp}ms\``)
         });
     }

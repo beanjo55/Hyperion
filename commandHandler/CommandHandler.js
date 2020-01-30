@@ -51,7 +51,7 @@ async function _devCommandHandler(msg, label, args, Hyperion){
     if(!command){
         return;
     }
-    return command.execute(msg, args, Hyperion);
+    return await command.execute(msg, args, Hyperion);
 }
 
 //main handler function
@@ -83,10 +83,10 @@ async function handleCommand(msg, Hyperion){
 async function _prefixHandle(msg, Hyperion){
 
     //test for dev prefix and authorized user
-    if((msg.author.id === Hyperion.config.owner) && (msg.content.startsWith(Hyperion.config.devPrefix))){
+    if((msg.author.id === Hyperion.constants.config.owner) && (msg.content.startsWith(Hyperion.constants.config.devPrefix))){
         const args = msg.content.split(" ").slice(1);
         const cmdLabelar = msg.content.split(" ").slice(0, 1);
-        const label = cmdLabelar[0].slice(Hyperion.config.devPrefix.length).toLowerCase();
+        const label = cmdLabelar[0].slice(Hyperion.constants.config.devPrefix.length).toLowerCase();
         return ["dev", label, args];
     }
 
@@ -140,7 +140,7 @@ async function commandList(Hyperion){
 
 const handler = {
     find: findCommand,
-    lsit: commandList,
+    list: commandList,
     handle: handleCommand
 };
-exports = handler;
+exports.handler = handler;
