@@ -39,9 +39,11 @@ Hyperion.models = models;
 const constants = {
     build: config.build,
     defaultColor: 15234850,
-    defaultColorHex: "#e87722"
+    defaultColorHex: "#e87722",
+    config: config
 };
 Hyperion.constants = constants;
+Hyperion.blacklist = config.blacklist;
 
 /*
 Hyperion.registerCommand("role", async (msg, args) =>{
