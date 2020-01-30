@@ -220,7 +220,7 @@ Hyperion.on("messageCreate", async (msg) => {
         return;
         
     }
-
+    
     const registered = await Hyperion.guildModel.exists({ guildID: msg.channel.guild.id});
     if(!registered){
         await Hyperion.registerGuild(msg.channel.guild);
@@ -236,7 +236,7 @@ Hyperion.on("messageCreate", async (msg) => {
         console.log(guilds.prefix[0])
         return guilds.prefix[0];
     });*/
-
+    
     const aprefix = await Hyperion.models.guild.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
     //console.log(aprefix)
     let prefix = aprefix.prefix[0];
