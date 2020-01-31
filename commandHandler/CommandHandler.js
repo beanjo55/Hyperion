@@ -1,4 +1,4 @@
-
+const signale = require('signale');
 
 
 
@@ -10,14 +10,41 @@ function findCommand(search, Hyperion){
 
 
 //checks if command is dev or internal, and if it should be shown/executed
-function checkInternal(member, command){
+function checkInternal(member, Hyperion){
+    return Hyperion.constants.config.staff.includes(member.id);
+}
 
+function checkDev(member, Hyperion){
+    return Hyperion.constants.config.owner === member.id;
 }
 
 
 //check if the executing user is on the required user list
 function checkRequiredUsers(member, command){
     return command.requiredUsers.includes(member.id);
+}
+
+async function checkPerms(msg, member, command, Hyperion){
+    if(command.requiredPerms.includes("mod")){
+        const modRoles = await Hyperion.models.guild.findOne({'guildID': msg.channel.guild.id}, 'modRoles').exec();
+        if(modRoles.length > 0){
+            modRoles.forEach(mrole =>{
+                if(member.roles.includes(mrole)){
+                    return true;
+                }
+            });
+        }
+    }
+
+    command.requiredPerms.forEach((perm) => {
+        if(perm !== "mod"){
+            if(member.permission.has(perm)){
+                return true;
+            }
+        }
+    });
+
+    return false;
 }
 
 async function generalHelp(msg, Hyperion){
@@ -30,17 +57,68 @@ async function generalHelp(msg, Hyperion){
             description: list.join("\n")
         }
     }
-    return msg.channel.createMessage(data);
+    return await msg.channel.createMessage(data);
+}
+
+async function commandHelp(msg, command){
+    const data = {
+        embed: {
+            description: command.helpInfo,
+            color: 0xe87722,
+            timestamp: new Date(),
+            title: `Help for ${command.name}`
+        }
+    }
+    return await msg.channel.createMessage(data);
 }
 
 
 //handles normal command execution
 async function _commandHandler(msg, label, args, Hyperion){
-    if(label === "help"){
+    if(label === "help" && args.length === 0){
+        return await generalHelp(msg, Hyperion);
+    }
+    if(label === "help" && args.length !== 0){
+        const command = findCommand(args[0], Hyperion);
+        if(!command){
+            return;
+        }
+        return await commandHelp(msg, command);
 
     }
     const command = findCommand(label, Hyperion);
+    if(command.commandType === "internal"){
+        if(!checkInternal(msg.member, Hyperion)){
+            return "unauthorized: internal";
+        }
+    }
+    if(command.commandType === "dev"){
+        if(!checkDev(msg.member, Hyperion)){
+            return "unauthorized: dev";
+        }
+    }
 
+    if(command.requiredUsers.length !== 0){
+        if(!checkRequiredUsers(msg.member, command)){
+            return "unauthorized: not a required user";
+        }
+    }
+
+    if(command.requiredPerms.length !== 0){
+        if(!checkPerms(msg, msg.member, command, Hyperion)){
+            return "unathorized: missing permissions";
+        }
+    }
+
+
+    const out = await command.execute(msg, args, Hyperion)
+    console.log(out)
+
+
+
+    //signale.error(`[Hyperion] command error on guild ${msg.channel.guild.id} from message ${msg.content}`);
+    //signale.error(err);
+    
 
 }
 

@@ -1,6 +1,5 @@
 const { command } = require('../command.js');
 const owoify = require('owoify-js').default;
-
 const _clean = text => {
     let rx = /`/g;
     let rx2 = /\*/g;
@@ -28,33 +27,35 @@ class Owo extends command{
             let text = args.slice(1, args.length).join(" ");
             let output = _clean(owoify(text, "uwu"));
             if(output.length > 2000){
-                msg.channel.createMessage("The output was too long!");
-                return;
+                return await msg.channel.createMessage("The output was too long!");
             }
-            msg.channel.createMessage(output);
-            return;
+            return await msg.channel.createMessage(output);
         }else{
             if(args[0] == "uvu"){
                 //console.log("uvu");
                 let text = args.slice(1, args.length).join(" ");
                 let output = _clean(owoify(text, "uvu"));
                 if(output.length > 2000){
-                    msg.channel.createMessage("The output was too long!");
-                    return;
+                    return await msg.channel.createMessage("The output was too long!");
                 }
-                msg.channel.createMessage(output);
-                return;
+                return await msg.channel.createMessage(output);
             }else{
                 let text = args.slice(0, args.length).join(" ");
                 let output = _clean(owoify(text));
                 if(output.length > 2000){
-                    msg.channel.createMessage("The output was too long!");
-                    return;
+                    return await msg.channel.createMessage("The output was too long!");
                 }
-                msg.channel.createMessage(output);
-                return;
+
+
+                msg.channel.createMessage(output)
+
+
+
+
+
             }
         }
+
     }
 }
 exports.cmd = Owo;

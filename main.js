@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 const GBL = require('gblapi.js');
-
+const signale = require('signale');
 
 const fs = require("fs");
 
@@ -46,6 +46,7 @@ const constants = {
 Hyperion.constants = constants;
 Hyperion.blacklist = config.blacklist;
 Hyperion.handler = handler;
+Hyperion.logger = signale;
 
 /*
 Hyperion.registerCommand("role", async (msg, args) =>{
