@@ -80,18 +80,19 @@ class Rep extends command{
         }
         const giverdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
         const targetdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
-        if(!dev){
-            if(typeof giverdata.lastRepTime === Number){
-                const timesince = Date.now() - giverdata.lastRepTime;
-
-                if(!(timesince >= day)){
-                    return `you can give more rep in ${msc(day-timesince)}`;
-                }
-            }
-        }
+        
         if(firstgiver){
             await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': 1, 'lastRepTime': Date.now()});
         }else{
+            if(!dev){
+                if(typeof giverdata.lastRepTime === Number){
+                    const timesince = Date.now() - giverdata.lastRepTime;
+    
+                    if(!(timesince >= day)){
+                        return `you can give more rep in ${msc(day-timesince)}`;
+                    }
+                }
+            }
             await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': giverdata.given+1, 'lastRepTime': Date.now()});
         }
         if(firstuser){
