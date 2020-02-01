@@ -20,6 +20,8 @@ class command {
         this.alwaysEnabled = false;
 
         this.helpInfo = "someone waz lazy";
+
+        this.commandType = "default";
     }
     async execute (){
 

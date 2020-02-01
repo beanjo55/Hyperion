@@ -48,7 +48,11 @@ async function checkPerms(msg, member, command, Hyperion){
 }
 
 async function generalHelp(msg, Hyperion){
-    const list = commandList(Hyperion);
+    const out = await commandList(Hyperion)
+    let list = [];
+    out.forEach(com =>{
+        list.push(com.name)
+    })
     const data = {
         embed: {
             color: 0xe87722,
@@ -224,7 +228,8 @@ async function _preHandle(msg, Hyperion){
 }
 
 async function commandList(Hyperion){
-    return Hyperion.commands.filter(com => ((com.commandType !== "dev") && (com.commandType !== "internal")))
+    let out = Hyperion.commands.filter(com => ((com.commandType !== "dev") && (com.commandType !== "internal") && (com.commandType !== "developer")));
+    return out
 }
 
 const handler = {

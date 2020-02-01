@@ -7,6 +7,7 @@ class Deactivate extends command{
         this.id = this.name;
         this.commandType = "internal";
         this.requiredUsers = ["253233185800847361"];
+        
     }
 
     async execute(msg, args, Hyperion){
