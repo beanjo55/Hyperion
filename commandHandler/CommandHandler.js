@@ -205,8 +205,8 @@ async function _prefixHandle(msg, Hyperion){
 
 //checks that would stop immediately 
 async function _preHandle(msg, Hyperion){
-    if(msg == null){
-        Hyperion.logger.warning("recieved null message")
+    if(msg.member == null){
+        return;
     }
     if(msg.member.bot){
         return false;
