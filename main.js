@@ -26,13 +26,15 @@ db.once('open', function() {
 
 const { Guild } = require('./Models/guild.js');
 const { premiumModel } = require("./Models/premium.js");
+const {repModel} = require("./Models/rep.js");
 
 Hyperion.db = db;
 //exports.Hyperion = Hyperion;
 const Glenn = new GBL('633056645194317825', config.glenn);
 const models = {
     guild: Guild,
-    premium: premiumModel
+    premium: premiumModel,
+    rep: repModel
 };
 Hyperion.models = models;
 
@@ -224,202 +226,11 @@ Hyperion.on("messageCreate", async (msg) => {
         
     }
     
-    const registered = await Hyperion.guildModel.exists({ guildID: msg.channel.guild.id});
+    const registered = await Hyperion.models.guild.exists({ guildID: msg.channel.guild.id});
     if(!registered){
         await Hyperion.registerGuild(msg.channel.guild);
     }
-
-    /*
-    let prefix = Hyperion.guildModel.findOne({'guildID': msg.channel.guild.id}, 'prefix', function(err, guilds){
-        if(err){
-            console.log(`prefix error on guild ${msg.channel.guild.id}`);
-            console.log(err);
-        }
-        //prefix = guilds.prefix[0];
-        console.log(guilds.prefix[0])
-        return guilds.prefix[0];
-    });*/
-    
-    const aprefix = await Hyperion.models.guild.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
-    //console.log(aprefix)
-    let prefix = aprefix.prefix[0];
-    //let prefix = "<"
-    if(msg.author.bot){
-        return;
-    }
-
-    if(config.blacklist.includes(msg.author.id)){
-        console.log("attempt from blacklisted user");
-        return;
-    }
-
-    let contentClean = msg.content.replace(/<@!/g, "<@");
-    if((contentClean.startsWith(Hyperion.user.mention) || msg.content.startsWith(prefix))){
-        //console.log(prefix);
-        let args = null;
-        let cmdLabel = "";
-        if(contentClean.startsWith(Hyperion.user.mention)){
-            args = msg.content.split(" ").slice(2);
-
-            const cmdLabelar = contentClean.split(" ").slice(1, 2);
-            cmdLabel = cmdLabelar[0].trim().toLowerCase();
-        }
-        else{
-            args = msg.content.split(" ").slice(1);
-
-            const cmdLabelar = msg.content.split(" ").slice(0, 1);
-            cmdLabel = cmdLabelar[0].slice(prefix.length).toLowerCase();
-        }
-        if(cmdLabel === "help"){
-            if(args.length > 0){
-                const found = Hyperion.commands.find(com => (com.name === args[0]) || (com.aliases.includes(args[0])));
-                const data = {
-                    embed: {
-                        description: found.helpInfo,
-                        color: 0xe87722,
-                        timestamp: new Date(),
-                        title: `Help for ${found.name}`
-                    }
-                }
-                msg.channel.createMessage(data);
-                return;
-            }else{
-                let list = Hyperion.commands.map(com => (com.name));
-                const data = {
-                    embed: {
-                        color: 0xe87722,
-                        timestamp: new Date(),
-                        title: "Commands",
-                        description: list.join("\n")
-                    }
-                }
-                msg.channel.createMessage(data);
-                return;
-            }
-        }
-
-        if(cmdLabel === "prefix" && args.length === 0){
-            const aprefix = await Hyperion.guildModel.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
-            let prefix = aprefix.prefix[0];
-            msg.channel.createMessage(`the prefix is \`${prefix}\``);
-            return;
-        }
-
-        const found = Hyperion.commands.find(com => (com.name === cmdLabel) || (com.aliases.includes(cmdLabel)));
-        if(found != undefined){
-
-            
-
-            
-            if(found.requiredUsers.length != 0){
-                const check = checkRequiredUsers(found, msg);
-                if(!check){
-                    return;
-                }
-            }
-            
-            if(found.requiredGuilds.length != 0){
-                const check = checkRequiredGuilds(found, msg);
-                if(!check){
-                    return;
-                }
-            }
-
-            if(found.requiredPerms.length != 0){
-                let canRun = false;
-                const modRoles = await Hyperion.models.guild.findOne({'guildID': msg.channel.guild.id}, 'modRoles').exec();
-                if(modRoles.length > 0){
-                    modRoles.forEach(mrole =>{
-                        if(msg.member.roles.includes(mrole)){
-                            canRun = true;
-                        }
-                    });
-                }
-                found.requiredPerms.forEach((perm) => {
-                    if(perm !== "mod"){
-                        if(msg.member.permission.has(perm)){
-                            canRun = true;
-                        }
-                    }
-                });
-                if(canRun == false){
-                    return;
-                }
-            }
-
-            found.execute(msg, args, Hyperion);
-
-        }
-
-
-
-
-
-
-    }
-    if((msg.author.id === "253233185800847361") && (msg.content.startsWith(config.devPrefix))){
-        Hyperion.handler.handle(msg, Hyperion);
-        prefix = config.devPrefix;
-
-        if(msg.author.bot){
-            return;
-        }
-    
-        let contentClean = msg.content.replace(/<@!/g, "<@");
-        let args = null;
-        let cmdLabel = "";
-
-        args = msg.content.split(" ").slice(1);
-        const cmdLabelar = msg.content.split(" ").slice(0, 1);
-        cmdLabel = cmdLabelar[0].slice(prefix.length).toLowerCase();
-
-        if(cmdLabel === "help"){
-            if(args.length > 0){
-                const found = Hyperion.commands.find(com => (com.name === args[0]) || (com.aliases.includes(args[0])));
-                const data = {
-                    embed: {
-                        description: found.helpInfo,
-                        color: 0xe87722,
-                        timestamp: new Date(),
-                        title: `Help for ${found.name}`
-                    }
-                }
-                msg.channel.createMessage(data);
-                return;
-            }else{
-                let list = Hyperion.commands.map(com => (com.name));
-                const data = {
-                    embed: {
-                        color: 0xe87722,
-                        timestamp: new Date(),
-                        title: "Commands",
-                        description: list.join("\n")
-                    }
-                }
-                msg.channel.createMessage(data);
-                return;
-            }
-        }
-        const found = Hyperion.commands.find(com => (com.name === cmdLabel) || (com.aliases.includes(cmdLabel)));
-        if(found != undefined){
-            found.execute(msg, args, Hyperion);
-    
-        }
-    }
-
-
-
-
-
-
-
-
-    //if(msg.content.startsWith("<@253233185800847361>") || msg.content.startsWith("<@!253233185800847361>")){
-    //    msg.channel.createMessage("https://cdn.discordapp.com/attachments/239446877953720321/333048272287432714/unknown.png");
-    //}
-    /*if(msg.content.toLowerCase().includes(config.aresp.trigger)){
-        Hyperion.createMessage(msg.channel.id, config.aresp.response);
-    }*/
+    Hyperion.handler.handle(msg, Hyperion)
 });
 
 Hyperion.on("guildCreate", (guild) => {
@@ -496,7 +307,7 @@ async function checkActivation(guild){
 
 Hyperion.registerGuild = registerGuild;
 Hyperion.registerPremium = registerActivation;
-Hyperion.guildModel = Guild;
+
 
 function glennPush(){
     Glenn.updateStats(Hyperion.guilds.size, Hyperion.shards.size);

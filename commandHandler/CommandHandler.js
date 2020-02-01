@@ -1,4 +1,4 @@
-const signale = require('signale');
+
 
 
 
@@ -111,8 +111,13 @@ async function _commandHandler(msg, label, args, Hyperion){
     }
 
 
-    const out = await command.execute(msg, args, Hyperion)
-    console.log(out)
+    await command.execute(msg, args, Hyperion, false).catch(err => {
+        Hyperion.logger.error(`[Hyperion] command error on guild ${msg.channel.guild.id} from message ${msg.content}`);
+        Hyperion.logger.error(err);
+    });
+
+
+
 
 
 
@@ -129,7 +134,10 @@ async function _devCommandHandler(msg, label, args, Hyperion){
     if(!command){
         return;
     }
-    return await command.execute(msg, args, Hyperion);
+    await command.execute(msg, args, Hyperion, true).catch(err => {
+        Hyperion.logger.error(`[Hyperion] command error on guild ${msg.channel.guild.id} from message ${msg.content}`);
+        Hyperion.logger.error(err);
+    });
 }
 
 //main handler function
@@ -205,7 +213,7 @@ async function _preHandle(msg, Hyperion){
     }
 
     //ensures the guild has an entry in the db, and creates one otherwise
-    const registered = await Hyperion.guildModel.exists({ guildID: msg.channel.guild.id});
+    const registered = await Hyperion.models.guild.exists({ guildID: msg.channel.guild.id});
     if(!registered){
         await Hyperion.registerGuild(msg.channel.guild);
     }

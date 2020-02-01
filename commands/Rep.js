@@ -1,0 +1,95 @@
+const {command} = require("../command.js");
+const { resolveUser } = require("../util.js");
+const Embed = require("embedcord");
+const msc = require("pretty-ms");
+const day = 86400000;
+
+class Rep extends command{
+    constructor(){
+        super();
+        this.name = "rep";
+        this.id = this.name;
+        this.aliases = ["reputation"];
+        this.commandType = "fun";
+        this.helpInfo = "gives someone a rep point, or checks how many you have";
+    }
+    async execute(msg, args, Hyperion, dev){
+        let message = "An unexpected error occured"
+        if(args.length === 0 || args[0] === "check"){
+            message = await this.check(msg, args, Hyperion);
+        }else{
+            message = await this.give(msg, args, Hyperion, dev);
+        }
+        try{
+            await msg.channel.createMessage(message)
+        }catch(err){
+            return Promise.reject(err);
+        }
+        return Promise.resolve("success")
+    }
+
+    async check(msg, args, Hyperion){
+        let user = undefined;
+        if(args[0] === "check"){
+            user = resolveUser(msg, args[1]);
+        }else{
+            user = resolveUser(msg, args[0]);
+        }
+        const exists = await Hyperion.models.rep.exists({userID: user.id});
+        if(!exists){
+            let repdata = new Hyperion.models.rep({
+                userID: user.id,
+
+            });
+            await repdata.save(function (err){
+                Hyperion.logger.error(`Failed to create rep entry for ${user.id}, error: ${err}`);
+            });
+        }
+        const data = await Hyperion.models.rep.findOne({'userID': user.id}).exec();
+        const embed = new Embed.DiscordEmbed()
+        .setColor(Hyperion.constants.defaultColorHex)
+        .setTitle(`${user.username}'s rep stats`)
+        .setTimestamp()
+        .addField("Rep Recieved", `${data.recieved}`, true)
+        .addField("Rep Given", `${data.given}`, true);
+        return embed;
+
+    }
+
+    async give(msg, args, Hyperion, dev){
+        const user = resolveUser(msg, args[0]);
+        const targetexists = await Hyperion.models.rep.exists({userID: user.id});
+        const giverexists = await Hyperion.models.rep.exists({userID: msg.member.id});
+        if(!targetexists){
+            let repdata = new Hyperion.models.rep({
+                userID: user.id
+            });
+            await repdata.save(function (err){
+                Hyperion.logger.error(`Failed to create rep entry for ${user.id}, error: ${err}`);
+            });
+        }
+        if(!giverexists){
+            let repdata = new Hyperion.models.rep({
+                userID: msg.member.id
+            });
+            await repdata.save(function (err){
+                Hyperion.logger.error(`Failed to create rep entry for ${msg.member.id}, error: ${err}`);
+            });
+        }
+        const giverdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
+        const targetdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
+        if(!dev){
+            if(giverdata.lastRepTime != null || giverdata.lastRepTime == undefined){
+                const timesince = Date.now() - giverdata.lastRepTime;
+
+                if(!(timesince >= day)){
+                    return `you can give more rep in ${msc(day-timesince)}`;
+                }
+            }
+        }
+        await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': giverdata.given+1, 'lastRepTime': new Date()});
+        await Hyperion.models.rep.updateOne({ 'userID': user.id}, { 'recieved': targetdata.recieved+1});
+        return `${msg.member.mention} has given ${user.mention} 1 rep point!`;
+    }
+}
+exports.cmd = Rep;

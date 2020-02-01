@@ -11,6 +11,8 @@ const _clean = text => {
 		return text;
 };
 
+const options = ["owo", "uwu", "uvu"];
+
 class Owo extends command{
     constructor(){
         super();
@@ -21,41 +23,39 @@ class Owo extends command{
 
     }
     async execute(msg, args){
-        //console.log(args);
-        if(args[0] == "uwu"){
-            //console.log("uwu");
-            let text = args.slice(1, args.length).join(" ");
-            let output = _clean(owoify(text, "uwu"));
-            if(output.length > 2000){
-                return await msg.channel.createMessage("The output was too long!");
-            }
-            return await msg.channel.createMessage(output);
-        }else{
-            if(args[0] == "uvu"){
-                //console.log("uvu");
-                let text = args.slice(1, args.length).join(" ");
-                let output = _clean(owoify(text, "uvu"));
-                if(output.length > 2000){
-                    return await msg.channel.createMessage("The output was too long!");
-                }
-                return await msg.channel.createMessage(output);
-            }else{
-                let text = args.slice(0, args.length).join(" ");
-                let output = _clean(owoify(text));
-                if(output.length > 2000){
-                    return await msg.channel.createMessage("The output was too long!");
-                }
-
-
-                msg.channel.createMessage(output)
-
-
-
-
-
-            }
+        let text = "";
+        let output = "";
+        const randomInt = Math.floor(Math.random(0, options.length) * options.length);
+        switch(args[0]){
+            case 'owo':
+                text = args.slice(1, args.length).join(" ");
+                output = _clean(owoify(text), "owo");
+                break;
+            case 'uwu':
+                text = args.slice(1, args.length).join(" ");
+                output = _clean(owoify(text), "uwu");
+                break;
+            case 'uvu':
+                text = args.slice(1, args.length).join(" ");
+                output = _clean(owoify(text), "uvu");
+                break;
+            default:
+                text = args.slice(0, args.length).join(" ");
+                output = _clean(owoify(text), options[randomInt]);
+                break;
         }
-
+        if(output.length>2000){
+            output = "The output was too long!"
+        }
+        if(output.length === 0){
+            output = "There was no output"
+        }
+        try{
+            await msg.channel.createMessage(output)
+        }catch(err){
+            return Promise.reject(err);
+        }
+        return Promise.resolve("success")
     }
 }
 exports.cmd = Owo;
