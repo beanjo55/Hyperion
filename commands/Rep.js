@@ -36,7 +36,9 @@ class Rep extends command{
             user = resolveUser(msg, args[0]);
         }
         const exists = await Hyperion.models.rep.exists({userID: user.id});
+        let first = false;
         if(!exists){
+            first = true;
             let repdata = new Hyperion.models.rep({
                 userID: user.id,
 
@@ -50,8 +52,13 @@ class Rep extends command{
         .setColor(Hyperion.constants.defaultColorHex)
         .setTitle(`${user.username}'s rep stats`)
         .setTimestamp()
-        .addField("Rep Recieved", `${data.recieved}`, true)
-        .addField("Rep Given", `${data.given}`, true);
+        if(!first){
+            embed.addField("Rep Recieved", `${data.recieved}`, true)
+            .addField("Rep Given", `${data.given}`, true);
+        }else{
+            embed.addField("Rep Recieved", `0`, true)
+            .addField("Rep Given", `0`, true);
+        }
         return embed;
 
     }
@@ -60,10 +67,14 @@ class Rep extends command{
         const user = resolveUser(msg, args[0]);
         const targetexists = await Hyperion.models.rep.exists({userID: user.id});
         const giverexists = await Hyperion.models.rep.exists({userID: msg.member.id});
+        let firstuser = false;
+        let firstgiver = false;
         if(!targetexists){
+            firstuser = true;
             await this.newEntry(user.id, Hyperion)
         }
         if(!giverexists){
+            firstgiver = true;
             await this.newEntry(msg.member.id, Hyperion)
         }
         const giverdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
@@ -77,8 +88,16 @@ class Rep extends command{
                 }
             }
         }
-        await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': giverdata.given+1, 'lastRepTime': Date.now()});
-        await Hyperion.models.rep.updateOne({ 'userID': user.id}, { 'recieved': targetdata.recieved+1});
+        if(firstgiver){
+            await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': 1, 'lastRepTime': Date.now()});
+        }else{
+            await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': giverdata.given+1, 'lastRepTime': Date.now()});
+        }
+        if(firstuser){
+            await Hyperion.models.rep.updateOne({ 'userID': user.id}, { 'recieved': targetdata.recieved+1});
+        }else{
+            await Hyperion.models.rep.updateOne({ 'userID': user.id}, { 'recieved': 1});
+        }
         return `${msg.member.mention} has given ${user.mention} 1 rep point!`;
     }
     async newEntry(id, Hyperion){
