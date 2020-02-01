@@ -52,6 +52,7 @@ class Rep extends command{
         .setColor(Hyperion.constants.defaultColorHex)
         .setTitle(`${user.username}'s rep stats`)
         .setTimestamp()
+        .setThumbnail(user.avatarURL)
         if(!first){
             embed.addField("Rep Recieved", `${data.recieved}`, true)
             .addField("Rep Given", `${data.given}`, true);
