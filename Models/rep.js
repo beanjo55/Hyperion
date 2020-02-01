@@ -18,7 +18,8 @@ const repschema = new Schema({
     },
 
     lastRepTime:{
-        type: Date
+        type: Number,
+        default: 0
     }
 })
 const repmodel = model('Rep', repschema);

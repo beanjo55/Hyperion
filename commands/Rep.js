@@ -42,7 +42,7 @@ class Rep extends command{
 
             });
             await repdata.save(function (err){
-                Hyperion.logger.error(`Failed to create rep entry for ${user.id}, error: ${err}`);
+                Hyperion.logger.error(`Failed to create rep entry for checked user ${user.id}, error: ${err}`);
             });
         }
         const data = await Hyperion.models.rep.findOne({'userID': user.id}).exec();
@@ -61,11 +61,11 @@ class Rep extends command{
         const targetexists = await Hyperion.models.rep.exists({userID: user.id});
         const giverexists = await Hyperion.models.rep.exists({userID: msg.member.id});
         if(!targetexists){
-            let repdata = new Hyperion.models.rep({
+            let newrecievedata = new Hyperion.models.rep({
                 userID: user.id
             });
-            await repdata.save(function (err){
-                Hyperion.logger.error(`Failed to create rep entry for ${user.id}, error: ${err}`);
+            await newrecievedata.save(function (err){
+                Hyperion.logger.error(`Failed to create rep entry for recieving user ${user.id}, error: ${err}`);
             });
         }
         if(!giverexists){
@@ -73,13 +73,13 @@ class Rep extends command{
                 userID: msg.member.id
             });
             await repdata.save(function (err){
-                Hyperion.logger.error(`Failed to create rep entry for ${msg.member.id}, error: ${err}`);
+                Hyperion.logger.error(`Failed to create rep entry for giving user ${msg.member.id}, error: ${err}`);
             });
         }
         const giverdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
         const targetdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
         if(!dev){
-            if(giverdata.lastRepTime != null || giverdata.lastRepTime == undefined){
+            if(typeof giverdata.lastRepTime === Number){
                 const timesince = Date.now() - giverdata.lastRepTime;
 
                 if(!(timesince >= day)){
@@ -87,7 +87,7 @@ class Rep extends command{
                 }
             }
         }
-        await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': giverdata.given+1, 'lastRepTime': new Date()});
+        await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': giverdata.given+1, 'lastRepTime': Date.now()});
         await Hyperion.models.rep.updateOne({ 'userID': user.id}, { 'recieved': targetdata.recieved+1});
         return `${msg.member.mention} has given ${user.mention} 1 rep point!`;
     }
