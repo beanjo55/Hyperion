@@ -4,7 +4,8 @@ const repschema = new Schema({
     userID: {
         type: String,
         required: true,
-        index: true
+        index: true,
+        unique: true
     },
 
     recieved:{

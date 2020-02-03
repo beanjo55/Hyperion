@@ -36,30 +36,32 @@ class Rep extends command{
             user = resolveUser(msg, args[0]);
         }
         const exists = await Hyperion.models.rep.exists({userID: user.id});
-        let first = false;
+        let repdata = null;
         if(!exists){
-            first = true;
-            let repdata = new Hyperion.models.rep({
+            repdata = new Hyperion.models.rep({
                 userID: user.id,
-
+                recieved: 0,
+                given: 0,
+                lastRepTime: 0
             });
-            await repdata.save(function (err){
-                Hyperion.logger.error(`Failed to create rep entry for checked user ${user.id}, error: ${err}`);
-            });
+            
+        }else{
+            repdata = await Hyperion.models.rep.findOne({'userID': user.id}).exec();
         }
-        const data = await Hyperion.models.rep.findOne({'userID': user.id}).exec();
+
         const embed = new Embed.DiscordEmbed()
         .setColor(Hyperion.constants.defaultColorHex)
         .setTitle(`${user.username}'s rep stats`)
         .setTimestamp()
         .setThumbnail(user.avatarURL)
-        if(!first){
-            embed.addField("Rep Recieved", `${data.recieved}`, true)
-            .addField("Rep Given", `${data.given}`, true);
-        }else{
-            embed.addField("Rep Recieved", `0`, true)
-            .addField("Rep Given", `0`, true);
-        }
+        .addField("Rep Recieved", `${repdata.recieved}`, true)
+        .addField("Rep Given", `${repdata.given}`, true);
+
+        await repdata.save(function (err){
+            if(err !== null){
+                Hyperion.logger.error(`Failed to create rep entry for checked user ${user.id}, error: ${err}`);
+            }
+        });
         return embed;
 
     }
@@ -68,52 +70,50 @@ class Rep extends command{
         const user = resolveUser(msg, args[0]);
         const targetexists = await Hyperion.models.rep.exists({userID: user.id});
         const giverexists = await Hyperion.models.rep.exists({userID: msg.member.id});
-        let firstuser = false;
-        let firstgiver = false;
+        let giverdata = null;
+        let targetdata = null;
         if(!targetexists){
-            firstuser = true;
-            await this.newEntry(user.id, Hyperion)
+            targetdata = new Hyperion.models.rep({
+                userID: user.id,
+                given: 0,
+                recieved: 0,
+                lastRepTime: 0
+            });
+        }else{
+            targetdata = await Hyperion.models.rep.findOne({'userID': user.id}).exec();
         }
         if(!giverexists){
-            firstgiver = true;
-            await this.newEntry(msg.member.id, Hyperion)
-        }
-        const giverdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
-        const targetdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
-        
-        if(firstgiver){
-            await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': 1, 'lastRepTime': Date.now()});
+            giverdata = new Hyperion.models.rep({
+                userID: msg.member.id,
+                given: 0,
+                recieved: 0,
+                lastRepTime: 0
+            });
         }else{
-            if(!dev){
-                if(typeof giverdata.lastRepTime === Number){
-                    const timesince = Date.now() - giverdata.lastRepTime;
-    
-                    if(!(timesince >= day)){
-                        return `you can give more rep in ${msc(day-timesince)}`;
-                    }
+            giverdata = await Hyperion.models.rep.findOne({'userID': msg.member.id}).exec();
+        }
+        if(!dev){
+            if(giverdata.lastRepTime !== 0){
+                const timesince = Date.now() - giverdata.lastRepTime;
+                if(!(timesince >= day)){
+                    return `you can give more rep in ${msc(day-timesince)}`;
                 }
             }
-            await Hyperion.models.rep.updateOne({ 'userID': msg.member.id}, { 'given': giverdata.given+1, 'lastRepTime': Date.now()});
         }
-        if(firstuser){
-            await Hyperion.models.rep.updateOne({ 'userID': user.id}, { 'recieved': targetdata.recieved+1});
-        }else{
-            await Hyperion.models.rep.updateOne({ 'userID': user.id}, { 'recieved': 1});
-        }
-        return `${msg.member.mention} has given ${user.mention} 1 rep point!`;
-    }
-    async newEntry(id, Hyperion){
-        let repdata = new Hyperion.models.rep({
-            userID: id,
-            given: 0,
-            recieved: 0,
-            lastRepTime: 0,
-        });
-        await repdata.save(function (err){
+        giverdata.given = giverdata.given+1;
+        targetdata.recieved = targetdata.recieved+1;
+        giverdata.lastRepTime = Date.now();
+        await targetdata.save(function(err){
             if(err !== null){
-                Hyperion.logger.error(`Failed to create rep entry for user ${id}, error: ${err}`);
+                Hyperion.logger.error(`Failed to create rep entry for user ${user.id}, error: ${err}`);
             }
-        });
+        })
+        await giverdata.save(function(err){
+            if(err !== null){
+                Hyperion.logger.error(`Failed to create rep entry for user ${msg.member.id}, error: ${err}`);
+            }
+        })
+        return `${msg.member.mention} has given ${user.mention} 1 rep point!`;
     }
 }
 

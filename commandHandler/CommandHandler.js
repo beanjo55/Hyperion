@@ -91,6 +91,9 @@ async function _commandHandler(msg, label, args, Hyperion){
 
     }
     const command = findCommand(label, Hyperion);
+    if(!command){
+        return "no command"
+    }
     if(command.commandType === "internal"){
         if(!checkInternal(msg.member, Hyperion)){
             return "unauthorized: internal";
