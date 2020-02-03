@@ -68,6 +68,9 @@ class Rep extends command{
 
     async give(msg, args, Hyperion, dev){
         const user = resolveUser(msg, args[0]);
+        if(msg.member.id === user.id){
+            return msg.channel.createMessage("You cant rep yourself!");
+        }
         const targetexists = await Hyperion.models.rep.exists({userID: user.id});
         const giverexists = await Hyperion.models.rep.exists({userID: msg.member.id});
         let giverdata = null;
