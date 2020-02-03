@@ -91,7 +91,7 @@ async function _commandHandler(msg, label, args, Hyperion){
 
     }
     if(label === "prefix" && args.length === 0){
-        const aprefix = await Hyperion.guild.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
+        const aprefix = await Hyperion.models.guild.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
         let prefix = aprefix.prefix[0];
         msg.channel.createMessage(`the prefix is \`${prefix}\``);
         return;
