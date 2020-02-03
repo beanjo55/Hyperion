@@ -90,6 +90,12 @@ async function _commandHandler(msg, label, args, Hyperion){
         return await commandHelp(msg, command);
 
     }
+    if(label === "prefix" && args.length === 0){
+        const aprefix = await Hyperion.guild.findOne({'guildID': msg.channel.guild.id}, 'prefix').exec();
+        let prefix = aprefix.prefix[0];
+        msg.channel.createMessage(`the prefix is \`${prefix}\``);
+        return;
+    }
     const command = findCommand(label, Hyperion);
     if(!command){
         return "no command"
