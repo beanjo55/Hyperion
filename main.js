@@ -16,7 +16,7 @@ const Hyperion = new Eris(config.token, {
 const { command } = require("./command.js");
 
 Hyperion.commands = new Eris.Collection(command);
-mongoose.connect(config.dbPath, {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect(config.dbPath, {useNewUrlParser: true, useUnifiedTopology: true, dbName: config.build});
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
