@@ -63,7 +63,7 @@ class Eval extends command{
                 const data = {
                     embed: {
                          author: { name: 'Eval Results', icon_url: msg.author.avatarURL },
-                         description: "``` " + _clean(evaled) + "```",
+                         description: "```js\n" + _clean(evaled) + "```",
                          color: 0xe87722,
                          timestamp: new Date(),
                     }
