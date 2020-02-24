@@ -29,19 +29,19 @@ class Owo extends command{
         switch(args[0]){
             case 'owo':
                 text = args.slice(1, args.length).join(" ");
-                output = _clean(owoify(text), "owo");
+                output = _clean(owoify(text, "owo"));
                 break;
             case 'uwu':
                 text = args.slice(1, args.length).join(" ");
-                output = _clean(owoify(text), "uwu");
+                output = _clean(owoify(text, "uwu"));
                 break;
             case 'uvu':
                 text = args.slice(1, args.length).join(" ");
-                output = _clean(owoify(text), "uvu");
+                output = _clean(owoify(text, "uvu"));
                 break;
             default:
                 text = args.slice(0, args.length).join(" ");
-                output = _clean(owoify(text), options[randomInt]);
+                output = _clean(owoify(text, options[randomInt]));
                 break;
         }
         if(output.length>2000){
