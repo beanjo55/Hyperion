@@ -209,7 +209,9 @@ function checkRequiredGuilds(cmd, msg){
 
 
 Hyperion.on("messageCreate", async (msg) => {
-
+    if(msg.user.bot){
+        return;
+    }
     if(msg.channel.type === 1){
         if(msg.author.id === Hyperion.user.id){return;}
         const data = {

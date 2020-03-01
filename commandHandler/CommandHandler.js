@@ -155,7 +155,9 @@ async function _devCommandHandler(msg, label, args, Hyperion){
 
 //main handler function
 async function handleCommand(msg, Hyperion){
-
+    if(msg.author.bot){
+        return;
+    }
     if(!_preHandle(msg, Hyperion)){
         return "invalid";
     }
@@ -218,8 +220,11 @@ async function _prefixHandle(msg, Hyperion){
 
 //checks that would stop immediately 
 async function _preHandle(msg, Hyperion){
+    if(msg.author.id === Hyperion.user.id){
+        return false;
+    }
     if(msg.member == null){
-        return;
+        return false;
     }
     if(msg.member.bot){
         return false;
