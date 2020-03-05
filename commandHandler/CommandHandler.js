@@ -124,11 +124,11 @@ async function _commandHandler(msg, label, args, Hyperion){
     }
 
 
-    await command.execute(msg, args, Hyperion, false)/*.catch(err => {
+    await command.execute(msg, args, Hyperion, false).catch(err => {
         Hyperion.logger.error(`[Hyperion] command error on guild ${msg.channel.guild.id} from message ${msg.content}`);
         Hyperion.logger.error(err);
     });
-    */
+    
 
 
 
