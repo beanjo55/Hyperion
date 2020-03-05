@@ -182,7 +182,7 @@ const load = () => {
         });
     });
 }
-
+Hyperion.sentry = Sentry;
 
 Hyperion.on("ready", () => { // When the bot is ready
     console.log("Ready!"); // Log "Ready!"
