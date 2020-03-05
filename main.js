@@ -2,6 +2,7 @@
 
 const GBL = require('gblapi.js');
 const signale = require('signale');
+const Sentry = require('@sentry/node');
 
 const fs = require("fs");
 
@@ -167,6 +168,7 @@ Hyperion.registerCommand("role", async (msg, args) =>{
 });
 */
 
+Sentry.init(config.sentry);
 const load = () => {
     fs.readdir("./commands/", (err, files) => {
         

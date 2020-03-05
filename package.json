@@ -4,6 +4,7 @@
   "description": "a shitty discord bot",
   "main": "main.js",
   "dependencies": {
+    "@sentry/node": "^5.13.0",
     "bufferutil": "^4.0.1",
     "chalk": "^3.0.0",
     "embedcord": "^2.0.0",
