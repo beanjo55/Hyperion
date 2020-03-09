@@ -48,7 +48,7 @@ const userinfo = new Schema({
         default: 0
     },
 
-    repPings: {
+    socialPings: {
         type: Boolean,
         default: true
     },

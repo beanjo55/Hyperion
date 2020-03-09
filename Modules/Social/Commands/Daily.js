@@ -19,6 +19,13 @@ class Daily extends command{
         return Date.now() - userdata.lastDailyTime;
     }
 
+    async save(doc, ctx){
+        doc.save().catch(err => {
+            ctx.Hyperion.logger("Hyperion", "Daily", `Error saving daily for ${doc.user}, err: ${err}`)
+            return {status: {code: 2, message: "an error occured", error: err}};
+        });
+    }
+
     async execute(ctx){
 
         const payout = randomInt(range[0], range[1]);
@@ -56,10 +63,7 @@ class Daily extends command{
                 giverdata.money += payout;
                 giverdata.lastDailyTime = Date.now();
 
-                giverdata.save().catch(err => {
-                    ctx.Hyperion.logger("Hyperion", "Daily", `Error saving daily for ${ctx.user.id}, err: ${err}`)
-                    return {status: {code: 2, message: "an error occured", error: err}};
-                });
+                this.save(giverdata, ctx);
 
                 return {status: {code: 0, message: `You gave your daily money of ${payout}$ to yourself, but y tho?`}};
             }
@@ -67,17 +71,15 @@ class Daily extends command{
             giverdata.lastDailyTime = Date.now();
             targetdata.money += payout;
 
-            targetdata.save().catch(err => {
-                ctx.Hyperion.logger("Hyperion", "Daily", `Error saving daily for ${ctx.user.id}, err: ${err}`)
-                return {status: {code: 2, message: "an error occured", error: err}};
-            });
+            this.save(targetdata, ctx);
+            this.save(giverdata, ctx);
 
-            giverdata.save().catch(err => {
-                ctx.Hyperion.logger("Hyperion", "Daily", `Error saving daily for ${ctx.user.id}, err: ${err}`)
-                return {status: {code: 2, message: "an error occured", error: err}};
-            });
-
-            const message = `${ctx.msg.author.mention} gave their daily money of ${payout} to ${target.mention}!`;
+            let message;
+            if(targetdata.socialPings){
+                message = `${ctx.msg.author.mention} gave their daily money of ${payout} to ${target.mention}!`;
+            }else{
+                message = `${ctx.msg.author.mention} gave their daily money of ${payout} to ${target.username}!`;
+            }
             return {status: {code: 0, message: message}};
 
 
@@ -92,10 +94,7 @@ class Daily extends command{
             }
             userdata.lastDailyTime = Date.now();
             userdata.money += payout;
-            userdata.save().catch(err => {
-                ctx.Hyperion.logger("Hyperion", "Daily", `Error saving daily for ${ctx.user.id}, err: ${err}`)
-                return {status: {code: 2, message: "an error occured", error: err}};
-            });
+            this.save(userdata, ctx);
 
             return {status:{code: 0, message: `You collected your daily of ${payout}$!`}};
         }
