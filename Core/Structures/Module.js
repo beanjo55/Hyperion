@@ -3,15 +3,15 @@ const fs = require("fs");
 
 
 class Module{
-    constructor(){
-        this.name = "module";
+    constructor(data){
+        this.name = data.name || "module";
         this.id = this.name;
 
-        this.private = false;
-        this.alwaysEnabled = false;
+        this.private = data.private || false;
+        this.alwaysEnabled = data.alwaysEnabled || false;
 
-        this.hasCommands = false;
-        this.needsInit = false;
+        this.hasCommands = data.hasCommands || false;
+        this.needsInit = data.needsInit || false;
 
         this.modpath = `${__dirname}/Module`;
         this.cmdpath = `${__dirname}/Commands`;
