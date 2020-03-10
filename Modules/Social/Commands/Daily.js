@@ -22,7 +22,7 @@ class Daily extends command{
     async save(doc, ctx){
         doc.save().catch(err => {
             ctx.Hyperion.logger("Hyperion", "Daily", `Error saving daily for ${doc.user}, err: ${err}`)
-            return {status: {code: 2, message: "an error occured", error: err}};
+            return {status: {code: 2, error: err}, payload: "an error occured"};
         });
     }
 
@@ -34,9 +34,9 @@ class Daily extends command{
 
         if(ctx.args.length > 0){
 
-            const target = ctx.Hyperion.resolvers.hoistUser(ctx.msg, ctx.args[0], ctx.msg.channel.guild.members);
+            const target = ctx.Hyperion.resolvers.hoistUser(ctx.msg, ctx.args[0], ctx.guild.members);
             if(!target){
-                return {status: {code: 4, message: "I don't know who that is, try again"}};
+                return {status: {code: 4}, payload: "I don't know who that is, try again"};
             }
 
             let targetdata;
@@ -47,19 +47,19 @@ class Daily extends command{
             }
 
             let giverdata;
-            if(ctx.Hyperion.models.social.exists({user: ctx.msg.author.id})){
-                giverdata = await ctx.Hyperion.models.social.findOne({user: ctx.msg.author.id});
+            if(ctx.Hyperion.models.social.exists({user: user.id})){
+                giverdata = await ctx.Hyperion.models.social.findOne({user: user.id});
             }else{
-                giverdata = new ctx.Hyperion.models.social({user: ctx.msg.author.id});
+                giverdata = new ctx.Hyperion.models.social({user: user.id});
             }
 
             if((!this.getTime(giverdata) >= day)){
                 if(!ctx.dev){
-                    return {status: {code: 0, msg: `You can give your daily money in ${msc(day - this.getTime(giverdata))}`}}
+                    return {status: {code: 0}, payload: `You can give your daily money in ${msc(day - this.getTime(giverdata))}`}
                 }
             }
 
-            if(target.id === ctx.msg.author.id){
+            if(target.id === user.id){
                 giverdata.money += payout;
                 giverdata.lastDailyTime = Date.now();
 
@@ -76,11 +76,11 @@ class Daily extends command{
 
             let message;
             if(targetdata.socialPings){
-                message = `${ctx.msg.author.mention} gave their daily money of ${payout} to ${target.mention}!`;
+                message = `${user.mention} gave their daily money of ${payout} to ${target.mention}!`;
             }else{
-                message = `${ctx.msg.author.mention} gave their daily money of ${payout} to ${target.username}!`;
+                message = `${user.mention} gave their daily money of ${payout} to ${target.username}!`;
             }
-            return {status: {code: 0, message: message}};
+            return {status: {code: 0}, payload: message};
 
 
         }else{
@@ -89,14 +89,14 @@ class Daily extends command{
 
             if(!(this.getTime(userdata) >= day)){
                 if(!ctx.dev){
-                    return {status: {code: 0, msg: `you can collect your daily money in ${msc(day - this.getTime(userdata))}`}}
+                    return {status: {code: 0}, payload: `You can collect your daily money in ${msc(day - this.getTime(userdata))}`}
                 }
             }
             userdata.lastDailyTime = Date.now();
             userdata.money += payout;
             this.save(userdata, ctx);
 
-            return {status:{code: 0, message: `You collected your daily of ${payout}$!`}};
+            return {status:{code: 0}, payload: `You collected your daily of ${payout}$!`};
         }
     }
 }

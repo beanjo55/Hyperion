@@ -6,3 +6,12 @@ command/handler status codes:
     4: command failure (not an error. bad input, user not found, etc)
     5: unauthorized (dev/internal commands, blacklisted, no perms)
 
+command return:
+    {
+        status: {
+            code: number (required)
+            error: err (optional, not present if no error)
+        }
+
+        payload: data (message or data to return. not always present on error, unless there is a friendly error message to return)
+    }
