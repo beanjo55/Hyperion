@@ -110,7 +110,7 @@ class Rep extends command{
             if(userdata.lastDailyTime !== 0){
                 const timesince = Date.now() - userdata.lastDailyTime;
                 if(!(timesince >= day)){
-                    return `you can give more money in ${msc(day-timesince)}`;
+                    return `you can collect more money in ${msc(day-timesince)}`;
                 }
             }
         }
