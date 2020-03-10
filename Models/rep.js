@@ -21,6 +21,16 @@ const repschema = new Schema({
     lastRepTime:{
         type: Number,
         default: 0
+    },
+
+    lastDailyTime: {
+        type: Number,
+        default: 0
+    },
+
+    money: {
+        type: Number,
+        default: 0
     }
 })
 const repmodel = model('Rep', repschema);
