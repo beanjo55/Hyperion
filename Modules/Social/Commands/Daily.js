@@ -26,6 +26,14 @@ class Daily extends command{
         });
     }
 
+    async getDoc(id, ctx){
+        if(await ctx.Hyperion.models.social.exists({user: id})){
+            return await ctx.Hyperion.models.social.findOne({user: id});
+        }else{
+            return new ctx.Hyperion.models.social({user: id});
+        }
+    }
+
     async execute(ctx){
 
         const payout = randomInt(range[0], range[1]);
@@ -39,19 +47,9 @@ class Daily extends command{
                 return {status: {code: 4}, payload: "I don't know who that is, try again"};
             }
 
-            let targetdata;
-            if(ctx.Hyperion.models.social.exists({user: target.id})){
-                targetdata = await ctx.Hyperion.models.social.findOne({user: target.id});
-            }else{
-                targetdata = new ctx.Hyperion.models.social({user: target.id});
-            }
+            let targetdata = await this.getDoc(target.id, ctx);
 
-            let giverdata;
-            if(ctx.Hyperion.models.social.exists({user: user.id})){
-                giverdata = await ctx.Hyperion.models.social.findOne({user: user.id});
-            }else{
-                giverdata = new ctx.Hyperion.models.social({user: user.id});
-            }
+            let giverdata = await this.getDoc(ctx.user.id, ctx);
 
             if((!this.getTime(giverdata) >= day)){
                 if(!ctx.dev){
@@ -85,7 +83,7 @@ class Daily extends command{
 
         }else{
 
-            let userdata = await ctx.Hyperion.models.social.findOne({user: user.id}).exec();
+            let userdata = await this.getDoc(ctx.user.id, ctx);
 
             if(!(this.getTime(userdata) >= day)){
                 if(!ctx.dev){
