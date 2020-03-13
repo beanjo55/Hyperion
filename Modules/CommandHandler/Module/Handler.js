@@ -3,12 +3,12 @@
 
 
 async function handler(msg){
-    let context = {};
-    context.msg = msg;
-    context.user = msg.author;
-    context.member = msg.member;
-    context.channel = msg.channel;
-    context.guild = msg.channel.guild;
+    let ctx = {};
+    ctx.msg = msg;
+    ctx.user = msg.author;
+    ctx.member = msg.member;
+    ctx.channel = msg.channel;
+    ctx.guild = msg.channel.guild;
 
     let config = await conf(msg.channel.guild, this);
     if(!config.status){
@@ -20,9 +20,9 @@ async function handler(msg){
     if(!config.payload){
         return {status:{code: 1, error: new Error("Bad conf return")}};
     }
-    context.guildconf = config.payload;
+    ctx.guildconf = config.payload;
 
-    
+
 }
 
 async function conf(guild, Hyperion){

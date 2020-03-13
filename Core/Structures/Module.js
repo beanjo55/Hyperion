@@ -16,7 +16,6 @@ class Module{
         this.modpath = `${__dirname}/Module`;
         this.cmdpath = `${__dirname}/Commands`;
 
-        this.mod = {};
         
     }
 
@@ -25,17 +24,14 @@ class Module{
             const modFiles = fs.readdirSync(this.modPath);
             modFiles.forEach(e => {
                 let name = e.substring(0, e.length-3);
-                this.mod[name] = require(`${this.modPath}/${e}`).modfile;
+                this[name] = require(`${this.modPath}/${e}`).modfile;
             });
         }catch(err){
             logger.error("Hyperion", "Load Mod", `Error loading module files for module ${this.name}: ${err}`);
         }
     }
 
-    reloadMod(){
-        this.mod = {};
-        this.loadMod();
-    }
+    
 
     loadCommands(Hyperion){
         if(!this.hasCmds){
@@ -44,8 +40,12 @@ class Module{
         try{
             const cmdFiles = fs.readdirSync(this.cmdPath);
             cmdFiles.forEach(e => {
-                const {cmd} = require(`${this.cmdPath}/${e}`).modfile;
-                Hyperion.commands.add(cmd)
+                try{
+                    const cmd = require(`${this.cmdPath}/${e}`).cmd;
+                    Hyperion.commands.add(new cmd);
+                }catch(err){
+                    logger.error("Hyperion", "Load Commands", `Failed to load command ${e} from module ${this.name}. error: ${err}`);
+                }
             });
         }catch(err){
             logger.error("Hyperion", "Load Commands", `Error loading commands for module ${this.name}: ${err}`);
