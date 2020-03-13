@@ -66,6 +66,11 @@ const userinfo = new Schema({
         type: String
     },
 
+    data: {
+        type: Object,
+        default: {}
+    },
+
 
     
     /*

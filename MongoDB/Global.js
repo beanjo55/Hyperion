@@ -20,6 +20,11 @@ const globalconf = new Schema({
     blacklist: {
         type: Array,
         default: []
+    },
+
+    data: {
+        type: Object,
+        default: {}
     }
 },{
     minimize: false,
