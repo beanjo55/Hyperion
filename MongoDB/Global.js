@@ -22,6 +22,11 @@ const globalconf = new Schema({
         default: []
     },
 
+    globalCooldown: {
+        type: Number,
+        default: 1000
+    },
+
     data: {
         type: Object,
         default: {}

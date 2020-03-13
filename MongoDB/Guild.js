@@ -50,6 +50,16 @@ const guildconf = new Schema({
         default: {}
     },
 
+    logging: {
+        type: Object,
+        default: {}
+    },
+
+    welcome: {
+        type: Object,
+        default: {}
+    },
+
     mod: {
         type: Object,
         default: {

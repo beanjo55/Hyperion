@@ -1,11 +1,11 @@
 const {Collection} = require('eris');
-const cooldown = require("./Cooldown.js").struct;
 
 class Command{
     constructor(){
         this.name = "dummy";
         this.id = this.name;
         this.module = "default";
+        this.aliases = [];
 
         this.internal = false;
         this.alwaysEnabled = false;
@@ -19,6 +19,8 @@ class Command{
         this.helpDetail = "dummy";
         this.helpUsage = "dummy";
         this.helpUsageExample = "dummy";
+
+        this.subcommands = new Collection(Command)
     }
 
     //dummy default command 
