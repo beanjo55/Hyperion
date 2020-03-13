@@ -1,7 +1,4 @@
 
-
-
-
 async function handler(msg){
     let ctx = {};
 
@@ -24,6 +21,8 @@ async function handler(msg){
     ctx.channel = msg.channel;
     ctx.guild = msg.channel.guild;
     ctx.Hyperion = this;
+    ctx.content = msg.content
+    ctx.userconf = await userConf(ctx, ctx.user);
 
     let isolated = isolate(ctx.guildconf, this, msg.content, false);
 
@@ -31,12 +30,12 @@ async function handler(msg){
 
     if(isolated.type === "dev" || isolated.type === "admin"){
         
-        const admin = await isAdmin(ctx, msg.author.id);
+        const admin = await isAdmin(ctx);
         if(!admin){
             isolated = isolate(ctx.guildconf, this, msg.content, true);
         }else{
             ctx.admin = true;
-            ctx.dev = isDev(ctx, msg.author.id);
+            ctx.dev = isDev(ctx);
         }
     }
 
@@ -135,17 +134,31 @@ async function isolate(guildconf, Hyperion, content, retry){
     }
 }
 
-async function isAdmin(ctx, user){
-    const data = await ctx.Hyperion.models.user.findOne({user: user.id}).exec();
-    if(data.acks.admin || data.acks.developer || data.acks.owner){
+async function userConf(ctx, user){
+    if(await ctx.Hyperion.models.user.exists({user: user.id})){
+        return await ctx.Hyperion.models.user.findOne({user: user.id}).exec();
+    }else{
+        let data = new ctx.Hyperion.models.user({
+            user: user.id
+        });
+        data.save().catch(err => {
+            if(err !== null){
+                ctx.Hyperion.logger.error("Hyperion", "User Conf", `Failed to make user conf for ${user.id}, error: ${err}`);
+            }
+        });
+        return data;
+    }
+}
+
+async function isAdmin(ctx){
+    if(ctx.userconf.acks.admin || ctx.userconf.acks.developer || ctx.userconf.acks.owner){
         return true;
     }
     return false;
 }
 
-async function isDev(ctx, user){
-    const data = await ctx.Hyperion.models.user.findOne({user: user.id}).exec();
-    if(data.acks.developer || data.acks.owner){
+async function isDev(ctx){
+    if(ctx.userconf.acks.developer || ctx.userconf.acks.owner){
         return true;
     }
     return false;
@@ -187,11 +200,11 @@ async function guildChecks(ctx){
         updateCmdConf(ctx, ctx.command.name, true);
     }
 
-    if(ctx.guildconf.modules[ctx.command.module] === false){
+    if(!(ctx.guildconf.modules[ctx.command.module] || ctx.Hyperion.modules.get(ctx.command.module).alwaysEnabled)){
         return {status: {code: 5}, payload: "Module server disabled"};
     }
 
-    if(ctx.guildconf.commands[ctx.command.name] === false){
+    if(!(ctx.guildconf.commands[ctx.command.name].status || ctx.command.alwaysEnabled)){
         return {status: {code: 5}, payload: "Command Server Disabled"};
     }
     return {status: {code: 0}};

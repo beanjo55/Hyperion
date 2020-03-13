@@ -23,8 +23,14 @@ class Module{
         try{
             const modFiles = fs.readdirSync(this.modPath);
             modFiles.forEach(e => {
-                let name = e.substring(0, e.length-3);
-                this[name] = require(`${this.modPath}/${e}`).modfile;
+                if(!e.startsWith(".")){
+                    try{
+                        let name = e.substring(0, e.length-3);
+                        this[name] = require(`${this.modPath}/${e}`).modfile
+                    }catch(err){
+                        logger.error("Hyperion", "Load Mod", `Error laoding mod file ${e}, error: ${err}`)
+                    }
+                }
             });
         }catch(err){
             logger.error("Hyperion", "Load Mod", `Error loading module files for module ${this.name}: ${err}`);
@@ -40,11 +46,13 @@ class Module{
         try{
             const cmdFiles = fs.readdirSync(this.cmdPath);
             cmdFiles.forEach(e => {
-                try{
-                    const cmd = require(`${this.cmdPath}/${e}`).cmd;
-                    Hyperion.commands.add(new cmd);
-                }catch(err){
-                    logger.error("Hyperion", "Load Commands", `Failed to load command ${e} from module ${this.name}. error: ${err}`);
+                if(!e.startsWith(".")){
+                    try{
+                        const cmd = require(`${this.cmdPath}/${e}`).cmd;
+                        Hyperion.commands.add(new cmd);
+                    }catch(err){
+                        logger.error("Hyperion", "Load Commands", `Failed to load command ${e} from module ${this.name}. error: ${err}`);
+                    }
                 }
             });
         }catch(err){
