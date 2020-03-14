@@ -19,6 +19,8 @@ class MessageCreateHandler{
             });
             this.guilds.get(msg.channel.guild.id).fetched = true;
         }
+
+        this.handler(msg);
     }
 }
 exports.event = new MessageCreateHandler;

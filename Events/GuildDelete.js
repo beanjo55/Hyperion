@@ -1,7 +1,6 @@
 class GuildDeleteHandler{
     constructor(){
         this.name = "guildDelete";
-        this.handler = this.handle;
     }
     async handle(guild){
 

@@ -1,10 +1,9 @@
 class ShardResumeHandler{
     constructor(){
         this.name = "shardResume";
-        this.handler = this.handle;
     }
     async handle(shardID){
-
+        this.logger.success("Hyperion", "Sharding", `Shard ${shardID} resumed`);
     }
 }
 exports.event = new ShardResumeHandler;
