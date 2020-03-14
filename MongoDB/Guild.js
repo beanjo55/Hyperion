@@ -47,7 +47,11 @@ const guildconf = new Schema({
 
     starboard: {
         type: Object,
-        default: {}
+        default: {
+            selfstar: false,
+            starchannel: "",
+            ignoredchannels: ""
+        }
     },
 
     logging: {
