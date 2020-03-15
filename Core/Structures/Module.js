@@ -12,8 +12,9 @@ class Module{
 
         this.hasCommands = data.hasCommands || false;
         this.needsInit = data.needsInit || false;
+        this.needsLoad = data.needsLoad || false;
 
-        this.modpath = `${__dirname}/Module`;
+        //this.modpath = `${__dirname}/Module`;
         this.cmdpath = `${__dirname}/Commands`;
 
         
@@ -21,12 +22,12 @@ class Module{
 
     loadMod(){
         try{
-            const modFiles = fs.readdirSync(this.modPath);
+            const modFiles = fs.readdirSync(this.modpath);
             modFiles.forEach(e => {
                 if(!e.startsWith(".")){
                     try{
                         let name = e.substring(0, e.length-3);
-                        this[name] = require(`${this.modPath}/${e}`).modfile
+                        this[name] = require(`${this.modpath}/${e}`).modfile
                     }catch(err){
                         logger.error("Hyperion", "Load Mod", `Error laoding mod file ${e}, error: ${err}`)
                     }
@@ -40,16 +41,17 @@ class Module{
     
 
     loadCommands(Hyperion){
-        if(!this.hasCmds){
-            return;
-        }
         try{
-            const cmdFiles = fs.readdirSync(this.cmdPath);
+            const cmdFiles = fs.readdirSync(this.cmdpath);
             cmdFiles.forEach(e => {
                 if(!e.startsWith(".")){
                     try{
-                        const cmd = require(`${this.cmdPath}/${e}`).cmd;
-                        Hyperion.commands.add(new cmd);
+                        const precmd = require(`${this.cmdpath}/${e}`).cmd;
+                        let cmd = new precmd;
+                        if(cmd.hasSub){
+                            cmd.registerSubcommands();
+                        }
+                        Hyperion.commands.add(cmd);
                     }catch(err){
                         logger.error("Hyperion", "Load Commands", `Failed to load command ${e} from module ${this.name}. error: ${err}`);
                     }

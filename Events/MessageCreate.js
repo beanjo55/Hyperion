@@ -1,3 +1,4 @@
+const { inspect } = require('util');
 class MessageCreateHandler{
     constructor(){
         this.name = "messageCreate"
@@ -20,7 +21,8 @@ class MessageCreateHandler{
             this.guilds.get(msg.channel.guild.id).fetched = true;
         }
 
-        this.handler(msg);
+        this.handler(msg)
+        //msg.channel.createMessage("```js\n" + inspect(await this.handler(msg), {depth: 1}) + "```");
     }
 }
 exports.event = new MessageCreateHandler;

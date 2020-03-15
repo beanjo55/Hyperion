@@ -14,13 +14,30 @@ class Command{
         this.botperms = [];
         this.needsRolepos = false;
 
+        this.dev = false;
+        this.admin = false;
+        this.support = false;
+
         this.cooldownTime = 2000;
 
         this.helpDetail = "dummy";
         this.helpUsage = "dummy";
         this.helpUsageExample = "dummy";
 
-        this.subcommands = new Collection(Command)
+        this.hasSub = false;
+
+        this.selfResponse = false;
+        this.subcommandslist = [];
+        this.subcommands = undefined;
+    }
+
+    async registerSubcommands(){
+        this.subcommands = new Collection(Command);
+        if(this.subcommandslist.length > 0){
+            this.subcommandslist.forEach(cmd =>{
+                this.subcommands.add(new cmd);
+            })
+        }
     }
 
     //dummy default command 

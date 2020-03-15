@@ -1,17 +1,25 @@
-
+//const { inspect } = require('util');
 async function handler(msg){
     let ctx = {};
-
+    if(msg.author.bot){
+        return;
+    }
+    
+    //console.log("starting handler")
+    //console.log(this.commands)
+    
     let config = await conf(msg.channel.guild, this);
+    //console.log(config)
     if(!config.status){
         return {status:{code: 1, error: new Error("Bad conf return")}};
     }
-    if(!config.status.error){
+    if(config.status.error){
         return config;
     }
     if(!config.payload){
         return {status:{code: 1, error: new Error("Bad conf return")}};
     }
+    //console.log("got cfg")
     ctx.guildconf = config.payload;
     ctx.dev = false;
     ctx.admin = false;
@@ -24,8 +32,9 @@ async function handler(msg){
     ctx.content = msg.content
     ctx.userconf = await userConf(ctx, ctx.user);
 
-    let isolated = isolate(ctx.guildconf, this, msg.content, false);
-
+    //console.log("isolating");
+    let isolated = await isolate(ctx.guildconf, this, msg.content, false);
+    //console.log(isolated)
     if(!isolated){return;}
 
     if(isolated.type === "dev" || isolated.type === "admin"){
@@ -35,21 +44,23 @@ async function handler(msg){
             isolated = isolate(ctx.guildconf, this, msg.content, true);
         }else{
             ctx.admin = true;
-            ctx.dev = isDev(ctx);
+            ctx.dev = await isDev(ctx);
         }
     }
-
+    
     if(!isolated){return;}
-
-    let com = await findCommand(isolated.label, ctx);
+    //console.log(this.commands)
+    let com = await findCommand(isolated.command, ctx);
+    //console.log(isolated)
     if(!com){return;}
     if(com.status.code === 6){return com}
     ctx.command = com.payload;
-
+    ctx.args = isolated.args;
+    //console.log(inspect(ctx, {depth: 1}))
     const global = await globalChecks(ctx);
     if(!global){return;}
     if(global.status.code !== 0){return global;}
-
+    
     ctx.permLevel = await memberGuildPerms(ctx);
     if(!(ctx.dev || ctx.admin)){
         const guildcheck = await guildChecks(ctx);
@@ -77,25 +88,32 @@ async function handler(msg){
         if(!cooldown){return;}
         if(cooldown.status.code !== 0){return cooldown;}
     }
-
+    if(!ctx.args){
+        ctx.args = []
+    }
     const result = await executeCommand(ctx);
     if(!result){return;}
+    if(!ctx.command.selfResponse && result.payload){
+        ctx.channel.createMessage(result.payload);
+    }
     postExecute(ctx);
     return result;
 }
 
 async function conf(guild, Hyperion){
     let guildconf;
-    if(!Hyperion.models.guildconf.exists({guild: guild.id})){
-        guildconf = new Hyperion.models.guildconf({
+    if(!await Hyperion.models.guild.exists({guild: guild.id})){
+        guildconf = new Hyperion.models.guild({
             guild: guild.id
         });
         await guildconf.save().catch(err => {
-            Hyperion.logger.error("Hyperion", "New Guild Config", `Failed to make new config in handler for ${guild.id}, err: ${err}`);
-            return {status: {code: 1, error: err}};
+            if(err !== null){
+                Hyperion.logger.error("Hyperion", "New Guild Config", `Failed to make new config in handler for ${guild.id}, err: ${err}`);
+                return {status: {code: 1, error: err}};
+            }
         })
     }else{
-        guildconf = await Hyperion.models.guildconf.findOne({guild: guild.id});
+        guildconf = await Hyperion.models.guild.findOne({guild: guild.id});
     }
     Hyperion.guilds.get(guild.id).guildconf = guildconf;
     return {status:{code: 0}, payload: guildconf};
@@ -109,21 +127,22 @@ async function isolate(guildconf, Hyperion, content, retry){
     let label = "";
 
     if(!retry){
-        if(content.startsWith(Hyperion.config.devPrefix)){
+        if(content.startsWith(Hyperion.devPrefix)){
             args = content.split(" ").slice(1);
-            label = content.split(" ").slice(0, 1)[0].slice(Hyperion.config.devPrefix.length).trim().toLowerCase();
-            return {type: "dev", label: label, args: args}
+            label = content.split(" ").slice(0, 1)[0].slice(Hyperion.devPrefix.length).trim().toLowerCase();
+            return {type: "dev", command: label, args: args}
         }
 
-        if(content.startsWith(Hyperion.config.adminPrefix)){
-            label = content.split(" ").slice(0, 1)[0].slice(Hyperion.config.adminPrefix.length).trim().toLowerCase();
-            return {type: "admin", label: label, args: args}
+        if(content.startsWith(Hyperion.adminPrefix)){
+            args = content.split(" ").slice(1);
+            label = content.split(" ").slice(0, 1)[0].slice(Hyperion.adminPrefix.length).trim().toLowerCase();
+            return {type: "admin", command: label, args: args}
         }
     }
 
     if(content.startsWith(Hyperion.user.mention)){
         args = content.split(" ").slice(2);
-        label = content.split(" ").slice(1, 2)[0].trim.toLowerCase();
+        label = content.split(" ").slice(1, 2)[0].trim().toLowerCase();
         return {type: "mention", command: label, args: args};
     }
     
@@ -154,6 +173,7 @@ async function isAdmin(ctx){
     if(ctx.userconf.acks.admin || ctx.userconf.acks.developer || ctx.userconf.acks.owner){
         return true;
     }
+    //if(ctx.user.id === "253233185800847361"){return true;}
     return false;
 }
 
@@ -161,11 +181,16 @@ async function isDev(ctx){
     if(ctx.userconf.acks.developer || ctx.userconf.acks.owner){
         return true;
     }
+    //if(ctx.user.id === "253233185800847361"){return true;}
     return false;
 }
 
 async function findCommand(label, ctx){
-    let command = ctx.Hyperion.commands.find(c => (c.name === label) || (c.aliases.includes(label)));
+    let command = ctx.Hyperion.commands.get(label);
+    if(!command){
+        command = ctx.Hyperion.commands.find(c => c.aliases.includes(label));
+    }
+    //console.log(command)
     if(!command){
         return {status: {code: 6}};
     }
@@ -177,17 +202,25 @@ async function globalChecks(ctx){
         return {status: {code: 5}, payload: "User blacklisted"};
     }
 
-    if(ctx.Hyperion.global.gDisabledMods.includes(ctx.cmd.module.name)){
+    if(ctx.Hyperion.global.gDisabledMods.includes(ctx.command.module.name)){
         return {status: {code: 5}, payload: "Module globally disabled"};
     }
 
-    if(ctx.Hyperion.gDisabledCommands.includes(ctx.cmd.name)){
+    if(ctx.Hyperion.global.gDisabledCommands.includes(ctx.command.name)){
         return {status: {code: 5}, payload: "Command globally disabled"};
+    }
+
+    if(ctx.command.dev){
+        ctx.dev = await isDev(ctx)
+        if(!ctx.dev){
+            return {status: {code: 5}, payload: "Not a dev"}
+        }
     }
     return {status: {code: 0}};
 }
 
 async function guildChecks(ctx){
+    //console.log(ctx)
     if(ctx.guildconf.modules[ctx.command.module] === undefined){
         ctx.guildconf.modules[ctx.command.module] = true;
         ctx.Hyperion.guilds.get(ctx.guild.id).guildconf.modules[ctx.command.module] = true;
@@ -211,10 +244,10 @@ async function guildChecks(ctx){
 }
 
 async function memberGuildPerms(ctx){
-    if(ctx.member.has("administrator")){
+    if(ctx.member.permission.has("administrator")){
         return 3;
     }
-    if(ctx.member.has("manageGuild")){
+    if(ctx.member.permission.has("manageGuild")){
         return 2;
     }
     ctx.member.roles.forEach(role => {
@@ -238,34 +271,43 @@ async function guildIgnored(ctx){
 
 async function guildRoleChecks(ctx){
     const cgconf = ctx.guildconf.commands[ctx.command.name];
-    if(cgconf.disabledRoles.length !== 0){
-        ctx.member.roles.forEach(role => {
-            if(cgconf.disabledRoles.includes(role)){
-                return {status: {code: 5}, payload: "disabled role"};
-            }
-        })
+    if(cgconf.disabledRoles){
+        if(cgconf.disabledRoles.length !== 0){
+            ctx.member.roles.forEach(role => {
+                if(cgconf.disabledRoles.includes(role)){
+                    return {status: {code: 5}, payload: "disabled role"};
+                }
+            })
+        }
     }
-    if(cgconf.allowedRoles.length !== 0){
-        ctx.member.roles.forEach(role => {
-            if(cgconf.allowedRoles.includes(role)){
-                return {status: {code: 0}};
-            }
-        });
+    if(cgconf.allowedRoles){
+        if(cgconf.allowedRoles.length !== 0){
+            ctx.member.roles.forEach(role => {
+                if(cgconf.allowedRoles.includes(role)){
+                    return {status: {code: 0}};
+                }
+            });
         return {status: {code: 5}, payload: "User did not have allowed role"};
+        }
     }
     return {status: {code: 0}};
+    
 }
 
 async function guildChannelChecks(ctx){
     const cgconf = ctx.guildconf.commands[ctx.command.name];
-    if(cgconf.disabledChannels.length !== 0){
-        if(cgconf.disabledChannels.includes(ctx.channel)){
-            return {status: {code: 5}, payload: "Disabled Channel"};
+    if(cgconf.disabledChannels){
+        if(cgconf.disabledChannels.length !== 0){
+            if(cgconf.disabledChannels.includes(ctx.channel)){
+                return {status: {code: 5}, payload: "Disabled Channel"};
+            }
         }
     }
-    if(cgconf.allowedChannels.length !== 0){
-        if(!cgconf.allowedChannels.includes(ctx.channel)){
-            return {status: {code: 5}, payload: "Not an allowed channel"};
+    if(cgconf.allowedChannels){
+        if(cgconf.allowedChannels.length !== 0){
+            if(!cgconf.allowedChannels.includes(ctx.channel)){
+                return {status: {code: 5}, payload: "Not an allowed channel"};
+            }
         }
     }
     return {status: {code: 0}};
@@ -280,12 +322,21 @@ async function cooldownCheck(ctx){
         if((Date.now() - cooldown.ranAt) < cooldown.cooldownTime){
             return {status: {code: 7}, payload: "Command Cooldown"};
         }
-        delete ctx.Hyperion.modules.get("commandHandler").cooldowns[ctx.user.id]
+        //delete ctx.Hyperion.modules.get("commandHandler").cooldowns[ctx.user.id]
     }
     return {status: {code: 0}};
 }
 
 async function executeCommand(ctx){
+    if(ctx.command.hasSub && ctx.args){
+        let subcmd = ctx.command.subcommands.get(ctx.args[0]);
+        if(!subcmd){
+            subcmd = ctx.command.subcommands.find(c => c.ailiases.includes(ctx.args[0]));
+        }
+        if(subcmd){
+            ctx.command = subcmd;
+        }
+    }
     const result = await ctx.command.execute(ctx).catch(err =>{
         ctx.Hyperion.logger.error("Hyperion", "Command Error", `Error executing ${ctx.command.name}, Command Call: ${ctx.msg.content}\nerror: ${err}`);
         ctx.Hyperion.sentry.configureScope(function(scope){
@@ -308,7 +359,7 @@ async function postExecute(ctx){
 
 async function updateModConf(ctx, mod, status){
     
-    let conf = ctx.Hyperion.models.findOne({guild: ctx.guild.id}).exec();
+    let conf = await ctx.Hyperion.models.guild.findOne({guild: ctx.guild.id}).exec();
     conf.modules[mod] = status;
     conf.save().catch(err => {
         if(err !== null){
@@ -325,7 +376,7 @@ async function updateCmdConf(ctx, cmd, status){
         allowedRoles: [],
         disabledRoles: []
     }
-    let conf = await ctx.Hyperion.models.findOne({guild: ctx.guild.id}).exec();
+    let conf = await ctx.Hyperion.models.guild.findOne({guild: ctx.guild.id}).exec();
     conf.commands[cmd] = template;
     conf.save().catch(err => {
         if(err !== null){

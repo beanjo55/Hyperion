@@ -1,10 +1,10 @@
 const Module = require("../../Core/Structures/Module.js").struct;
 
-class Info extends Module{
+class Dev extends Module{
     constructor(){
         super({
-            name: "info",
-            private: false,
+            name: "dev",
+            private: true,
             alwaysEnabled: true,
             hasCommands: true,
             needsInit: false,
@@ -13,4 +13,4 @@ class Info extends Module{
         this.cmdpath = `${__dirname}/Commands`;
     }
 }
-exports.module = Info;
+exports.module = Dev;

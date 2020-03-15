@@ -9,6 +9,8 @@ class Ping extends command{
         this.aliases = ["pong"];
 
         this.alwaysEnabled = true;
+
+        this.selfResponse = true;
     }
 
     async execute(ctx){
