@@ -21,6 +21,8 @@ class Command{
         this.cooldownTime = 2000;
 
         this.helpDetail = "dummy";
+        //this.helpAliases = "dummy";
+        this.helpSubcommands = "dummy";
         this.helpUsage = "dummy";
         this.helpUsageExample = "dummy";
 

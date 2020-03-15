@@ -1,12 +1,9 @@
-//const { inspect } = require('util');
 async function handler(msg){
     let ctx = {};
     if(msg.author.bot){
         return;
     }
     
-    //console.log("starting handler")
-    //console.log(this.commands)
     
     let config = await conf(msg.channel.guild, this);
     //console.log(config)
@@ -19,7 +16,6 @@ async function handler(msg){
     if(!config.payload){
         return {status:{code: 1, error: new Error("Bad conf return")}};
     }
-    //console.log("got cfg")
     ctx.guildconf = config.payload;
     ctx.dev = false;
     ctx.admin = false;
@@ -32,9 +28,7 @@ async function handler(msg){
     ctx.content = msg.content
     ctx.userconf = await userConf(ctx, ctx.user);
 
-    //console.log("isolating");
     let isolated = await isolate(ctx.guildconf, this, msg.content, false);
-    //console.log(isolated)
     if(!isolated){return;}
 
     if(isolated.type === "dev" || isolated.type === "admin"){
@@ -49,14 +43,15 @@ async function handler(msg){
     }
     
     if(!isolated){return;}
-    //console.log(this.commands)
+    ctx.args = isolated.args;
     let com = await findCommand(isolated.command, ctx);
-    //console.log(isolated)
     if(!com){return;}
+    if(com === "help"){
+        return ctx.channel.createMessage(await sendHelp(ctx));
+    }
     if(com.status.code === 6){return com}
     ctx.command = com.payload;
-    ctx.args = isolated.args;
-    //console.log(inspect(ctx, {depth: 1}))
+    
     const global = await globalChecks(ctx);
     if(!global){return;}
     if(global.status.code !== 0){return global;}
@@ -173,7 +168,6 @@ async function isAdmin(ctx){
     if(ctx.userconf.acks.admin || ctx.userconf.acks.developer || ctx.userconf.acks.owner){
         return true;
     }
-    //if(ctx.user.id === "253233185800847361"){return true;}
     return false;
 }
 
@@ -181,16 +175,15 @@ async function isDev(ctx){
     if(ctx.userconf.acks.developer || ctx.userconf.acks.owner){
         return true;
     }
-    //if(ctx.user.id === "253233185800847361"){return true;}
     return false;
 }
 
 async function findCommand(label, ctx){
+    if(label.toLowerCase() === "help"){return "help";}
     let command = ctx.Hyperion.commands.get(label);
     if(!command){
         command = ctx.Hyperion.commands.find(c => c.aliases.includes(label));
     }
-    //console.log(command)
     if(!command){
         return {status: {code: 6}};
     }
@@ -220,7 +213,6 @@ async function globalChecks(ctx){
 }
 
 async function guildChecks(ctx){
-    //console.log(ctx)
     if(ctx.guildconf.modules[ctx.command.module] === undefined){
         ctx.guildconf.modules[ctx.command.module] = true;
         ctx.Hyperion.guilds.get(ctx.guild.id).guildconf.modules[ctx.command.module] = true;
@@ -322,7 +314,7 @@ async function cooldownCheck(ctx){
         if((Date.now() - cooldown.ranAt) < cooldown.cooldownTime){
             return {status: {code: 7}, payload: "Command Cooldown"};
         }
-        //delete ctx.Hyperion.modules.get("commandHandler").cooldowns[ctx.user.id]
+        
     }
     return {status: {code: 0}};
 }
@@ -383,5 +375,54 @@ async function updateCmdConf(ctx, cmd, status){
             ctx.Hyperion.logger.error("Hyperion", "Update Guild Conf", `Failed to add new command status to guild conf on guild: ${ctx.guild.id}, err: ${err}`);
         }
     });
+}
+
+async function sendHelp(ctx){
+    if(ctx.args && ctx.args[0]){
+        const cmd = await findCommand(ctx.args[0], ctx);
+        if(cmd && cmd !== "help"){
+            return await sendCommandHelp(ctx, cmd);
+        }
+    }
+    let cats = ctx.Hyperion.modules.filter(mod => !mod.private && mod.hasCommands);
+    console.log(cats)
+    let data = {
+        embed: {
+            title: "Hyperion Help",
+            color: ctx.Hyperion.defaultColor,
+            timestamp: new Date(),
+            fields: []
+        }
+    };
+    cats.forEach(cat => {
+        let cmds = ctx.Hyperion.commands.filter(c => c.module.toLowerCase() === cat.name.toLowerCase()).map(c => c.name).join(", ");
+        data.embed.fields.push({
+            name: cat.name,
+            value: cmds,
+            inline: false
+        });
+    });
+    console.log(data.fields)
+    return data;
+}
+
+async function sendCommandHelp(ctx, cmd){
+    cmd = cmd.payload;
+    const rx = new RegExp("{prefix}", "gmi");
+    let info = `**Description:** ${cmd.helpDetail}\n**Cooldown:** ${cmd.cooldownTime/1000} seconds\n`;
+    if(cmd.hasSub){
+        info += `**Subcommands:**\n${cmd.helpSubcommands.replace(rx, ctx.guildconf.prefix)}\n`;
+    }
+    info += `**Usage:**\n${cmd.helpUsage.replace(rx, ctx.guildconf.prefix)}\n**Example:**\n${cmd.helpUsageExample.replace(rx, ctx.guildconf.prefix)}`;
+    
+    let data = {
+        embed: {
+            title: `Help for ${ctx.guildconf.prefix}${cmd.name}`,
+            color: ctx.Hyperion.defaultColor,
+            timestamp: new Date(),
+            description: info
+        }
+    };
+    return data;
 }
 exports.modfile = handler;

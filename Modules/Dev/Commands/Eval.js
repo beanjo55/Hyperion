@@ -19,6 +19,11 @@ class Eval extends command{
         this.hasSub = true;
         this.subcommandslist = [AsyncEval]
 
+        this.helpDetail = "Evaluates JavaScript code";
+        this.helpSubcommands = "{prefix}eval async - Evaluates JavaScript code in an async context";
+        this.helpUsage = "{prefix}eval code\n{prefix}eval async code";
+        this.helpUsageExample = "{prefix}eval 1 + 1\n{prefix}eval async return 1 + 1";
+
     }
     async execute(ctx){
         //console.log(ctx.args)
