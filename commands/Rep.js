@@ -68,6 +68,10 @@ class Rep extends command{
 
     async give(msg, args, Hyperion, dev){
         const user = resolveUser(msg, args[0]);
+
+        if(!user){
+            return "Who?";
+        }
         if(msg.member.id === user.id){
             return "You cant rep yourself!"
         }

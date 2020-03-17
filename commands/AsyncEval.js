@@ -43,12 +43,7 @@ class AsyncEval extends command{
     
         try {
     
-            const code = args.join(" ");
-            /*if(code.includes("token")){
-                relay.createMessage(msg.channel.id, "unsafe eval, aborted");
-                return;
-            }*/
-            let asyncstring = "async function run(msg, Hyperion){" + code + "}; run(msg, Hyperion)"
+            let asyncstring = "async function run(msg, Hyperion){" + args.join(" ") + "}; run(msg, Hyperion)"
             let evaled = await eval(asyncstring);
             if (typeof evaled !== "string")
                 evaled = inspect(evaled, {depth: 0});

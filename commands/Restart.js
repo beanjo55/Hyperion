@@ -33,7 +33,7 @@ class Restart extends command{
                 return;
             }
         }
-        msg.channel.createMessage("Going down for a restart, give me a minute");
+        await msg.channel.createMessage("bye\nhttps://tenor.com/view/guacamole-guac-dance-happy-chips-gif-5015394");
         process.exit(1);
         return;
     }
