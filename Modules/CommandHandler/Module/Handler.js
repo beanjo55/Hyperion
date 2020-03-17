@@ -51,17 +51,19 @@ async function handler(msg){
     }
     if(com.status.code === 6){return com}
     ctx.command = com.payload;
-    
+    console.log("found command")
     const global = await globalChecks(ctx);
     if(!global){return;}
     if(global.status.code !== 0){return global;}
-    
+    console.log("pass global")
     ctx.permLevel = await memberGuildPerms(ctx);
     if(!(ctx.dev || ctx.admin)){
         const guildcheck = await guildChecks(ctx);
+        console.log(guildcheck)
         if(!guildcheck){return;}
         if(guildcheck.status.code !== 0){return guildcheck;}
     }
+    console.log("perm check")
     if(!ctx.dev){
         if(ctx.permLevel < 2){
             const ignored = await guildIgnored(ctx);
@@ -77,7 +79,7 @@ async function handler(msg){
             if(guildChannel.status.code !== 0){return guildChannel;}
         }
     }
-
+    console.log("cooldown check")
     if(!ctx.dev){
         const cooldown = await cooldownCheck(ctx);
         if(!cooldown){return;}
@@ -179,6 +181,7 @@ async function isDev(ctx){
 }
 
 async function findCommand(label, ctx){
+    if(!label){return {status: {code: 6}};}
     if(label.toLowerCase() === "help"){return "help";}
     let command = ctx.Hyperion.commands.get(label);
     if(!command){
@@ -229,8 +232,10 @@ async function guildChecks(ctx){
         return {status: {code: 5}, payload: "Module server disabled"};
     }
 
-    if(!(ctx.guildconf.commands[ctx.command.name].status || ctx.command.alwaysEnabled)){
-        return {status: {code: 5}, payload: "Command Server Disabled"};
+    if((ctx.guildconf.commands[ctx.command.name].status === false)){
+        if(!ctx.command.alwaysEnabled){
+            return {status: {code: 5}, payload: "Command Server Disabled"};
+        }
     }
     return {status: {code: 0}};
 }
@@ -385,7 +390,7 @@ async function sendHelp(ctx){
         }
     }
     let cats = ctx.Hyperion.modules.filter(mod => !mod.private && mod.hasCommands);
-    console.log(cats)
+    //console.log(cats)
     let data = {
         embed: {
             title: "Hyperion Help",
@@ -402,7 +407,7 @@ async function sendHelp(ctx){
             inline: false
         });
     });
-    console.log(data.fields)
+    //console.log(data.fields)
     return data;
 }
 

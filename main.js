@@ -34,7 +34,7 @@ const models = {
 class hyperion extends Client{
     constructor(token, erisOptions, coreOptions, mongoLogin, mongoOptions){
         super(token, erisOptions);
-        this.build = coreOptions.build
+        this.build = coreOptions.build;
         this.modules = new Collection(Module);
         this.commands = new Collection(command);
         this.logger = logger;
@@ -45,7 +45,7 @@ class hyperion extends Client{
         });
         this.bevents = {};
         this.modlist = coreOptions.modlist;
-        this.models = models
+        this.models = models;
         this.devPrefix = coreOptions.devPrefix;
         this.adminPrefix = coreOptions.adminPrefix;
         this.mongoOptions = mongoOptions;
