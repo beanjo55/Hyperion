@@ -4,3 +4,4 @@ THIS IS RELAY
 config.json
 package-lock.json
 build
+.vscode

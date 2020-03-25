@@ -7,6 +7,7 @@ command/handler status codes:
     5: unauthorized (dev/internal commands, blacklisted, no perms)
     6: no command
     7: on cooldown (global or command)
+    8: misc error/other error
 
 command return:
     {
