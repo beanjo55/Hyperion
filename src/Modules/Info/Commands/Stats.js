@@ -30,17 +30,17 @@ class Stats extends command{
                     },
                     {
                         name: "Guilds",
-                        value: `${ctx.Hyperion.guilds.size}`,
+                        value: `${ctx.Hyperion.client.guilds.size}`,
                         inline: true
                     },
                     {
                         name: "Users",
-                        value: `${ctx.Hyperion.users.size}`,
+                        value: `${ctx.Hyperion.client.users.size}`,
                         inline: true
                     },
                     {
                         name: "Uptime",
-                        value: `${msc(ctx.Hyperion.uptime)}`,
+                        value: `${msc(ctx.Hyperion.client.uptime)}`,
                         inline: true
                     },
                     {

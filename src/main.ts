@@ -24,7 +24,8 @@ const models = {
 };
 
 
-class hyperion extends Client implements HyperionInterface{
+class hyperion implements HyperionInterface{
+    client: Eris.Client;
     build: string;
     modules: Collection<Module>;
     sentry: any;
@@ -40,10 +41,11 @@ class hyperion extends Client implements HyperionInterface{
     models: any;
     db: mongoose.Connection;
     global: any;
+    logLevel: number
     
 
     constructor(token: string, erisOptions: Eris.ClientOptions, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions){
-        super(token, erisOptions);
+        this.client = new Client(token, erisOptions);
         this.build = coreOptions.build;
         this.modules = new Collection(Module);
         this.commands = new Collection(Command);
@@ -62,19 +64,20 @@ class hyperion extends Client implements HyperionInterface{
         this.defaultColor = coreOptions.defaultColor;
         this.db = this.mongoDB(mongoLogin);
         this.version = coreOptions.version;
+        this.logLevel = coreOptions.defaultLogLevel;
 
     }
     async init(){
         await this.loadMods();
         await this.loadEvents();
-        this.global = await this.models.global.findOne({});
+        this.global = await this.models.global.findOne({}).lean().exec();
     }
 
     async loadEvent(eventfile: string){
         try{
             const Event = require(`./Events/${eventfile}`).event;
             this.bevents[Event.name] = Event.handle.bind(this);
-            this.on(Event.name, this.bevents[Event.name]);
+            this.client.on(Event.name, this.bevents[Event.name]);
         }catch(err){
             this.logger.error("Hyperion", "Event Loading", `Failed to load event ${eventfile}, error: ${err}`);
         }
@@ -134,5 +137,5 @@ class hyperion extends Client implements HyperionInterface{
 const Hyperion = new hyperion(config.token, config.erisOptions, config.coreOptions, config.mongoLogin, config.mongoOptions);
 
 Hyperion.init().then(() => {
-    Hyperion.connect();
+    Hyperion.client.connect();
 })

@@ -13,8 +13,9 @@ export class Module{
     needsLoad: boolean;
     cmdpath: string;
     modpath: string;
-    default: Boolean;
-    [key: string]: any
+    defaultStatus: Boolean;
+    hasCfg: Boolean;
+    [key: string]: any;
     
 
     constructor(data: any){
@@ -23,7 +24,8 @@ export class Module{
 
         this.private = data.private || false;
         this.alwaysEnabled = data.alwaysEnabled || false;
-        this.default = data.default;
+        this.defaultStatus = data.defaultStatus;
+        this.hasCfg = data.hasCfg;
 
         this.hasCommands = data.hasCommands || false;
         this.needsInit = data.needsInit || false;
@@ -42,9 +44,13 @@ export class Module{
                 if(!e.startsWith(".")){
                     try{
                         let name = e.substring(0, e.length-3);
-                        this[name] = require(`${this.modpath}/${e}`).modfile
+                        let modfile: any = require(`${this.modpath}/${e}`).modfile;
+                        if(modfile === undefined){
+                            modfile = require(`${this.modpath}/${e}`).default;
+                        }
+                        this[name] = modfile;
                     }catch(err){
-                        logger.error("Hyperion", "Load Mod", `Error laoding mod file ${e}, error: ${err}`)
+                        logger.error("Hyperion", "Load Mod", `Error laoding mod file ${e}, error: ${err}`);
                     }
                 }
             });

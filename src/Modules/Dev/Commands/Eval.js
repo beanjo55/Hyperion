@@ -41,7 +41,7 @@ class Eval extends command{
     }
 
     async clean(text, ctx){
-        const rx = new RegExp(ctx.Hyperion.token, "gim");
+        const rx = new RegExp(ctx.Hyperion.client.token, "gim");
         if (typeof(text) === "string"){
             text = text.replace(rx, "Fuck You");
             return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));

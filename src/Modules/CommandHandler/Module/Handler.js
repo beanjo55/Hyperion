@@ -112,7 +112,7 @@ async function conf(guild, Hyperion){
     }else{
         guildconf = await Hyperion.models.guild.findOne({guild: guild.id});
     }
-    Hyperion.guilds.get(guild.id).guildconf = guildconf;
+    Hyperion.client.guilds.get(guild.id).guildconf = guildconf;
     return {status:{code: 0}, payload: guildconf};
 
 }
@@ -137,7 +137,7 @@ async function isolate(guildconf, Hyperion, content, retry){
         }
     }
 
-    if(content.startsWith(Hyperion.user.mention)){
+    if(content.startsWith(Hyperion.client.user.mention)){
         args = content.split(" ").slice(2);
         label = content.split(" ").slice(1, 2)[0].trim().toLowerCase();
         return {type: "mention", command: label, args: args};
@@ -218,13 +218,13 @@ async function globalChecks(ctx){
 async function guildChecks(ctx){
     if(ctx.guildconf.modules[ctx.command.module] === undefined){
         ctx.guildconf.modules[ctx.command.module] = true;
-        ctx.Hyperion.guilds.get(ctx.guild.id).guildconf.modules[ctx.command.module] = true;
+        ctx.Hyperion.client.guilds.get(ctx.guild.id).guildconf.modules[ctx.command.module] = true;
         updateModConf(ctx, ctx.command.module, true);
     }
 
     if(ctx.guildconf.commands[ctx.command.name] === undefined){
         ctx.guildconf.commands[ctx.command.name] = true;
-        ctx.Hyperion.guilds.get(ctx.guild.id).guildconf.commands[ctx.command.name] = true;
+        ctx.Hyperion.client.guilds.get(ctx.guild.id).guildconf.commands[ctx.command.name] = true;
         updateCmdConf(ctx, ctx.command.name, true);
     }
 

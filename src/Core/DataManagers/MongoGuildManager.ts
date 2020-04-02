@@ -1,100 +1,26 @@
 const guildmodel = require("../../MongoDB/Guild.js").model;
 import * as Types from "../../types";
 import {Embed} from 'eris';
-
+import {Command} from "../Structures/Command";
+import {Module} from "../Structures/Module";
 
 class MongoGuildManager{
     model: any;
-    defaultModuleStates: any;
-    constructor(defaultModuleStates: any){
+    constructor(){
         this.model = guildmodel;
-        this.defaultModuleStates = defaultModuleStates;
     }
 
-    async create(guildID: string){
-        await this.model.create({guild: guildID}, this.defaultCallback);
-    }
-
-    async get(guildID: string){
-        return await this.model.findOne({guild: guildID}, this.defaultCallback);
-    }
-
-    async update(guildID: string, data: any){
-        return await this.model.updateOne({guild: guildID}, data, this.updateCallback);
-    }
-
-    async getPrefix(guildID: string){
-        return await this.model.findOne({guild: guildID}, 'prefix', this.defaultCallback);
-    }
-
-    async setPrefix(guildID: string, newprefix: string){
-        return await this.model.updateOne({guild: guildID}, {prefix: newprefix}, this.updateCallback);
-    }
-
-    async getModule(guildID: string, module: string){
-        
-    }
-
-    async getModules(guildID: string){
-        return await this.model.findOne({guild: guildID}, 'modules')
-    }
-
-    async setModule(guildID: string, module: string, status: Boolean, moduleList: Array<string>){
-        let doc: any = await this.model.findOne({guild: guildID}, 'modules', this.defaultCallback);
-
-    }
-
-    async getCommand(guildID: string, command: string){
-
-    }
-
-    async updateCommand(guildID: string, command: string, data: any){
-
-    }
-
-    async getModuleConfig(guildID: string, module: string){
-        if(!Object.keys(nameConfigMap).includes(module.toLowerCase())){
-            return {code: 0, error: "Invalid module name"}
+    validateModules(data: any, module: string){
+        if(!Object.getOwnPropertyNames(nameConfigMap).includes(module)){
+            return {code: 1, payload: "No matching module found"};
         }
-    }
 
-    async updateModuleConfig(guildID: string, module: string, data: any){
-
+        let modConf: any = nameConfigMap[module]
     }
-
-    async defaultCallback(err: any, result: any){
-        if(err && err !== null){
-            return {
-                status: {
-                    code: 8,
-                    error: err
-                },
-                payload: "Mongoose Error"
-            }
-        }else{
-            return result;
-        }
-    }
-
-    async updateCallback(err: any, writeResult: any){
-        if(err && err !== null){
-            return {
-                status: {
-                    code: 8,
-                    error: err
-                },
-                payload: "Mongoose Error"
-            }
-        }else{
-            return {
-                status: {
-                    code: 0
-                },
-                payload: writeResult
-            };
-        }
-    }
+    
 }
+
+const ops: Array<string> = ["get", "set"]
 
 
 
@@ -238,10 +164,12 @@ class TagConfig implements Types.TagConfig{
     allowedEditRoles: Array<string>;
     limitEdit: Boolean;
     delete: Boolean;
+    tags: Array<Types.tag>;
     constructor(data: Partial<Types.TagConfig>){
         this.allowedEditRoles = data.allowedEditRoles ?? [];
         this.limitEdit = data.limitEdit ?? false;
         this.delete = data.delete ?? false;
+        this.tags = data.tags ?? [];
     }
 }
 
@@ -290,7 +218,7 @@ class SocialConfig implements Types.SocialConfig{
         this.levelupChannel = data.levelupChannel ?? "";
     }
 }
-const nameConfigMap = {
+const nameConfigMap: any = {
     mod: ModConfig,
     command: CommandConfig,
     module: ModuleConfig,

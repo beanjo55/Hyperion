@@ -9,7 +9,8 @@ class CommandHandler extends Module{
             alwaysEnabled: true,
             hasCommands: false,
             needsInit: true,
-            needsLoad: true
+            needsLoad: true,
+            hasCfg: false
         });
         this.modpath = `${__dirname}/Module`;
     }

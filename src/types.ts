@@ -17,9 +17,11 @@ export interface CoreOptions{
     adminPrefix: string;
     version: string;
     defaultColor: string;
+    defaultLogLevel: number;
 }
 
-export interface HyperionInterface extends Client{
+export interface HyperionInterface {
+    client: Client;
     build: string;
     modules: Collection<Module>;
     sentry: any;
@@ -36,6 +38,7 @@ export interface HyperionInterface extends Client{
     db: mongoose.Connection;
     global: any;
     handler?: any;
+    logLevel: number;
 }
 
 export interface CommandConfig{
@@ -80,6 +83,7 @@ export interface LoggingConfig{
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
     specifyChannels: Boolean;
+
     banAdd: LogEvent;
     banRemove: LogEvent;
     memberAdd: LogEvent;
@@ -111,10 +115,21 @@ export interface WelcomeConfig{
     dm: Boolean;
 }
 
+export interface tag {
+    name: string;
+    author: string;
+    date: number;
+    editauthor?: string;
+    editdate?: number;
+    uses: number;
+    content: string; 
+}
+
 export interface TagConfig{
     allowedEditRoles: Array<string>;
     limitEdit: Boolean;
     delete: Boolean;
+    tags: Array<tag>;
 }
 
 export interface RankConfig{
@@ -145,4 +160,31 @@ export interface Status{
     code: Number;
     error?: Error | string;
     payload?: any;
+}
+
+export interface HandlerConfig{
+    type: string;
+    logLevel: number;
+    priority: number;
+}
+
+export interface GuildConfig {
+    guild: string;
+    prefix: string;
+    updatedAt: number;
+    modules: any;
+    reactionRoles: RRConfig;
+    autoroles: AutoroleConfig;
+    ranks: RankConfig;
+    tags: TagConfig;
+    starboard: StarboardConfig;
+    logging: LoggingConfig;
+    welcome: WelcomeConfig;
+    mod: ModConfig;
+    commands: any;
+    ignoredChannels: Array<string>;
+    ignoredRoles: Array<string>;
+    ignoredUsers: Array<string>;
+    cantRunMessage: boolean;
+    botMissingPermsMessages: boolean;
 }

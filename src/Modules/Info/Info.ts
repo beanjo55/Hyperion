@@ -8,7 +8,8 @@ class Info extends Module{
             alwaysEnabled: true,
             hasCommands: true,
             needsInit: false,
-            needsLoad: false
+            needsLoad: false,
+            hasCfg: false
         });
         this.cmdpath = `${__dirname}/Commands`;
     }

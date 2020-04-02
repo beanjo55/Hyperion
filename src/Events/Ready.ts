@@ -6,7 +6,7 @@ class ReadyHandler{
     }
     async handle(this: HyperionInterface){
         this.logger.success("Hyperion", "Ready Event", "Hyperion Ready");
-        this.editStatus(undefined, {name: "v2", type: 0});
+        this.client.editStatus(undefined, {name: "v2", type: 0});
     }
 }
 exports.event = new ReadyHandler;

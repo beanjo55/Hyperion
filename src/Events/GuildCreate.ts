@@ -6,7 +6,7 @@ class GuildCreateHandler{
         this.name = "guildCreate";
     }
     async handle(this: HyperionInterface, guild: Guild){
-        let guildconf = new this.models.guildconf({
+        let guildconf = new this.models.guild({
             guild: guild.id
         })
     }
