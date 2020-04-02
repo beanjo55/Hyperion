@@ -11,7 +11,7 @@ const Eris = require("eris");
 const config = require("./config.json");
 const Hyperion = new Eris(config.token, {
     restMode: true,
-    getAllUsers: true,
+    getAllUsers: false,
     defaultImageFormat: "png",
     defaultImageSize: 2048,
     guildSubscriptions: false
