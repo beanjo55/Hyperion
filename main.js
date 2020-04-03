@@ -11,10 +11,10 @@ const Eris = require("eris");
 const config = require("./config.json");
 const Hyperion = new Eris(config.token, {
     restMode: true,
-    getAllUsers: false,
+    getAllUsers: true,
     defaultImageFormat: "png",
     defaultImageSize: 2048,
-    guildSubscriptions: false
+    guildSubscriptions: true
 });
 
 const { command } = require("./command.js");
