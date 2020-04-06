@@ -14,7 +14,7 @@ const Hyperion = new Eris(config.token, {
     getAllUsers: true,
     defaultImageFormat: "png",
     defaultImageSize: 2048,
-    guildSubscriptions: true
+    guildSubscriptions: false
 });
 
 const { command } = require("./command.js");
