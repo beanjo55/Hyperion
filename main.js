@@ -322,7 +322,7 @@ Hyperion.registerPremium = registerActivation;
 
 
 function glennPush(){
-    if(Hyperion.guild.size <1){return;}
+    if(Hyperion.guilds.size <1){return;}
     Glenn.updateStats(Hyperion.guilds.size, Hyperion.shards.size);
     console.log(`pushed ${Hyperion.guilds.size} guilds to GBL`);
 }
