@@ -198,7 +198,12 @@ Hyperion.on("ready", () => { // When the bot is ready
 
 });
 
+Hyperion.on("shardDisconnect", (error, id) =>{
+    console.log(`disconnected, shardID: ${id}, error: ${error}`);
+});
 
+Hyperion.on("shardReady", (id) =>{console.log(`shard ${id} ready`);});
+Hyperion.on("shardResume", (id) =>{console.log(`shard ${id} resumed`);});
 
 
 function checkRequiredUsers(cmd, msg){
