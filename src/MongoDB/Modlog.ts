@@ -1,4 +1,4 @@
-const {Schema, model} = require('mongoose');
+const {Schema, model} = require("mongoose");
 
 
 
@@ -85,4 +85,4 @@ const modlog = new Schema({
     autoIndex: true,
     minimize: false
 });
-exports.model = new model("modlog", modlog)
+export default new model("modlog", modlog);

@@ -1,46 +1,48 @@
-const command = require('../../../Core/Structures/Command.js').Command;
+import {Command} from "../../../Core/Structures/Command";
 const os = require("os");
 const msc = require("pretty-ms");
+// eslint-disable-next-line no-unused-vars
+import {HyperionInterface} from "../../../types";
 
-class Stats extends command{
+class Stats extends Command{
     constructor(){
-        super();
-        this.name = "stats";
-        this.id = this.name;
-        this.module = "Info";
-        this.alwaysEnabled = true;
+        super({
+            name: "stats",
+            module: "info",
+            alwaysEnabled: true,
+        });
     }
 
-    async execute(ctx){
+    async execute(ctx: any, Hyperion: HyperionInterface): Promise<any>{
         let data = {
             embed:{
                 title: "Hyperion Stats",
-                color: ctx.Hyperion.defaultColor,
+                color: Hyperion.defaultColor,
                 timestamp: new Date(),
                 fields: [
                     {
                         name: "Version",
-                        value: `${ctx.Hyperion.version}`,
+                        value: `${Hyperion.version}`,
                         inline: true
                     },
                     {
                         name: "Commands",
-                        value: `${ctx.Hyperion.commands.size}`,
+                        value: `${Hyperion.commands.size}`,
                         inline: true
                     },
                     {
                         name: "Guilds",
-                        value: `${ctx.Hyperion.client.guilds.size}`,
+                        value: `${Hyperion.client.guilds.size}`,
                         inline: true
                     },
                     {
                         name: "Users",
-                        value: `${ctx.Hyperion.client.users.size}`,
+                        value: `${Hyperion.client.users.size}`,
                         inline: true
                     },
                     {
                         name: "Uptime",
-                        value: `${msc(ctx.Hyperion.client.uptime)}`,
+                        value: `${msc(Hyperion.client.uptime)}`,
                         inline: true
                     },
                     {
@@ -55,8 +57,8 @@ class Stats extends command{
                     }
                 ]
             }
-        }
-        return {status: {code: 0}, payload: data}
+        };
+        return {status: {code: 0}, payload: data};
     }
 }
-exports.cmd = Stats;
+export default Stats;

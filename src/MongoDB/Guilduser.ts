@@ -3,7 +3,7 @@
 */
 
 
-const {Schema, model} = require('mongoose');
+const {Schema, model} = require("mongoose");
 
 const guilduserdata = new Schema({
 
@@ -27,4 +27,4 @@ const guilduserdata = new Schema({
     strict: false
 });
 
-exports.model = new model("guilduserdata", guilduserdata);
+export default new model("guilduserdata", guilduserdata);

@@ -1,5 +1,6 @@
 import {Module} from "../../Core/Structures/Module";
-import {HyperionInterface} from "../../types"
+// eslint-disable-next-line no-unused-vars
+import {HyperionInterface} from "../../types";
 
 class CommandHandler extends Module{
     constructor(){
@@ -10,9 +11,9 @@ class CommandHandler extends Module{
             hasCommands: false,
             needsInit: true,
             needsLoad: true,
-            hasCfg: false
+            hasCfg: false,
+            dirname: __dirname
         });
-        this.modpath = `${__dirname}/Module`;
     }
 
     init(Hyperion: HyperionInterface){

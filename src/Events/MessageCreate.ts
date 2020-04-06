@@ -1,10 +1,11 @@
-const { inspect } = require('util');
+/* eslint-disable no-unused-vars */
+const { inspect } = require("util");
 import {HyperionInterface} from "../types";
-import {Message, Guild, TextChannel} from 'eris';
+import {Message, Guild, TextChannel} from "eris";
 class MessageCreateHandler{
     name: String;
     constructor(){
-        this.name = "messageCreate"
+        this.name = "messageCreate";
     }
 
     async handle(this: HyperionInterface, msg: Message){

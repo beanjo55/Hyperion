@@ -1,10 +1,14 @@
 import {logger} from "./Logger";
 const fs = require("fs");
+// eslint-disable-next-line no-unused-vars
 import {HyperionInterface} from "../../types";
-
+const { inspect } = require("util");
+// eslint-disable-next-line no-unused-vars
+import {Command, CommandConstructor} from "./Command";
 
 export class Module{
     name: string;
+    friendlyName: string;
     id: string;
     private: boolean;
     alwaysEnabled: boolean;
@@ -19,20 +23,21 @@ export class Module{
     
 
     constructor(data: any){
-        this.name = data.name || "module";
+        this.name = data.name ?? "module";
+        this.friendlyName = data.friendlyName ?? this.name;
         this.id = this.name;
 
-        this.private = data.private || false;
-        this.alwaysEnabled = data.alwaysEnabled || false;
-        this.defaultStatus = data.defaultStatus;
-        this.hasCfg = data.hasCfg;
+        this.private = data.private ?? false;
+        this.alwaysEnabled = data.alwaysEnabled ?? false;
+        this.defaultStatus = data.defaultStatus ?? true;
+        this.hasCfg = data.hasCfg ?? false;
 
-        this.hasCommands = data.hasCommands || false;
-        this.needsInit = data.needsInit || false;
-        this.needsLoad = data.needsLoad || false;
+        this.hasCommands = data.hasCommands ?? false;
+        this.needsInit = data.needsInit ?? false;
+        this.needsLoad = data.needsLoad ?? false;
 
-        this.cmdpath = `${__dirname}/Commands`;
-        this.modpath = `${__dirname}/Module`;
+        this.cmdpath = `${data.dirname}/Commands`;
+        this.modpath = `${data.dirname}/Module`;
 
         
     }
@@ -67,14 +72,17 @@ export class Module{
             cmdFiles.forEach((e: string) => {
                 if(!e.startsWith(".")){
                     try{
-                        const precmd = require(`${this.cmdpath}/${e}`).cmd;
+                        const precmd = require(`${this.cmdpath}/${e}`).default;
                         let cmd = new precmd;
                         if(cmd.hasSub){
-                            cmd.registerSubcommands();
+                            const subcommands = require(`${this.cmdpath}/${e}`).subcmd;
+                            subcommands.forEach((scmd: CommandConstructor) => {
+                                cmd.subcommands.add(new scmd);
+                            });
                         }
                         Hyperion.commands.add(cmd);
                     }catch(err){
-                        logger.error("Hyperion", "Load Commands", `Failed to load command ${e} from module ${this.name}. error: ${err}`);
+                        logger.error("Hyperion", "Load Commands", `Failed to load command ${e} from module ${this.name}. error: ${inspect(err)}`);
                     }
                 }
             });
@@ -100,6 +108,7 @@ export class Module{
 
 
     //module setup, to be implemented by module
+    // eslint-disable-next-line no-unused-vars
     init(Hyperion: HyperionInterface){
 
     }

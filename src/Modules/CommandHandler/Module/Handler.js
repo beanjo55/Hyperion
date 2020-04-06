@@ -25,7 +25,7 @@ async function handler(msg){
     ctx.channel = msg.channel;
     ctx.guild = msg.channel.guild;
     ctx.Hyperion = this;
-    ctx.content = msg.content
+    ctx.content = msg.content;
     ctx.userconf = await userConf(ctx, ctx.user);
 
     let isolated = await isolate(ctx.guildconf, this, msg.content, false);
@@ -47,9 +47,11 @@ async function handler(msg){
     let com = await findCommand(isolated.command, ctx);
     if(!com){return;}
     if(com === "help"){
-        return ctx.channel.createMessage(await sendHelp(ctx));
+        const helpdata = await sendHelp(ctx);
+        if(!helpdata){return;}
+        return ctx.channel.createMessage(helpdata);
     }
-    if(com.status.code === 6){return com}
+    if(com.status.code === 6){return com;}
     ctx.command = com.payload;
     //console.log("found command")
     const global = await globalChecks(ctx);
@@ -59,7 +61,7 @@ async function handler(msg){
     ctx.permLevel = await memberGuildPerms(ctx);
     if(!(ctx.dev || ctx.admin)){
         const guildcheck = await guildChecks(ctx);
-        console.log(guildcheck)
+        console.log(guildcheck);
         if(!guildcheck){return;}
         if(guildcheck.status.code !== 0){return guildcheck;}
     }
@@ -74,7 +76,7 @@ async function handler(msg){
             if(!guildRole){return;}
             if(guildRole.status.code !== 0){return guildRole;}
 
-            const guildChannel = await guildChannelChecks(ctx)
+            const guildChannel = await guildChannelChecks(ctx);
             if(!guildChannel){return;}
             if(guildChannel.status.code !== 0){return guildChannel;}
         }
@@ -86,7 +88,7 @@ async function handler(msg){
         if(cooldown.status.code !== 0){return cooldown;}
     }
     if(!ctx.args){
-        ctx.args = []
+        ctx.args = [];
     }
     const result = await executeCommand(ctx);
     if(!result){return;}
@@ -108,7 +110,7 @@ async function conf(guild, Hyperion){
                 Hyperion.logger.error("Hyperion", "New Guild Config", `Failed to make new config in handler for ${guild.id}, err: ${err}`);
                 return {status: {code: 1, error: err}};
             }
-        })
+        });
     }else{
         guildconf = await Hyperion.models.guild.findOne({guild: guild.id});
     }
@@ -127,13 +129,13 @@ async function isolate(guildconf, Hyperion, content, retry){
         if(content.startsWith(Hyperion.devPrefix)){
             args = content.split(" ").slice(1);
             label = content.split(" ").slice(0, 1)[0].slice(Hyperion.devPrefix.length).trim().toLowerCase();
-            return {type: "dev", command: label, args: args}
+            return {type: "dev", command: label, args: args};
         }
 
         if(content.startsWith(Hyperion.adminPrefix)){
             args = content.split(" ").slice(1);
             label = content.split(" ").slice(0, 1)[0].slice(Hyperion.adminPrefix.length).trim().toLowerCase();
-            return {type: "admin", command: label, args: args}
+            return {type: "admin", command: label, args: args};
         }
     }
 
@@ -146,7 +148,7 @@ async function isolate(guildconf, Hyperion, content, retry){
     if(content.startsWith(guildconf.prefix)){
         args = content.split(" ").slice(1);
         label = content.split(" ").slice(0, 1)[0].slice(guildconf.prefix.length).trim().toLowerCase();
-        return {type: "normal", command: label, args: args}
+        return {type: "normal", command: label, args: args};
     }
 }
 
@@ -207,9 +209,9 @@ async function globalChecks(ctx){
     }
 
     if(ctx.command.dev){
-        ctx.dev = await isDev(ctx)
+        ctx.dev = await isDev(ctx);
         if(!ctx.dev){
-            return {status: {code: 5}, payload: "Not a dev"}
+            return {status: {code: 5}, payload: "Not a dev"};
         }
     }
     return {status: {code: 0}};
@@ -274,7 +276,7 @@ async function guildRoleChecks(ctx){
                 if(cgconf.disabledRoles.includes(role)){
                     return {status: {code: 5}, payload: "disabled role"};
                 }
-            })
+            });
         }
     }
     if(cgconf.allowedRoles){
@@ -284,7 +286,7 @@ async function guildRoleChecks(ctx){
                     return {status: {code: 0}};
                 }
             });
-        return {status: {code: 5}, payload: "User did not have allowed role"};
+            return {status: {code: 5}, payload: "User did not have allowed role"};
         }
     }
     return {status: {code: 0}};
@@ -328,18 +330,18 @@ async function executeCommand(ctx){
     if(ctx.command.hasSub && ctx.args){
         let subcmd = ctx.command.subcommands.get(ctx.args[0]);
         if(!subcmd){
-            subcmd = ctx.command.subcommands.find(c => c.ailiases.includes(ctx.args[0]));
+            subcmd = ctx.command.subcommands.find(c => c.aliases.includes(ctx.args[0]));
         }
         if(subcmd){
             ctx.command = subcmd;
         }
     }
-    const result = await ctx.command.execute(ctx).catch(err =>{
+    const result = await ctx.command.execute(ctx, ctx.Hyperion).catch(err =>{
         ctx.Hyperion.logger.error("Hyperion", "Command Error", `Error executing ${ctx.command.name}, Command Call: ${ctx.msg.content}\nerror: ${err}`);
         ctx.Hyperion.sentry.configureScope(function(scope){
             scope.setExtra("Command String", ctx.msg.content);
-            scope.setExtra("Guild", ctx.guild.id)
-        })
+            scope.setExtra("Guild", ctx.guild.id);
+        });
         ctx.Hyperion.sentry.captureException(err);
     });
     return result;
@@ -350,7 +352,7 @@ async function postExecute(ctx){
         command: ctx.command.name,
         ranAt: Date.now(),
         cooldownTime: ctx.command.cooldownTime
-    }
+    };
     ctx.Hyperion.modules.get("commandhandler").cooldowns[ctx.user.id] = cooldown;
 }
 
@@ -372,7 +374,7 @@ async function updateCmdConf(ctx, cmd, status){
         disabledChannels: [],
         allowedRoles: [],
         disabledRoles: []
-    }
+    };
     let conf = await ctx.Hyperion.models.guild.findOne({guild: ctx.guild.id}).exec();
     conf.commands[cmd] = template;
     conf.save().catch(err => {
@@ -413,6 +415,7 @@ async function sendHelp(ctx){
 
 async function sendCommandHelp(ctx, cmd){
     cmd = cmd.payload;
+    if(!cmd){return;}
     const rx = new RegExp("{prefix}", "gmi");
     let info = `**Description:** ${cmd.helpDetail}\n**Cooldown:** ${cmd.cooldownTime/1000} seconds\n`;
     if(cmd.hasSub){

@@ -1,4 +1,4 @@
-const {Schema, model} = require('mongoose');
+const {Schema, model} = require("mongoose");
 
 
 const guildconf = new Schema({
@@ -95,6 +95,11 @@ const guildconf = new Schema({
     botMissingPermsMessages: {
         type: Boolean,
         default: false
+    },
+    
+    embedCommonResponses: {
+        type: Boolean,
+        default: false
     }
 
 
@@ -103,4 +108,4 @@ const guildconf = new Schema({
     autoIndex: true
 });
 
-exports.model = new model("guild", guildconf);
+export default new model("guild", guildconf);

@@ -1,19 +1,21 @@
-import {Client, Collection} from 'eris';
-import Eris from 'eris'
+/* eslint-disable no-unused-vars */
+import {Client, Collection} from "eris";
+import Eris from "eris";
 import {Module} from "./Core/Structures/Module.js";
 import {Command} from "./Core/Structures/Command.js";
 import {logger} from "./Core/Structures/Logger";
 import fs = require("fs");
-import mongoose = require('mongoose');
+import mongoose = require("mongoose");
 const config = require("../config.json");
 
 import {CoreOptions, HyperionInterface} from "./types";
 
-const user = require("./MongoDB/User.js").model;
-const guild = require("./MongoDB/Guild.js").model;
-const guilduser = require("./MongoDB/Guilduser.js").model;
-const modlog = require("./MongoDB/Modlog.js").model;
-const global = require("./MongoDB/Global.js").model;
+import {default as guild} from "./MongoDB/Guild";
+import {default as user} from "./MongoDB/User";
+import {default as guilduser} from "./MongoDB/Guilduser";
+import {default as modlog} from "./MongoDB/Modlog";
+import {default as global} from "./MongoDB/Global";
+import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
 
 const models = {
     user: user,
@@ -36,12 +38,14 @@ class hyperion implements HyperionInterface{
     modlist: Array<string>;
     version: string;
     adminPrefix: string;
-    defaultColor: string;
+    defaultColor: number;
     mongoOptions: mongoose.ConnectionOptions;
     models: any;
     db: mongoose.Connection;
     global: any;
     logLevel: number
+    managers: any;
+    stars: any;
     
 
     constructor(token: string, erisOptions: Eris.ClientOptions, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions){
@@ -50,7 +54,7 @@ class hyperion implements HyperionInterface{
         this.modules = new Collection(Module);
         this.commands = new Collection(Command);
         this.logger = logger;
-        this.sentry = require('@sentry/node');
+        this.sentry = require("@sentry/node");
         this.sentry.init({
             dsn: coreOptions.sentryDSN,
             environment: coreOptions.build
@@ -65,6 +69,8 @@ class hyperion implements HyperionInterface{
         this.db = this.mongoDB(mongoLogin);
         this.version = coreOptions.version;
         this.logLevel = coreOptions.defaultLogLevel;
+        this.managers = {guild: new MGM};
+        this.stars = {};
 
     }
     async init(){
@@ -87,7 +93,7 @@ class hyperion implements HyperionInterface{
         const eventfiles = fs.readdirSync(__dirname + "/Events");
         eventfiles.forEach(file => {
             this.loadEvent(file);
-        })
+        });
     }
 
     async reloadEvent(){
@@ -115,7 +121,7 @@ class hyperion implements HyperionInterface{
                 mod.init(this);
             }
             if(mod.hasCommands){
-                mod.loadCommands(this)
+                mod.loadCommands(this);
             }
         });
         
@@ -124,13 +130,13 @@ class hyperion implements HyperionInterface{
     mongoDB(mongoLogin: string){
         this.mongoOptions.dbName = this.build;
         mongoose.connect(mongoLogin, this.mongoOptions);
-        mongoose.connection.on('error', () => {
+        mongoose.connection.on("error", () => {
             this.logger.error("MongoDB", "Connection", "Failed to connect to MongoDB");
         });
-        mongoose.connection.on('open', () => {
+        mongoose.connection.on("open", () => {
             this.logger.success("MongoDB", "Connection", "Connected to MongoDB");
-        })
-        return mongoose.connection
+        });
+        return mongoose.connection;
     }
 }
 
@@ -138,4 +144,4 @@ const Hyperion = new hyperion(config.token, config.erisOptions, config.coreOptio
 
 Hyperion.init().then(() => {
     Hyperion.client.connect();
-})
+});

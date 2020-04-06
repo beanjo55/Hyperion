@@ -1,4 +1,5 @@
-import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed} from 'eris';
+/* eslint-disable no-unused-vars */
+import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
 import mongoose from "mongoose";
@@ -16,7 +17,7 @@ export interface CoreOptions{
     devPrefix: string;
     adminPrefix: string;
     version: string;
-    defaultColor: string;
+    defaultColor: number;
     defaultLogLevel: number;
 }
 
@@ -32,13 +33,15 @@ export interface HyperionInterface {
     modlist: Array<string>;
     version: string;
     adminPrefix: string;
-    defaultColor: string;
+    defaultColor: number;
     mongoOptions: mongoose.ConnectionOptions;
     models: any;
     db: mongoose.Connection;
     global: any;
     handler?: any;
     logLevel: number;
+    managers: any;
+    stars: any;
 }
 
 export interface CommandConfig{
@@ -47,11 +50,12 @@ export interface CommandConfig{
     allowedChannels: Array<string>;
     disabledChannels: Array<string>;
     enabled: Boolean;
+    subcommands?: Array<CommandConfig>;
+    name?: string;
 }
 
 export interface ModuleConfig{
     enabled: Boolean;
-    name: string;
 }
 
 export interface ModConfig{
@@ -70,6 +74,7 @@ export interface StarboardConfig{
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
     selfStar: Boolean;
+    customStar: string;
 }
 
 export interface LogEvent {

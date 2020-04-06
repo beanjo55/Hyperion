@@ -1,4 +1,4 @@
-import signale from 'signale';
+import signale from "signale";
 
 function error(name: string, subprefix: string, message: string){
     if(subprefix){

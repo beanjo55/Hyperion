@@ -1,4 +1,4 @@
-import {Module} from "../../Core/Structures/Module"
+import {Module} from "../../Core/Structures/Module";
 
 class Dev extends Module{
     constructor(){
@@ -8,9 +8,10 @@ class Dev extends Module{
             alwaysEnabled: true,
             hasCommands: true,
             needsInit: false,
-            needsLoad: false
+            needsLoad: false,
+            dirname: __dirname
         });
-        this.cmdpath = `${__dirname}/Commands`;
+
     }
 }
 export default Dev;

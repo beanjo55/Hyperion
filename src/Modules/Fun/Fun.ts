@@ -4,13 +4,14 @@ class Fun extends Module{
     constructor(){
         super({
             name: "fun",
+            friendlyName: "Fun",
             private: false,
             alwaysEnabled: false,
             hasCommands: true,
             needsInit: false,
-            needsLoad: false
+            needsLoad: false,
+            dirname: __dirname
         });
-        this.cmdpath = `${__dirname}/Commands`;
     }
 }
 export default Fun;

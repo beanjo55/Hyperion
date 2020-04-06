@@ -1,4 +1,4 @@
-const {Schema, model} = require('mongoose');
+const {Schema, model} = require("mongoose");
 
 const userinfo = new Schema({
 
@@ -95,4 +95,4 @@ const userinfo = new Schema({
     autoIndex: true
 });
 
-exports.model = new model("user", userinfo);
+export default new model("user", userinfo);

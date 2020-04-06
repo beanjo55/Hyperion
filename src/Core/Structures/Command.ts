@@ -1,7 +1,8 @@
-import {Collection} from 'eris';
+import {Collection} from "eris";
+// eslint-disable-next-line no-unused-vars
+import {HyperionInterface} from "../../types";
 
-
-interface CommandConstructor extends Command{
+export interface CommandConstructor extends Command{
     new (): Command;
 }
 
@@ -24,55 +25,48 @@ export class Command{
     helpSubcommands: string;
     helpUsage: string;
     helpUsageExample: string;
+    noExample: boolean;
     hasSub: boolean;
     selfResponse: boolean;
-    subcommandslist: Array<CommandConstructor>;
     subcommands: Collection<Command>;
 
 
-    constructor(){
-        this.name = "dummy";
+    constructor(data: Partial<Command>){
+        this.name = data.name ?? "dummy";
         this.id = this.name;
-        this.module = "default";
-        this.aliases = [];
+        this.module = data.module ?? "default";
+        this.aliases = data.aliases ?? [];
 
-        this.internal = false;
-        this.alwaysEnabled = false;
+        this.internal = data.internal ?? false;
+        this.alwaysEnabled = data.alwaysEnabled ?? false;
 
-        this.userperms = [];
-        this.botperms = [];
-        this.needsRolepos = false;
+        this.userperms = data.userperms ?? [];
+        this.botperms = data.botperms ?? [];
+        this.needsRolepos = data.needsRolepos ?? false;
 
-        this.dev = false;
-        this.admin = false;
-        this.support = false;
+        this.dev = data.dev ?? false;
+        this.admin = data.admin ?? false;
+        this.support = data.support ?? false;
 
-        this.cooldownTime = 2000;
+        this.cooldownTime = data.cooldownTime ?? 2000;
 
-        this.helpDetail = "dummy";
-        this.helpAliases = "dummy";
-        this.helpSubcommands = "dummy";
-        this.helpUsage = "dummy";
-        this.helpUsageExample = "dummy";
+        this.helpDetail = data.helpDetail ?? "dummy";
+        this.helpAliases = data.helpAliases ?? "dummy";
+        this.helpSubcommands = data.helpSubcommands ?? "dummy";
+        this.helpUsage = data.helpUsage ?? "dummy";
+        this.helpUsageExample = data.helpUsageExample ?? "dummy";
+        this.noExample = data.noExample ?? false;
 
-        this.hasSub = false;
+        this.hasSub = data.hasSub ?? false;
 
-        this.selfResponse = false;
-        this.subcommandslist = [];
-        this.subcommands = new Collection(Command)
-    }
-
-    async registerSubcommands(){
+        this.selfResponse = data.selfResponse ?? false;
         this.subcommands = new Collection(Command);
-        if(this.subcommandslist.length > 0){
-            this.subcommandslist.forEach((cmd: CommandConstructor) =>{
-                this.subcommands.add(new cmd);
-            })
-        }
     }
+
 
     //dummy default command 
-    async execute(){
+    // eslint-disable-next-line no-unused-vars
+    async execute(ctx: any, Hyperion: HyperionInterface): Promise<any|void>{
         throw new Error("Unimplemented command!");
     }
 
