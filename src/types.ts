@@ -75,6 +75,7 @@ export interface StarboardConfig{
     ignoredRoles: Array<string>;
     selfStar: Boolean;
     customStar: string;
+    starCount: number;
 }
 
 export interface LogEvent {

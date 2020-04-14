@@ -11,11 +11,11 @@ class MongoGuildManager{
         this.model = guildmodel;
     }
 
-    async createConfig(guildID: string){
+    async createConfig(guildID: string): Promise<Types.GuildConfig>{
         return await this.model.create({guild: guildID});
     }
 
-    async getConfig(guildID: string){
+    async getConfig(guildID: string): Promise<Types.GuildConfig>{
         if(await this.model.exists({guild: guildID})){
             return await this.model.findOne({guild: guildID}).lean().exec();
         }else{
@@ -59,7 +59,7 @@ class MongoGuildManager{
         return await this.model.updateOne({guild: guildID}, {commands: guilddata.commands}).exec();
     }
 
-    async updateModuleConfig(data: any, mod: string, guildID: string){
+    async updateModuleConfig(guildID: string, mod: string, data: any){
         if(!Object.getOwnPropertyNames(nameConfigMap).includes(mod)){
             return {code: 1, payload: "No matching module found"};
         }
@@ -72,17 +72,17 @@ class MongoGuildManager{
         return await this.model.updateOne({guild: guildID}, update).exec();
     }
 
+    async update(guildID: string, update: any){
+        return await this.model.updateOne({guild: guildID}, update).exec();
+    }
+    
     merge(oldData: any, newData: any){
         const newProps: Array<string> = Object.getOwnPropertyNames(newData);
         newProps.forEach((prop: string) => {
             oldData[prop] = newData[prop];
         });
-        return newData;
+        return oldData;
     }
-    async update(guildID: string, update: any){
-        return await this.model.updateOne({guild: guildID}, update).exec();
-    }
-    
 }
 
 
@@ -147,6 +147,7 @@ class StarboardConfig implements Types.StarboardConfig{
     ignoredRoles: Array<string>;
     selfStar: Boolean;
     customStar: string;
+    starCount: number;
     constructor(data: Partial<Types.StarboardConfig>){
         this.starChannel = data.starChannel ?? "";
         this.ignoredChannels = data.ignoredChannels ?? [];
@@ -154,6 +155,7 @@ class StarboardConfig implements Types.StarboardConfig{
 
         this.selfStar = data.selfStar ?? false;
         this.customStar = data.customStar ?? "";
+        this.starCount = data.starCount ?? 3;
     }
 }
 

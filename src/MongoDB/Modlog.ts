@@ -1,7 +1,4 @@
 const {Schema, model} = require("mongoose");
-
-
-
 const modlog = new Schema({
 
     guild: {
@@ -67,8 +64,9 @@ const modlog = new Schema({
 
     //array of moderated users. normally just one except for ban match
     user: {
-        type: Array,
-        required: true
+        type: String,
+        required: true,
+        index: true
     },
 
     modName: {

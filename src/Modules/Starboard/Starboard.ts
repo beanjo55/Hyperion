@@ -6,10 +6,11 @@ class Starboard extends Module{
     constructor(){
         super({
             name: "starboard",
-            hasCommands: true,
+            hasCommands: false,
             friendlyName: "Starboard",
             hasCfg: true,
-            dirname: __dirname
+            dirname: __dirname,
+            needsLoad: true
         });
     }
 }
