@@ -1,6 +1,5 @@
 
 name: TS Compile
-
 on:
   push:
   pull_request:
@@ -27,7 +26,6 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add ./build/\*.\* -f
-        git add ./lang/\*.\* -f
         git add package.json -f
         git commit -m "Auto Build"
     - name: Push Build
