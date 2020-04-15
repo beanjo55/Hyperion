@@ -18,7 +18,7 @@ jobs:
     - name: yarn install
       run: yarn install
     - name: tsc
-      uses: beanjo55/action-tsc@v1
+      uses: beanjo55/action-tsc@v1.2
       with:
         project: ./
     - name: Commit Build
