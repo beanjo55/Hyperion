@@ -22,11 +22,12 @@ jobs:
         project: ./
     - name: Commit Build
       run: |
-        git checkout build --
+
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add ./build/\*.\* -f
         git add package.json -f
+        git checkout build --
         git commit -m "Auto Build"
     - name: Push Build
       uses: ad-m/github-push-action@master
