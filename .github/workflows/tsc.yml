@@ -23,7 +23,7 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add ./build/*.* -f
+        git add ./build/\*.\* -f
         git commit -m "Auto Build"
     - name: Push Build
       uses: ad-m/github-push-action@master
