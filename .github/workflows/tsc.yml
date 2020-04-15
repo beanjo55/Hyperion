@@ -18,7 +18,9 @@ jobs:
     - name: yarn install
       run: yarn install
     - name: tsc
-      uses: icrawl/action-tsc@v1
+      uses: beanjo55/action-tsc
+      with:
+        project: ./
     - name: Commit Build
       run: |
         ls
