@@ -1,4 +1,3 @@
-# This is a basic workflow to help you get started with Actions
 
 name: TS Compile
 
@@ -12,11 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: install node v12
+    - name: install node v13
       uses: actions/setup-node@v1
       with:
-        node-version: 12
+        node-version: 13
     - name: yarn install
       run: yarn install
     - name: tsc
       uses: icrawl/action-tsc@v1
+    - name: Commit Build
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add ./build/*.* -f
+        git commit -m "Auto Build"
+    - name: Push Build
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
