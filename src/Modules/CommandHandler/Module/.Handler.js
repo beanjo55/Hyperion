@@ -392,7 +392,6 @@ async function sendHelp(ctx){
         }
     }
     let cats = ctx.Hyperion.modules.filter(mod => !mod.private && mod.hasCommands);
-    //console.log(cats)
     let data = {
         embed: {
             title: "Hyperion Help",
@@ -409,7 +408,6 @@ async function sendHelp(ctx){
             inline: false
         });
     });
-    //console.log(data.fields)
     return data;
 }
 
@@ -433,4 +431,5 @@ async function sendCommandHelp(ctx, cmd){
     };
     return data;
 }
+// eslint-disable-next-line no-undef
 exports.modfile = handler;

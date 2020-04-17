@@ -28,7 +28,7 @@ class MongoGuildManager{
         if(mod === undefined){return {code: 1, payload: "No matching module found"};}
         if(mod.private){return {code: 1, payload: "Module is private and not stored in config"};}
         if(!state && mod.alwaysEnabled){return {code: 1, payload: "This module is always enabled and may not be disabled"};}
-        return {code: 0, payload: new ModuleConfig({enabled: state})};
+        return {code: 0, payload: new ModuleConfig({enabled: state}, mod.defaultStatus)};
     }
 
     validateCommandState(data: any, command: string, commands: Collection<Command>){
@@ -45,8 +45,8 @@ class MongoGuildManager{
         if(!guilddata.modules){return {code: 1, payload: "An error occured"};}
         const validated: any = this.validateModuleState(newState, newMod, modules);
         if(validated.code !== 0){return validated;}
-        guilddata.modules[newMod] = validated.payload;
-        return await this.model.updateOne({guild: guildID}, {modules: guilddata.modules}).exec();
+        const merged = this.merge(guilddata.modules, validated);
+        return await this.model.updateOne({guild: guildID}, {modules: merged}).exec();
     }
 
     async updateCommands(guildID: string, newCmd: string, data: any, commands: Collection<Command>){
@@ -55,8 +55,7 @@ class MongoGuildManager{
         const merged: any = this.merge(guilddata[newCmd], data);
         const validated: any = this.validateCommandState(merged, newCmd, commands);
         if(validated.code !== 0){return validated;}
-        guilddata.commands[newCmd] = validated.payload;
-        return await this.model.updateOne({guild: guildID}, {commands: guilddata.commands}).exec();
+        return await this.model.updateOne({guild: guildID}, {commands: merged}).exec();
     }
 
     async updateModuleConfig(guildID: string, mod: string, data: any){
@@ -113,8 +112,8 @@ class CommandConfig implements Types.CommandConfig{
 
 class ModuleConfig implements Types.ModuleConfig{
     enabled: Boolean;
-    constructor(data: Types.ModuleConfig){
-        this.enabled = data.enabled;
+    constructor(data: Types.ModuleConfig, defState: boolean){
+        this.enabled = data.enabled ?? defState;
     }
 }
 

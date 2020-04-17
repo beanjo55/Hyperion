@@ -34,7 +34,7 @@ async function star(Hyperion: HyperionInterface, omsg: Message, emote: Emoji, us
             updatePost(Hyperion, Hyperion.stars[msg.id].msg, Hyperion.stars[msg.id].count);
         }else{
             if(await starModel.exists({message: msg.id})){
-                const oldPostID: any = await starModel.findOne({message: msg.id}).lean.exec();
+                const oldPostID: any = await starModel.findOne({message: msg.id}).lean().exec();
                 const oldPost: Message = await msg.channel.getMessage(oldPostID.starpost);
                 updatePost(Hyperion, oldPost, Hyperion.stars[msg.id].count);
             }else{

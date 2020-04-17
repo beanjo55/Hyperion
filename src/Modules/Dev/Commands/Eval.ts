@@ -54,13 +54,14 @@ class Eval extends Command{
     async evalresult(ctx: any, result: string, Hyperion: HyperionInterface){
         const output = await this.clean(result, ctx, Hyperion);
         if(output.length > 1990){
+            console.log(output);
             return "The output was too long, it was sent to the console log";
         }
         const data ={
             embed: {
                 author: { name: "Eval Results", icon_url: ctx.user.avatarURL },
                 description: "```js\n" + output + "```",
-                color: ctx.Hyperion.defaultColor,
+                color: Hyperion.defaultColor,
                 timestamp: new Date()
             }
         };

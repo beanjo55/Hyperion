@@ -2,10 +2,6 @@ import {Collection} from "eris";
 // eslint-disable-next-line no-unused-vars
 import {HyperionInterface} from "../../types";
 
-export interface CommandConstructor extends Command{
-    new (): Command;
-}
-
 export class Command{
     name: string;
     id: string;

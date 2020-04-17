@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { inspect } = require("util");
-import {HyperionInterface} from "../types";
+import {HyperionInterface, HyperionGuild} from "../types";
 import {Message, Guild, TextChannel} from "eris";
 class MessageCreateHandler{
     name: String;
@@ -17,9 +17,15 @@ class MessageCreateHandler{
         if(msg.author.bot){
             return;
         }
+        const fetchguild: HyperionGuild = (this.client.guilds.get(guild.id) as HyperionGuild);
+        if(!fetchguild){return;}
+        if(!fetchguild.fetched){
+            fetchguild.fetchAllMembers().catch((err: any) => this.logger.error(`failed to fetch guild ${guild.id}, error: ${inspect(err)}`));
+            (this.client.guilds.get(guild.id) as HyperionGuild).fetched = true;
+        }
+        
 
-
-        this.handler(msg);
+        this.handler.handler(msg, this);
         //msg.channel.createMessage("```js\n" + inspect(await this.handler(msg), {depth: 1}) + "```");
     }
 }

@@ -15,14 +15,18 @@ import {default as user} from "./MongoDB/User";
 import {default as guilduser} from "./MongoDB/Guilduser";
 import {default as modlog} from "./MongoDB/Modlog";
 import {default as global} from "./MongoDB/Global";
+import {default as starModel} from "./MongoDB/Starred";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
+import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
+import {hur as HoistUserResolver} from "./Core/Utils/Resolvers";
 
 const models = {
     user: user,
     guild: guild,
     guilduser: guilduser,
     modlog: modlog,
-    global: global
+    global: global,
+    starred: starModel
 };
 
 
@@ -46,7 +50,7 @@ class hyperion implements HyperionInterface{
     logLevel: number
     managers: any;
     stars: any;
-    
+    utils: any;
 
     constructor(token: string, erisOptions: Eris.ClientOptions, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions){
         this.client = new Client(token, erisOptions);
@@ -69,8 +73,9 @@ class hyperion implements HyperionInterface{
         this.db = this.mongoDB(mongoLogin);
         this.version = coreOptions.version;
         this.logLevel = coreOptions.defaultLogLevel;
-        this.managers = {guild: new MGM};
+        this.managers = {guild: new MGM, user: new MUM};
         this.stars = {};
+        this.utils = {hoistResolver: HoistUserResolver};
 
     }
     async init(){

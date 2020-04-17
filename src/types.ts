@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
-import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed} from "eris";
+import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed, Member, User} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
 import mongoose from "mongoose";
 
 
 export interface HyperionGuild extends Guild{
-    fetched: boolean;
-    guildconf: any;
+    fetched?: boolean;
+    guildconf?: any;
 }
 
 export interface CoreOptions{
@@ -42,6 +42,7 @@ export interface HyperionInterface {
     logLevel: number;
     managers: any;
     stars: any;
+    utils: any;
 }
 
 export interface CommandConfig{
@@ -193,4 +194,53 @@ export interface GuildConfig {
     ignoredUsers: Array<string>;
     cantRunMessage: boolean;
     botMissingPermsMessages: boolean;
+}
+
+export interface AckInterface{
+    contrib: boolean;
+    friend: boolean;
+    staff: boolean;
+    support: boolean;
+    admin: boolean;
+    developer: boolean;
+    owner: boolean;
+    custom: string;
+}
+
+export interface CommandContext{
+    msg: Message;
+    channel: TextChannel;
+    guild: Guild;
+    guildConfig: GuildConfig;
+    member: Member;
+    user: User;
+    command: Command;
+    module: Module;
+    content: string;
+    args: Array<string>;
+    dev: boolean;
+    admin: boolean;
+    override?: boolean;
+    permLevel?: number;
+    respond?: string;
+    silent?: boolean;
+    delete?: boolean;
+}
+
+export interface UserConfig{
+    user: string;
+    level: number,
+    exp: number;
+    money: number;
+    rep: number;
+    repGiven: number;
+    lastRepTime: number;
+    lastDailyTime: number;
+    lastSallyGame: number;
+    socialPings: boolean;
+    color?: string;
+    friends: Array<string>;
+    partner?: string;
+    data: any;
+    acks: AckInterface;
 }

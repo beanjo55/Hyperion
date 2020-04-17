@@ -4,7 +4,7 @@ const fs = require("fs");
 import {HyperionInterface} from "../../types";
 const { inspect } = require("util");
 // eslint-disable-next-line no-unused-vars
-import {Command, CommandConstructor} from "./Command";
+import {Command} from "./Command";
 
 export class Module{
     name: string;
@@ -17,8 +17,8 @@ export class Module{
     needsLoad: boolean;
     cmdpath: string;
     modpath: string;
-    defaultStatus: Boolean;
-    hasCfg: Boolean;
+    defaultStatus: boolean;
+    hasCfg: boolean;
     [key: string]: any;
     
 
@@ -76,7 +76,7 @@ export class Module{
                         let cmd = new precmd;
                         if(cmd.hasSub){
                             const subcommands = require(`${this.cmdpath}/${e}`).subcmd;
-                            subcommands.forEach((scmd: CommandConstructor) => {
+                            subcommands.forEach((scmd: any) => {
                                 cmd.subcommands.add(new scmd);
                             });
                         }

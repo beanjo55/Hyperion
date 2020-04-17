@@ -18,7 +18,7 @@ class Bean extends Command{
             content: ctx.args.join(" "),
             embed: {
                 title: "BEANED!!!",
-                color: ctx.Hyperion.defaultColor,
+                color: Hyperion.defaultColor,
                 timestamp: new Date(),
                 image: {
                     url: "https://cdn.discordapp.com/attachments/239446877953720321/333048272287432714/unknown.png"
