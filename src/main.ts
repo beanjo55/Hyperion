@@ -37,6 +37,7 @@ const models = {
     starred: starModel
 };
 
+
 class hyperion implements HyperionInterface{
     client: Eris.Client;
     build: string;
