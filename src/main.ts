@@ -1,10 +1,18 @@
 /* eslint-disable no-unused-vars */
+import {default as fs} from "fs";
+
+
+fs.readFile(`${__dirname}/v2.txt`, "utf8", function (error, data) {
+    console.log(data);
+    start();
+});
+
 import {Client, Collection} from "eris";
 import Eris from "eris";
 import {Module} from "./Core/Structures/Module.js";
 import {Command} from "./Core/Structures/Command.js";
 import {logger} from "./Core/Structures/Logger";
-import fs = require("fs");
+
 import mongoose = require("mongoose");
 const config = require("../config.json");
 
@@ -28,7 +36,6 @@ const models = {
     global: global,
     starred: starModel
 };
-
 
 class hyperion implements HyperionInterface{
     client: Eris.Client;
@@ -145,8 +152,10 @@ class hyperion implements HyperionInterface{
     }
 }
 
-const Hyperion = new hyperion(config.token, config.erisOptions, config.coreOptions, config.mongoLogin, config.mongoOptions);
 
-Hyperion.init().then(() => {
-    Hyperion.client.connect();
-});
+async function start(){
+    const Hyperion = new hyperion(config.token, config.erisOptions, config.coreOptions, config.mongoLogin, config.mongoOptions);
+    Hyperion.init().then(() => {
+        Hyperion.client.connect();
+    });
+}
