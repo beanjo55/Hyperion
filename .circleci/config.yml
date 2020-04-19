@@ -12,7 +12,7 @@ jobs:
           steps:
             - run: npm install
             - run: npm run-script build
-      - store_artifacts
+      - store_artifacts:
           path: ./build/
 workflows:
     build:
