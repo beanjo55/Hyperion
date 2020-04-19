@@ -12,8 +12,12 @@ jobs:
           steps:
             - run: npm install
             - run: npm run-script build
+      - run:
+        name: Compress Artifacts
+        command: tar -cvf build.tar ./build/
       - store_artifacts:
-          path: ./build/
+          path: build.tar
+          destination: built
 workflows:
     build:
       jobs:
