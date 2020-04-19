@@ -24,6 +24,7 @@ function resolveUser(msg: Message, search: string, members: Collection<Member>):
     return member;
 }
 
+// eslint-disable-next-line no-unused-vars
 function hoistUserResolver(msg: Message, search: string, members: Collection<Member>): Member | undefined{
     if(!(msg.channel.type === 0 || msg.channel.type === 5)){ return;}
     if(!search){
@@ -31,23 +32,9 @@ function hoistUserResolver(msg: Message, search: string, members: Collection<Mem
     }
 
     let guild = msg.channel.guild;
+    let hroles: Array<Role> = guild.roles.filter((r: Role) => r.hoist);
+    hroles.sort((a: Role, b: Role) => b.position - a.position);
 
-    let member = undefined;
-
-    let hoistRoles = guild.roles.filter((r: Role) => r.hoist).sort((a: Role, b: Role) => b.position - a.position);
-    hoistRoles.forEach((hRole: Role) => {
-        let memberset = members.filter(m => m.roles.includes(hRole.id));
-        let tempSet = new Collection(Member);
-        memberset.forEach((m: Member) => {
-            tempSet.add(m);
-        });
-        member = resolveUser(msg, search, tempSet);
-    });
-
-    if(!member){
-        member = resolveUser(msg, search, members);
-    }
-    return member;
 }
 
 export {hoistUserResolver as hur};

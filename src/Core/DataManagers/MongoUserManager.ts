@@ -14,17 +14,21 @@ class MongoUserManager{
     }
 
     async getUserConfig(user: string): Promise<Types.UserConfig>{
-        console.log("get user conf");
         if(await this.model.exists({user: user})){
-            console.log("exisitng");
             return await this.model.findOne({user: user}).lean().exec();
         }else{
-            console.log("new");
+            return await this.createConfig(user);
+        }
+    }
+
+    async ensureExists(user: string){
+        if(!await this.model.exists({user: user})){
             return await this.createConfig(user);
         }
     }
 
     async gotRep(user: string){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {$inc: {rep: 1}});
     }
 
@@ -34,10 +38,12 @@ class MongoUserManager{
     }
 
     async setRep(user: string, amount: number){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {rep: amount});
     }
 
     async gaveRep(user: string){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {$inc: {repGiven: 1}});
     }
 
@@ -47,10 +53,12 @@ class MongoUserManager{
     }
 
     async setGivenRep(user: string, amount: number){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {repGiven: amount});
     }
 
     async changeMoney(user: string, amount: number){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {$inc: {money: amount}});
     }
 
@@ -65,18 +73,22 @@ class MongoUserManager{
     }
 
     async setRepTime(user: string){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {lastRepTime: Date.now()});
     }
 
     async setDailyTime(user: string){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {lastDailyTime: Date.now()});
     }
 
     async resetRepTime(user: string){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {lastRepTime: 0});
     }
 
     async resetDailyTime(user: string){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {lastDailyTime: 0});
     }
 
@@ -94,6 +106,7 @@ class MongoUserManager{
     }
 
     async setPings(user: string, status: boolean){
+        await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {socailPings: status});
     }
 

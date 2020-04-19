@@ -23,6 +23,25 @@ class MongoGuildManager{
         }
     }
 
+    async getPrefix(guildID: string): Promise<string>{
+        const doc: Types.GuildConfig = await this.getConfig(guildID);
+        if(!doc){return "%";}
+        if(!doc.prefix){return "%";}
+        if(doc.prefix === ""){return "%";}
+        return doc.prefix;
+    }
+
+    async setPrefix(guildID: string, newPrefix: string){
+        return await this.model.updateOne({guild: guildID}, {prefix: newPrefix});
+    }
+
+    async getMods(guildID: string): Promise<Array<string>>{
+        const guildConfig: Types.GuildConfig = await this.getConfig(guildID);
+        if(!guildConfig.mod){return [];}
+        if(!guildConfig.mod.modRoles){return [];}
+        return guildConfig.mod.modRoles;
+    }
+
     validateModuleState(state: boolean, module: string, modules: Collection<Module>){
         const mod: undefined | Module = modules.get(module);
         if(mod === undefined){return {code: 1, payload: "No matching module found"};}

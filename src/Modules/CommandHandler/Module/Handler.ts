@@ -364,7 +364,7 @@ class CommandHandler{
 
     sendHelp(ctx: any, Hyperion: Types.HyperionInterface){
         if(ctx.args && ctx.args[0]){
-            const cmd = this.findCommand(ctx.args[0], ctx);
+            const cmd = this.findCommand(ctx.args[0], Hyperion);
             if(cmd){
                 return this.sendCommandHelp(ctx, cmd, Hyperion);
             }
