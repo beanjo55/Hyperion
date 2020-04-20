@@ -31,7 +31,7 @@ class Build extends Command{
         const stage2: string = "mv build/ oldBuild/"
         + " | tar --overwrite -xf built.tar"
         + " | rm -rf built.tar"
-        + " | rm -rf oldBuild/";
+        + " | rm -Rf oldBuild/";
 
         let message: string = "";
         if(buildNum === "latest"){
@@ -51,7 +51,7 @@ class Build extends Command{
                 exec(stage2, (error2: any, stdout2: any) => {
                     if(error2){
                         console.log(error2);
-                        return post.edit("Exctract failed");
+                        return post.edit("Extract failed");
                     }
                     return post.edit(`Sucessfully downloaded and extracted build ${buildNum}!`);
                 });
