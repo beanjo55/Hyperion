@@ -29,8 +29,7 @@ class Build extends Command{
         + " | wget -q --output-document=./built.tar -i -";
 
         const stage2: string = "mv build/ oldBuild/"
-        + " | tar --overwrite -xf built.tar";
-        + " | rm -rf built.tar?circle-token=" + Hyperion.circleCIToken
+        + " | tar --overwrite -xf built.tar"
         + " | rm -rf built.tar"
         + " | rm -rf oldBuild/";
 
