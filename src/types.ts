@@ -16,7 +16,6 @@ export interface CoreOptions{
     modlist: Array<string>;
     devPrefix: string;
     adminPrefix: string;
-    version: string;
     defaultColor: number;
     defaultLogLevel: number;
     circleCIToken: string;

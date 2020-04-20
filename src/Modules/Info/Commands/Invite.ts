@@ -10,7 +10,7 @@ class Invite extends Command{
 
             helpDetail: "Shows an invite for the bot",
             helpUsage: "{prefix}invite",
-            helpUsageExample: "{prefix}invite"
+            noExample: true
         });
     }
 

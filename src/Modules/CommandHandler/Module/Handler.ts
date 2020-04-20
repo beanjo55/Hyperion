@@ -391,8 +391,10 @@ class CommandHandler{
         if(cmd.hasSub){
             info += `**Subcommands:**\n${cmd.helpSubcommands.replace(rx, ctx.guildConfig.prefix)}\n`;
         }
-        info += `**Usage:**\n${cmd.helpUsage.replace(rx, ctx.guildConfig.prefix)}\n**Example:**\n${cmd.helpUsageExample.replace(rx, ctx.guildConfig.prefix)}`;
-        
+        info += `**Usage:**\n${cmd.helpUsage.replace(rx, ctx.guildConfig.prefix)}`;
+        if(!cmd.noExample){
+            info += `\n${cmd.helpUsageExample.replace(rx, ctx.guildConfig.prefix)}`;
+        }
         let data = {
             embed: {
                 title: `Help for ${ctx.guildConfig.prefix}${cmd.name}`,

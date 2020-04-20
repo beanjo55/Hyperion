@@ -82,7 +82,7 @@ class hyperion implements HyperionInterface{
         this.mongoOptions = mongoOptions;
         this.defaultColor = coreOptions.defaultColor;
         this.db = this.mongoDB(mongoLogin);
-        this.version = coreOptions.version;
+        this.version = require("../package.json").version;
         this.logLevel = coreOptions.defaultLogLevel;
         this.managers = {guild: new MGM, user: new MUM};
         this.stars = {};

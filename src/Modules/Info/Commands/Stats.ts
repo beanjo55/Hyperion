@@ -10,6 +10,10 @@ class Stats extends Command{
             name: "stats",
             module: "info",
             alwaysEnabled: true,
+
+            helpDetail: "Shows some bot stats",
+            helpUsage: "{prefix}stats",
+            noExample: true
         });
     }
 

@@ -10,8 +10,11 @@ class Ping extends Command{
             aliases: ["pong"],
 
             alwaysEnabled: true,
+            selfResponse: true,
 
-            selfResponse: true
+            helpDetail: "Shows current latency",
+            helpUsage: "{prefix}ping",
+            noExample: true
         });
     }
 
