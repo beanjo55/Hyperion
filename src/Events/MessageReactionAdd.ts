@@ -22,7 +22,7 @@ class MessageReactionAddHandler{
                 starboard.Star(this, msg, emote, userID, conf, "add");
             }
         }
-        console.log(emote);
+
         
 
     }
