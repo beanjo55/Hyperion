@@ -58,7 +58,7 @@ class Stats extends Command{
                 ]
             }
         };
-        return {status: {code: 0}, payload: data};
+        return data;
     }
 }
 export default Stats;

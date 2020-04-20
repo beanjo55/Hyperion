@@ -23,7 +23,7 @@ class Daily extends Command{
     async execute(ctx: CommandContext, Hyperion: HyperionInterface){
         const payout: number = randomInt(lower, upper);
         const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
-        let time: number = await Hyperion.managers.user.getdailyTime(ctx.user.id);
+        let time: number = await Hyperion.managers.user.getDailyTime(ctx.user.id);
         if((Date.now() - time <= day) && !ctx.admin){
             return `You can collect or give in ${msc(day - (Date.now()-time))}`;
         }

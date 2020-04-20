@@ -27,6 +27,8 @@ import {default as starModel} from "./MongoDB/Starred";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
 import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
 import {hur as HoistUserResolver} from "./Core/Utils/Resolvers";
+import {sr as sortRoles} from "./Core/Utils/Roles";
+import {gc as getColor} from "./Core/Utils/Roles";
 
 const models = {
     user: user,
@@ -85,7 +87,7 @@ class hyperion implements HyperionInterface{
         this.managers = {guild: new MGM, user: new MUM};
         this.stars = {};
         this.circleCIToken = coreOptions.circleCIToken;
-        this.utils = {hoistResolver: HoistUserResolver};
+        this.utils = {hoistResolver: HoistUserResolver, sortRoles: sortRoles, getColor: getColor};
 
     }
     async init(){

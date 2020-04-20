@@ -338,23 +338,15 @@ class CommandHandler{
     async commandSuccess(ctx: Types.CommandContext, result: any, Hyperion: Types.HyperionInterface){
         this.updateCooldown(ctx.user.id, ctx.command, Hyperion.global.globalCooldown);
         if(ctx.command.selfResponse){return;}
-        if(result.payload){
-            try{
-                await ctx.channel.createMessage(result.payload);
-            }catch(err){
-                if(!inspect(err).startsWith("Discord")){
-                    ctx.channel.createMessage("An Error Occured").catch();
-                }
-            }
-        }else{
-            try{
-                await ctx.channel.createMessage(result);
-            }catch(err){
-                if(!inspect(err).startsWith("Discord")){
-                    ctx.channel.createMessage("An Error Occured").catch();
-                }
+
+        try{
+            await ctx.channel.createMessage(result);
+        }catch(err){
+            if(!inspect(err).startsWith("Discord")){
+                ctx.channel.createMessage("An Error Occured").catch();
             }
         }
+        
     }
 
     // eslint-disable-next-line no-unused-vars

@@ -35,9 +35,9 @@ class Eval extends Command{
             if(typeof evaled !== "string"){
                 evaled = inspect(evaled, {depth: 0});
             }
-            return {status: {code: 0}, payload: await this.evalresult(ctx, evaled, Hyperion)};
+            return await this.evalresult(ctx, evaled, Hyperion);
         }catch(err){
-            return {status: {code: 0}, payload: await this.evalerror(ctx, err, Hyperion)};
+            return await this.evalerror(ctx, err, Hyperion);
         }
     }
 
@@ -90,9 +90,9 @@ class AsyncEval extends Eval{
             if(typeof evaled !== "string"){
                 evaled = inspect(evaled, {depth: 0});
             }
-            return {status: {code: 0}, payload: await this.evalresult(ctx, evaled, Hyperion)};
+            return await this.evalresult(ctx, evaled, Hyperion);
         }catch(err){
-            return {status: {code: 0}, payload: await this.evalerror(ctx, err, Hyperion)};
+            return await this.evalerror(ctx, err, Hyperion);
         }
 
     }

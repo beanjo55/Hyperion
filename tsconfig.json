@@ -63,5 +63,5 @@
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true  /* Disallow inconsistently-cased references to the same file. */
   },
-  "include": ["src/**/*", "src/Modules/CommandHandler/Module/.Handler.js"]
+  "include": ["src/**/*"]
 }

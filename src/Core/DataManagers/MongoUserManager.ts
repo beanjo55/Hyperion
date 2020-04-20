@@ -37,6 +37,12 @@ class MongoUserManager{
         return doc.rep;
     }
 
+    async getMoney(user: string): Promise<number>{
+        const doc: Types.UserConfig = await this.getUserConfig(user);
+        return doc.money;
+    }
+
+
     async setRep(user: string, amount: number){
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {rep: amount});
@@ -93,7 +99,12 @@ class MongoUserManager{
     }
 
     async setAcks(user: string, data: Types.AckInterface){
-        const validated = new Acks(data);
+        let mdata = {};
+        const doc: Types.UserConfig | any = await this.getUserConfig(user);
+        if(doc){
+            mdata = this.merge(doc.acks, data);
+        }
+        const validated = new Acks(mdata);
         return await this.model.updateOne({user: user}, {acks: validated});
     }
 
@@ -113,6 +124,14 @@ class MongoUserManager{
     async getPingStatus(user: string): Promise<boolean>{
         const doc: Types.UserConfig = await this.getUserConfig(user);
         return doc.socialPings;
+    }
+
+    merge(oldData: any, newData: any){
+        const newProps: Array<string> = Object.getOwnPropertyNames(newData);
+        newProps.forEach((prop: string) => {
+            oldData[prop] = newData[prop];
+        });
+        return oldData;
     }
         
 }
