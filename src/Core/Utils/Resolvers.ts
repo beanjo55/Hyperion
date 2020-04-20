@@ -34,14 +34,14 @@ function hoistUserResolver(msg: Message, search: string, members: Collection<Mem
     let guild = msg.channel.guild;
     let hroles: Array<Role> = guild.roles.filter((r: Role) => r.hoist);
     hroles.sort((a: Role, b: Role) => b.position - a.position);
-    for(let i = 0; i< hroles.length; i++){
+    for(let i = 0; i < hroles.length; i++){
         let r: Role = hroles[i];
         let tempColl = new Collection(Member);
         let tempArr = members.filter((m: Member) => m.roles.includes(r.id));
         tempArr.forEach((m: Member) => {
             tempColl.add(m);
         });
-        var pass: Member | undefined = resolveUser(msg, search, tempColl);
+        let pass: Member | undefined = resolveUser(msg, search, tempColl);
 
         if(pass !== undefined){return pass;}
     }
