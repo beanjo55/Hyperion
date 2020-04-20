@@ -11,6 +11,7 @@ class Build extends Command{
             module: "dev",
             internal: true,
             dev: true,
+            selfResponse: true,
             helpDetail: "Fetches a new built version from the CI",
             helpUsage: "{prefix}build\n{prefix}build [build number]",
             helpUsageExample: "{prefix}build\n{prefix}build 8"
