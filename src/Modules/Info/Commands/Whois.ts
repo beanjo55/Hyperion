@@ -60,7 +60,7 @@ class Whois extends Command{
                 description: `${target.mention} - ${target.username}#${target.discriminator}`,
                 author: {
                     name: `${target.username}#${target.discriminator}`,
-                    iconURL: target.avatarURL
+                    icon_url: target.avatarURL
                 },
                 color: color,
                 timestamp: new Date(),
@@ -113,6 +113,25 @@ class Whois extends Command{
         if(acks.friend){ack.push("Project Friend");}
         if(acks.contrib){ack.push("Project Contributor");}
         if(acks.custom){ack.push(acks.custom);}
+        if(target.id === ctx.guild.ownerID){
+            ack.push("Server Owner");
+        }else{
+            if(target.permission.has("administrator")){
+                ack.push("Server Administrator");
+            }else{
+                if(target.permission.has("manageGuild")){
+                    ack.push("Server Manager");
+                }else{
+                    let mods = await Hyperion.managers.guild.getMods(ctx.guild.id);
+                    for(let i = 0; i < mods.length; i++){
+                        if(target.roles.includes(mods[i])){
+                            ack.push("Server Moderator");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         if(ack.length > 0){
             data.embed.fields.push({name: "Acknowledgements", value: ack.join(", ")});
         }
