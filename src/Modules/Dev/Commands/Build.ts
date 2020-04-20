@@ -28,7 +28,8 @@ class Build extends Command{
         + " | sed -e \"s/$/?circle-token=" + Hyperion.circleCIToken + "/\""
         + " | wget -q --output-document=./built.tar -i -";
 
-        const stage2: string = "mv build/ oldBuild/"
+        const stage2: string = "cd " + dir
+        + " | mv build/ oldBuild/"
         + " | tar --overwrite -xf built.tar"
         + " | rm -rf built.tar"
         + " | rm -Rf oldBuild/";
