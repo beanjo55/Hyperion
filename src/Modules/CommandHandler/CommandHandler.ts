@@ -17,7 +17,7 @@ class CommandHandler extends Module{
     }
 
     init(Hyperion: HyperionInterface){
-        Hyperion.handler = new this.Handler({type: "normal", logLevel: 3, ghost: false});
+        Hyperion.handler = new this.Handler({type: "normal", logLevel: 1, ghost: false});
     }
 
     /*

@@ -74,9 +74,9 @@ class CommandHandler{
         if(!guildConfig.mod){return false;}
         if(!guildConfig.mod.modRoles){return false;}
         if(guildConfig.mod.modRoles.length === 0){return false;}
-        guildConfig.mod.modRoles.forEach((role: string) => {
+        for(const role in guildConfig.mod.modRoles){
             if(user.roles.includes(role)){return true;}
-        });
+        }
         return false;
     }
 
@@ -182,9 +182,9 @@ class CommandHandler{
 
     ignored(guildConfig: Types.GuildConfig, user: Member, channel: string): boolean{
         if(guildConfig.ignoredRoles !== undefined){
-            guildConfig.ignoredRoles.forEach((role: string) => {
+            for(const role in guildConfig.ignoredRoles){
                 if(user.roles.includes(role)){return true;}
-            });
+            }
         }
 
         if(guildConfig.ignoredChannels !== undefined){
@@ -204,9 +204,9 @@ class CommandHandler{
         if(!guildConfig.commands[command]){return null;}
         if(!guildConfig.commands[command].allowedRoles){return null;}
         if(guildConfig.commands[command].allowedRoles.length === 0){return null;}
-        guildConfig.commands[command].allowedRoles.forEach((role: string) => {
+        for(const role of guildConfig.commands[command].allowedRoles){
             if(roles.includes(role)){return true;}
-        });
+        }
         return false;
     }
 
@@ -216,9 +216,9 @@ class CommandHandler{
         if(!guildConfig.commands[command]){return null;}
         if(!guildConfig.commands[command].disabledRoles){return null;}
         if(guildConfig.commands[command].disabledRoles.length === 0){return null;}
-        guildConfig.commands[command].disabledRoles.forEach((role: string) => {
+        for(const role of guildConfig.commands[command].disabledRoles){
             if(roles.includes(role)){return true;}
-        });
+        }
         return false;
     }
 
@@ -307,10 +307,11 @@ class CommandHandler{
     }
 
     async executeCommand(ctx: Types.CommandContext, Hyperion: Types.HyperionInterface){
-        const result = await ctx.command.execute(ctx, Hyperion).catch((err: any) => {
+        await ctx.command.execute(ctx, Hyperion).then((result: any) => {
+            return this.commandSuccess(ctx, result, Hyperion);
+        }).catch((err: any) => {
             if(this.logLevel >= 2 && err.toString().startsWith("Discord")){
                 Hyperion.logger.warning("Hyperion", "API Error", `Command failed with discord error: ${inspect(err)}`);
-                return this.commandError(ctx, err, Hyperion);
             }
             Hyperion.logger.error("Hyperion", "Command Error", `Error executing ${ctx.command.name}, Command Call: ${ctx.msg.content}\nerror: ${err}`);
             Hyperion.sentry.configureScope(function(scope: any){
@@ -320,7 +321,7 @@ class CommandHandler{
             Hyperion.sentry.captureException(err);
             return this.commandError(ctx, err, Hyperion);
         });
-        return this.commandSuccess(ctx, result, Hyperion);
+
         
     }
 
