@@ -6,3 +6,5 @@ package-lock.json
 build
 .vscode
 eris-docs
+oldBuild
+built.tar
