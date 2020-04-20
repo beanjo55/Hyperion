@@ -30,9 +30,9 @@ class Build extends Command{
 
         const stage2: string = "cd " + dir
         + " | mv build/ oldBuild/"
-        + " | tar --overwrite -xf built.tar"
-        + " | rm -rf built.tar"
-        + " | rm -Rf oldBuild/";
+        + " | tar --overwrite -xf built.tar";
+        //+ " | rm -rf built.tar"
+        //+ " | rm -Rf oldBuild/";
 
         let message: string = "";
         if(buildNum === "latest"){
