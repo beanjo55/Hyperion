@@ -19,6 +19,7 @@ export interface CoreOptions{
     version: string;
     defaultColor: number;
     defaultLogLevel: number;
+    circleCIToken: string;
 }
 
 export interface HyperionInterface {
@@ -43,6 +44,7 @@ export interface HyperionInterface {
     managers: any;
     stars: any;
     utils: any;
+    circleCIToken: string;
 }
 
 export interface CommandConfig{

@@ -43,8 +43,9 @@ class Eval extends Command{
 
     async clean(text: string, ctx: any, Hyperion: HyperionInterface){
         const rx = new RegExp((Hyperion.client.token as string), "gim");
+        const circlerx = new RegExp((Hyperion.circleCIToken as string), "gim");
         if (typeof(text) === "string"){
-            text = text.replace(rx, "Fuck You");
+            text = text.replace(rx, "Fuck You").replace(circlerx, "No");
             return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
         }else{
             return text;

@@ -59,6 +59,7 @@ class hyperion implements HyperionInterface{
     managers: any;
     stars: any;
     utils: any;
+    circleCIToken: string;
 
     constructor(token: string, erisOptions: Eris.ClientOptions, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions){
         this.client = new Client(token, erisOptions);
@@ -83,6 +84,7 @@ class hyperion implements HyperionInterface{
         this.logLevel = coreOptions.defaultLogLevel;
         this.managers = {guild: new MGM, user: new MUM};
         this.stars = {};
+        this.circleCIToken = coreOptions.circleCIToken;
         this.utils = {hoistResolver: HoistUserResolver};
 
     }

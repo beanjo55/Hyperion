@@ -33,7 +33,9 @@
     "eslint": "^6.8.0"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "npm run-script compile && npm run-script copy",
+    "copy": "cp ./src/v2.txt ./build/v2.txt",
+    "compile": "tsc"
   },
   "author": "bean#8888",
   "license": "ISC"
