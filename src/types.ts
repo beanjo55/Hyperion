@@ -2,6 +2,8 @@
 import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed, Member, User} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
+import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
+import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
 import mongoose from "mongoose";
 
 
@@ -19,6 +21,11 @@ export interface CoreOptions{
     defaultColor: number;
     defaultLogLevel: number;
     circleCIToken: string;
+}
+
+export interface Managers{
+    guild: MGM;
+    user: MUM;
 }
 
 export interface HyperionInterface {
@@ -40,7 +47,7 @@ export interface HyperionInterface {
     global: any;
     handler?: any;
     logLevel: number;
-    managers: any;
+    managers: Managers;
     stars: any;
     utils: any;
     circleCIToken: string;
@@ -244,4 +251,5 @@ export interface UserConfig{
     partner?: string;
     data: any;
     acks: AckInterface;
+    bio: string;
 }

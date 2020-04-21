@@ -126,6 +126,17 @@ class MongoUserManager{
         return doc.socialPings;
     }
 
+    async getBio(user: string): Promise<string>{
+        const doc: Types.UserConfig = await this.getUserConfig(user);
+        this.model.updateOne({user: user});
+        return doc.bio;
+    }
+
+    async setBio(user: string, bio: string){
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {bio: bio});
+    }
+
     merge(oldData: any, newData: any){
         const newProps: Array<string> = Object.getOwnPropertyNames(newData);
         newProps.forEach((prop: string) => {

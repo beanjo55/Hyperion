@@ -94,14 +94,30 @@ class Whois extends Command{
                         name: "Money",
                         value: `$${money}`,
                         inline: true
-                    },
-                    {
-                        name: "Roles",
-                        value: roleList.join(", ")
                     }
                 ]
             }
         };
+
+        let bio = await Hyperion.managers.user.getBio(target.id);
+        if(bio && bio !== ""){
+            if(bio.length > 1024){
+                bio = bio.substring(0, 1020) + "...";
+            }
+            data.embed.fields.push({
+                name: "Bio",
+                value: bio
+            });
+        }
+
+        let roleString = roleList.join(" ");
+        if(roleString.length > 0){
+            data.embed.fields.push({
+                name: "Roles",
+                value: roleString
+            });
+        }
+        
         
         const acks = await Hyperion.managers.user.getAcks(target.id);
         let ack: Array<string> = [];

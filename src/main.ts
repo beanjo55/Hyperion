@@ -16,7 +16,7 @@ import {logger} from "./Core/Structures/Logger";
 import mongoose = require("mongoose");
 const config = require("../config.json");
 
-import {CoreOptions, HyperionInterface} from "./types";
+import {CoreOptions, HyperionInterface, Managers} from "./types";
 
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
@@ -58,7 +58,7 @@ class hyperion implements HyperionInterface{
     db: mongoose.Connection;
     global: any;
     logLevel: number
-    managers: any;
+    managers: Managers;
     stars: any;
     utils: any;
     circleCIToken: string;
