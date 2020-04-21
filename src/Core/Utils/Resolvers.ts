@@ -45,7 +45,7 @@ function hoistUserResolver(msg: Message, search: string, members: Collection<Mem
 
         if(pass !== undefined){return pass;}
     }
-    return undefined;
+    return resolveUser(msg, search, members);
 }
 
 export {hoistUserResolver as hur};

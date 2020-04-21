@@ -15,6 +15,9 @@ function sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>){
 
 function getColor(roles: Collection<Role>, guildRoles: Collection<Role>){
     let colored = roles.filter((r: Role) => r.color !== 0).map((r: Role) => r.id);
+    let sorted = sortRoles(colored, guildRoles);
+    if(!sorted){return;}
+    if(!sorted[0]){return;}
     return sortRoles(colored, guildRoles)[0].color;
 }
 
