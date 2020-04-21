@@ -20,6 +20,13 @@ class Rep extends Command{
     async execute(ctx: CommandContext, Hyperion: HyperionInterface){
         const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
         let time: number = await Hyperion.managers.user.getRepTime(ctx.user.id);
+        if(ctx.args.length === 0){
+            if(Date.now() - time <= day){
+                return `You can give more rep in ${msc(day - (Date.now()-time))}`;
+            }else{
+                return "You can give a rep point now!";
+            }
+        }
         if((Date.now() - time <= day) && !ctx.admin){
             return `You can give more rep in ${msc(day - (Date.now()-time))}`;
         }

@@ -14,6 +14,7 @@ class Daily extends Command{
         super({
             name: "daily",
             module: "social",
+            aliases: ["dly", "dalies"],
             helpDetail: "Collect your daily money or give it to someone else",
             helpUsage: "{prefix}daily\n{prefix}daily [user]",
             helpUsageExample: "{prefix}daily\n{prefix}daily @bean"
@@ -24,8 +25,15 @@ class Daily extends Command{
         const payout: number = randomInt(lower, upper);
         const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
         let time: number = await Hyperion.managers.user.getDailyTime(ctx.user.id);
+        if(ctx.args.length === 0){
+            if(Date.now() - time <= day){
+                return `You can collect or give daily money in ${msc(day - (Date.now()-time))}`;
+            }else{
+                return "You can collect or give daily money now!";
+            }
+        }
         if((Date.now() - time <= day) && !ctx.admin){
-            return `You can collect or give in ${msc(day - (Date.now()-time))}`;
+            return `You can collect or give daily money in ${msc(day - (Date.now()-time))}`;
         }
         if(!target && ctx.args[0]){return "Who?";}
         if(!target && !ctx.args[0]){
