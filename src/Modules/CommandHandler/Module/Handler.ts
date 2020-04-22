@@ -131,6 +131,7 @@ class CommandHandler{
         }
 
         if(msg.content.replace("<@!", "<@").startsWith(Hyperion.client.user.mention)){
+            if(!msg.content.split(" ").slice(1, 2)[0]){return null;}
             return {
                 type: "normal",
                 label: msg.content.split(" ").slice(1, 2)[0].trim().toLowerCase(),
@@ -375,7 +376,7 @@ class CommandHandler{
         cats.forEach(cat => {
             let cmds = Hyperion.commands.filter(c => c.module.toLowerCase() === cat.name.toLowerCase()).map(c => c.name).join(", ");
             let toPush: any = {
-                name: cat.name,
+                name: cat.friendlyName,
                 value: cmds,
                 inline: false
             };
