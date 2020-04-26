@@ -35,7 +35,9 @@ async function star(Hyperion: HyperionInterface, omsg: Message, emote: Emoji, us
         }else{
             if(await starModel.exists({message: msg.id})){
                 const oldPostID: any = await starModel.findOne({message: msg.id}).lean().exec();
-                const oldPost: Message = await msg.channel.getMessage(oldPostID.starpost);
+                if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
+                const channel = msg.channel.guild.channels.get(conf.starboard.starChannel);
+                const oldPost: Message = await channel.getMessage(oldPostID.starpost);
                 updatePost(Hyperion, oldPost, Hyperion.stars[msg.id].count);
             }else{
                 const post: Message | undefined = await createPost(Hyperion, msg, conf, Hyperion.stars[msg.id].count);

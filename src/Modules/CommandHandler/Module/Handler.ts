@@ -261,6 +261,8 @@ class CommandHandler{
         if(this.ignored(guildConfig, ctx.member, ctx.channel.id)){
             if(!(this.isManager(ctx.member) || this.isMod(ctx.member, guildConfig))){return false;}
         }
+        if(ctx.command.userperms.includes("manager") && !this.isManager(ctx.member)){return false;}
+        if(ctx.command.userperms.includes("mod") && !this.isMod(ctx.member, guildConfig)){return false;}
         return true;
     }
 
@@ -358,6 +360,9 @@ class CommandHandler{
 
     sendHelp(ctx: any, Hyperion: Types.HyperionInterface){
         if(ctx.args && ctx.args[0]){
+            if(ctx.args[0] === "253233185800847361" || ctx.args[0] === "<@253233185800847361>" || ctx.args[0] === "<@!253233185800847361>"){
+                return "If you're reading this, you've been in a coma for almost 20 years now. We're trying a new technique. We don't know where this message will end up in your dream, but we hope it works. Please wake up, we miss you.";
+            }
             const cmd = this.findCommand(ctx.args[0], Hyperion);
             if(cmd){
                 return this.sendCommandHelp(ctx, cmd, Hyperion);
@@ -382,19 +387,27 @@ class CommandHandler{
             };
             data.embed.fields.push(toPush);
         });
+        this.updateCooldown(ctx.user.id, ({name: "help"} as Command), Hyperion.global.globalCooldown);
         return data;
     }
     
     sendCommandHelp(ctx: any, cmd: Command, Hyperion: Types.HyperionInterface){
         if(!cmd){return;}
         const rx = new RegExp("{prefix}", "gmi");
-        let info = `**Description:** ${cmd.helpDetail}\n**Cooldown:** ${cmd.cooldownTime/1000} seconds\n`;
-        if(cmd.hasSub){
-            info += `**Subcommands:**\n${cmd.helpSubcommands.replace(rx, ctx.guildConfig.prefix)}\n`;
+        let info = `**Description:** ${cmd.helpDetail}\n**Cooldown:** ${cmd.cooldownTime/1000} seconds`;
+        if(cmd.aliases.length !== 0){
+            info += `\n**Aliases:** ${cmd.aliases.join(", ")}`;
         }
-        info += `**Usage:**\n${cmd.helpUsage.replace(rx, ctx.guildConfig.prefix)}`;
+        if(cmd.userperms.length !== 0){
+            if(cmd.userperms.includes("manager")){info += "\n**Permission Level:** Manager";}
+            if(cmd.userperms.includes("mod")){info += "\n**Permission Level:** Moderator";}
+        }
+        if(cmd.hasSub){
+            info += `**Subcommands:**\n${cmd.helpSubcommands.replace(rx, ctx.guildConfig.prefix)}`;
+        }
+        info += `\n**Usage:**\n${cmd.helpUsage.replace(rx, ctx.guildConfig.prefix)}`;
         if(!cmd.noExample){
-            info += `\n${cmd.helpUsageExample.replace(rx, ctx.guildConfig.prefix)}`;
+            info += `\n**Examples:**\n${cmd.helpUsageExample.replace(rx, ctx.guildConfig.prefix)}`;
         }
         let data = {
             embed: {
@@ -404,6 +417,7 @@ class CommandHandler{
                 description: info
             }
         };
+        this.updateCooldown(ctx.user.id, ({name: "help"} as Command), Hyperion.global.globalCooldown);
         return data;
     }
     async handler(msg: Message, Hyperion: Types.HyperionInterface){
@@ -438,6 +452,7 @@ class CommandHandler{
 
         ctx.args = isolated.args;
         if(isolated.label.toLowerCase() === "help"){
+            this.checkCooldown(ctx.user.id, ({name: "help"} as Command), Hyperion.global.globalColldown);
             return await ctx.channel.createMessage(this.sendHelp(ctx, Hyperion));
         }
         const command: Command | undefined = this.findCommand(isolated.label, Hyperion);

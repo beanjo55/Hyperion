@@ -57,21 +57,24 @@ class Whois extends Command{
         let data: any = {
             embed: {
                 thumbnail: {url: target.avatarURL},
-                description: `${target.mention} - ${target.username}#${target.discriminator}`,
+                description: "",
                 author: {
                     name: `${target.username}#${target.discriminator}`,
                     icon_url: target.avatarURL
+                },
+                footer: {
+                    text: `User ID: ${target.id}`
                 },
                 color: color,
                 timestamp: new Date(),
                 fields: [
                     {
-                        name: "Registered At",
+                        name: "Registered On",
                         value: new Date(target.createdAt).toDateString(),
                         inline: true
                     },
                     {
-                        name: "Joined At",
+                        name: "Joined On",
                         value: new Date(target.joinedAt).toDateString(),
                         inline: true
                     },
@@ -98,6 +101,12 @@ class Whois extends Command{
                 ]
             }
         };
+
+        if(target.nick){
+            data.embed.description = `${target.username}#${target.discriminator} **${target.nick}**\n${target.mention}`;
+        }else{
+            data.embed.description = `${target.username}#${target.discriminator}\n${target.mention}`;
+        }
 
         let bio = await Hyperion.managers.user.getBio(target.id);
         if(bio && bio !== ""){
