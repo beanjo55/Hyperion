@@ -64,7 +64,9 @@ class MongoGuildManager{
         if(!guilddata.modules){return {code: 1, payload: "An error occured"};}
         const validated: any = this.validateModuleState(newState, newMod, modules);
         if(validated.code !== 0){return validated;}
-        const merged = this.merge(guilddata.modules, validated.payload);
+        const temp: any ={};
+        temp[newMod] = validated.payload;
+        const merged = this.merge(guilddata.modules, temp);
         return await this.model.updateOne({guild: guildID}, {modules: merged}).exec();
     }
 
