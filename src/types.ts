@@ -5,11 +5,12 @@ import {Command} from "./Core/Structures/Command";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
 import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
 import mongoose from "mongoose";
+import IORedis from "ioredis";
 
 
 export interface HyperionGuild extends Guild{
     fetched?: boolean;
-    guildconf?: any;
+    guildconf?: GuildConfig;
 }
 
 export interface CoreOptions{
@@ -51,6 +52,7 @@ export interface HyperionInterface {
     stars: any;
     utils: any;
     circleCIToken: string;
+    redis: IORedis.Redis;
 }
 
 
@@ -254,4 +256,27 @@ export interface UserConfig{
     data: any;
     acks: AckInterface;
     bio: string;
+}
+
+export enum ConfigOp{
+    show = 0,
+    view = 0,
+    get = 0,
+    set = 1,
+    add = 2,
+    remove = 3,
+    del = 3,
+    delete = 3,
+    clear = 4,
+    reset = 4
+}
+export interface ConfigKey{
+    parent: string;
+    id: string;
+    ops: Array<ConfigOp>;
+    description: string;
+    friendlyName: string;
+    dataType: string;
+    array: boolean;
+    default: any;
 }

@@ -58,6 +58,11 @@ class Stats extends Command{
                         name: "RAM Usage",
                         value: `${(process.memoryUsage().heapUsed/1024/1024).toFixed(2)}mb`,
                         inline: true
+                    },
+                    {
+                        name: "Lifetime Commands Used",
+                        value: `${await Hyperion.redis.get("lcr")}`,
+                        inline: true
                     }
                 ]
             }

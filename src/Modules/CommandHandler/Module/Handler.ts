@@ -341,6 +341,7 @@ class CommandHandler{
 
     async commandSuccess(ctx: Types.CommandContext, result: any, Hyperion: Types.HyperionInterface){
         this.updateCooldown(ctx.user.id, ctx.command, Hyperion.global.globalCooldown);
+        this.updateCommandStats(Hyperion, ctx.command);
         if(ctx.command.selfResponse){return;}
 
         try{
@@ -355,10 +356,11 @@ class CommandHandler{
 
     // eslint-disable-next-line no-unused-vars
     async updateCommandStats(Hyperion: Types.HyperionInterface, command: Command){
-        //TODO once redis is added
+        Hyperion.redis.incr("lcr");
     }
 
     sendHelp(ctx: any, Hyperion: Types.HyperionInterface){
+        if(Hyperion.global.blacklist.includes(ctx.user.id)){return;}
         if(ctx.args && ctx.args[0]){
             if(ctx.args[0] === "253233185800847361" || ctx.args[0] === "<@253233185800847361>" || ctx.args[0] === "<@!253233185800847361>"){
                 return "If you're reading this, you've been in a coma for almost 20 years now. We're trying a new technique. We don't know where this message will end up in your dream, but we hope it works. Please wake up, we miss you.";

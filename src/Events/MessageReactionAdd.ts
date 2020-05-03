@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import {HyperionInterface, GuildConfig} from "../types";
 import {Module} from "../Core/Structures/Module";
-import {Message, MessageContent, Emoji} from "eris";
+import {Message, Emoji} from "eris";
 
 class MessageReactionAddHandler{
     name: String;

@@ -1,0 +1,61 @@
+import {Command} from "../../../Core/Structures/Command";
+// eslint-disable-next-line no-unused-vars
+import {CommandContext, HyperionInterface} from "../../../types";
+import {toggleableModules} from "../Module/ConfigHelper";
+
+
+class Module extends Command{
+    constructor(){
+        super({
+            name: "module",
+            module: "manager",
+            alwaysEnabled: true,
+            userperms: ["manager"],
+
+            helpDetail: "Lists all the toggleable modules, or toggles a module",
+            helpUsage: "{prefix}module\n{prefix}module [module name]",
+            helpUsageExample: "{prefix}module starboard"
+        });
+    }
+
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+        let toggleable = toggleableModules(Hyperion.modules);
+        let list = toggleable.map((m: any) => m.name);
+        if(!ctx.args[0]){
+            const data = {
+                embed: {
+                    title: "Hyperion toggleable modules",
+                    color: Hyperion.defaultColor,
+                    timestamp: new Date,
+                    description: `The modules that you can toggle are listed below\n\`\`\`${list.join("\n")}\`\`\``
+                }
+            };
+            return data;
+        }
+        let name = ctx.args[0].toLowerCase();
+        if(!list.includes(name)){return "I cant find a toggleable module by that name";}
+        if(ctx.guildConfig && ctx.guildConfig.modules){
+            if((ctx.guildConfig as any)[name] !== undefined){
+                let oldstate = (ctx.guildConfig as any)[name].enabled;
+                try{
+                    await Hyperion.managers.guild.updateModuleStates(ctx.guild.id, name, !oldstate, Hyperion.modules);
+                }catch(err){
+                    Hyperion.logger.error("Hyperion", "Module toggle", `error toggling ${name}, error: ${err}`);
+                    return "Something went wrong";
+                }
+                return "Success!";
+            }
+        }
+        let mod = Hyperion.modules.get(name);
+        if(!mod){return "I couldnt find that module";}
+        try{
+            await Hyperion.managers.guild.updateModuleStates(ctx.guild.id, name, !mod.default, Hyperion.modules);
+        }catch(err){
+            Hyperion.logger.error("Hyperion", "Module toggle", `error toggling ${name}, error: ${err}`);
+            return "Something went wrong";
+        }
+        return "Success!";
+
+    }
+}
+export default Module;

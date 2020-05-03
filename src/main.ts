@@ -12,6 +12,7 @@ import Eris from "eris";
 import {Module} from "./Core/Structures/Module.js";
 import {Command} from "./Core/Structures/Command.js";
 import {logger} from "./Core/Structures/Logger";
+import {default as Redis} from "ioredis";
 
 import mongoose = require("mongoose");
 const config = require("../config.json");
@@ -29,6 +30,7 @@ import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
 import {hur as HoistUserResolver} from "./Core/Utils/Resolvers";
 import {sr as sortRoles} from "./Core/Utils/Roles";
 import {gc as getColor} from "./Core/Utils/Roles";
+import IORedis = require("ioredis");
 
 const models = {
     user: user,
@@ -62,6 +64,7 @@ class hyperion implements HyperionInterface{
     stars: any;
     utils: any;
     circleCIToken: string;
+    redis: Redis.Redis;
 
     constructor(token: string, erisOptions: Eris.ClientOptions, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions){
         this.client = new Client(token, erisOptions);
@@ -88,6 +91,7 @@ class hyperion implements HyperionInterface{
         this.stars = {};
         this.circleCIToken = coreOptions.circleCIToken;
         this.utils = {hoistResolver: HoistUserResolver, sortRoles: sortRoles, getColor: getColor};
+        this.redis = new Redis();
 
     }
     async init(){

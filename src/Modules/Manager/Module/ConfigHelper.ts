@@ -18,8 +18,28 @@ export enum ConfigOp{
     reset = 5
 }
 
+export interface KeyInfo{
+    format: "string" | "array";
+    contentType: "string" | "number" | "user" | "role" | "channel";
+}
+
+export interface Key{
+    module: string;
+    name: string;
+    info: KeyInfo;
+    description: string;
+    ops: Array<ConfigOp>;
+}
+
+export interface ModuleKeys{
+    keys: Array<Key>;
+    description: string;
+}
+
 export namespace ConfigKeys{
-    export type starboard = "selfstar" | "starchannel" | "ignoredchannels" | "ignoredroles" | "customstar" | "starcount";
+    export interface starboard{
+
+    }
 }
 
 

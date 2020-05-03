@@ -1,10 +1,14 @@
 import {logger} from "./Logger";
 const fs = require("fs");
 // eslint-disable-next-line no-unused-vars
-import {HyperionInterface} from "../../types";
+import {HyperionInterface, ConfigOp} from "../../types";
+import {ConfigKey as configkey} from "../../types";
 const { inspect } = require("util");
 // eslint-disable-next-line no-unused-vars
 import {Command} from "./Command";
+// eslint-disable-next-line no-unused-vars
+import {Collection} from "eris";
+
 
 export class Module{
     name: string;
@@ -14,11 +18,15 @@ export class Module{
     alwaysEnabled: boolean;
     hasCommands: boolean;
     needsInit: boolean;
-    needsLoad: boolean;
     cmdpath: string;
-    modpath: string;
     defaultStatus: boolean;
     hasCfg: boolean;
+    subscribedEvents: Array<string>;
+    configKeys?: Collection<configkey>;
+
+    //legacy module system
+    needsLoad: boolean;
+    modpath: string;
     [key: string]: any;
     
 
@@ -34,12 +42,23 @@ export class Module{
 
         this.hasCommands = data.hasCommands ?? false;
         this.needsInit = data.needsInit ?? false;
-        this.needsLoad = data.needsLoad ?? false;
 
-        this.cmdpath = `${data.dirname}/Commands`;
+        //legacy, moving to modules being self contained in the module class
+        this.needsLoad = data.needsLoad ?? false;
         this.modpath = `${data.dirname}/Module`;
 
+
+        this.cmdpath = `${data.dirname}/Commands`;
+        this.subscribedEvents = data.subscribedEvents ?? [];
+        if(data.configKeys){
+            this.configKeys = data.configKeys;
+        }
+
         
+    }
+
+    loadKeys(){
+        throw new Error("Module expected config keys, but they werent implemented!");
     }
 
     loadMod(){
@@ -111,5 +130,26 @@ export class Module{
     // eslint-disable-next-line no-unused-vars
     init(Hyperion: HyperionInterface){
 
+    }
+}
+
+export class ConfigKey implements configkey{
+    parent: string;
+    id: string;
+    ops: Array<ConfigOp>;
+    description: string;
+    friendlyName: string;
+    dataType: string;
+    array: boolean;
+    default: any;
+    constructor(data: Partial<configkey>){
+        this.parent = data.parent ?? "dummy";
+        this.id = data.id ?? "dummy";
+        this.ops = data.ops ?? [0];
+        this.description = data.description ?? "dummy";
+        this.friendlyName = data.friendlyName ?? "dummy";
+        this.dataType = data.dataType ?? "string";
+        this.array = data.array ?? false;
+        this.default = data.default;
     }
 }

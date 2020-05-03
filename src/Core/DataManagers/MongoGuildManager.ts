@@ -73,9 +73,11 @@ class MongoGuildManager{
     async updateCommands(guildID: string, newCmd: string, data: any, commands: Collection<Command>){
         let guilddata = await this.model.findOne({guild: guildID}, "commands").lean().exec();
         if(!guilddata.commands){return {code: 1, payload: "An error occured"};}
-        const merged: any = this.merge(guilddata[newCmd], data);
-        const validated: any = this.validateCommandState(merged, newCmd, commands);
+        const validated: any = this.validateCommandState(data, newCmd, commands);
         if(validated.code !== 0){return validated;}
+        let temp: any = {};
+        temp[newCmd] = validated.payload;
+        let merged: any = this.merge(guilddata.commands, temp);
         return await this.model.updateOne({guild: guildID}, {commands: merged}).exec();
     }
 
