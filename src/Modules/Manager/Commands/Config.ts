@@ -5,6 +5,7 @@ import {configurableModules} from "../Module/ConfigHelper";
 // eslint-disable-next-line no-unused-vars
 import { Module, ConfigKey } from "../../../Core/Structures/Module";
 import {inspect} from "util";
+import { GuildChannel } from "eris";
 
 
 const opmap = ["get", "set", "add", "remove", "clear"];
@@ -134,6 +135,17 @@ class Config extends Command{
                 if(isNaN(num)){return "That isnt a valid number";}
                 data[key.id] = num;
             }
+            if(key.dataType === "channel"){
+                let chan = ctx.guild.channels.get(value)?.id;
+                if(!chan && ctx.msg.channelMentions && ctx.msg.channelMentions[0]){
+                    chan = ctx.msg.channelMentions[0];
+                }
+                if(!chan){
+                    chan = ctx.guild.channels.find((c: GuildChannel) => (c.type === 0 || c.type === 5) && c.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
+                }
+                if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
+                data[key.id] = chan;
+            }
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
@@ -148,6 +160,17 @@ class Config extends Command{
             if(!old || !old[0]){
                 let data: any = {};
                 data[key.id] = [value];
+                if(key.dataType === "channel"){
+                    let chan = ctx.guild.channels.get(value)?.id;
+                    if(!chan && ctx.msg.channelMentions && ctx.msg.channelMentions[0]){
+                        chan = ctx.msg.channelMentions[0];
+                    }
+                    if(!chan){
+                        chan = ctx.guild.channels.find((c: GuildChannel) => (c.type === 0 || c.type === 5) && c.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
+                    }
+                    if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
+                    data[key.id] = [chan];
+                }
                 try{
                     await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
                 }catch(err){
@@ -157,7 +180,19 @@ class Config extends Command{
                 return "Success!";
             }
             if(old.includes(value)){return "That value is already added for this setting";}
-            old.push(value);
+            if(key.dataType === "channel"){
+                let chan = ctx.guild.channels.get(value)?.id;
+                if(!chan && ctx.msg.channelMentions && ctx.msg.channelMentions[0]){
+                    chan = ctx.msg.channelMentions[0];
+                }
+                if(!chan){
+                    chan = ctx.guild.channels.find((c: GuildChannel) => (c.type === 0 || c.type === 5) && c.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
+                }
+                if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
+                old.push(chan);
+            }else{
+                old.push(value);
+            }
             let data: any = {};
             data[key.id] = old;
             try{
@@ -172,6 +207,17 @@ class Config extends Command{
         if(op === 3){
             let old = (guilddata as any)[module.name][key.id];
             if(!old || !old[0]){return "No values were set, so there is nothing to remove";}
+            if(key.dataType === "channel"){
+                let chan = ctx.guild.channels.get(value)?.id;
+                if(!chan && ctx.msg.channelMentions && ctx.msg.channelMentions[0]){
+                    chan = ctx.msg.channelMentions[0];
+                }
+                if(!chan){
+                    chan = ctx.guild.channels.find((c: GuildChannel) => (c.type === 0 || c.type === 5) && c.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
+                }
+                if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
+                value = chan;
+            }
             if(!old.includes(value)){return "That value isnt part of that key";}
             let newarr: Array<any> = [];
             old.forEach((val: any) => {
@@ -179,6 +225,7 @@ class Config extends Command{
             });
             let data: any = {};
             data[key.id] = newarr;
+
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
@@ -202,6 +249,16 @@ class Config extends Command{
                 description: `\`\`\`\n${inspect(out)}\`\`\``
             }
         };
+        if(key.dataType === "channel" && !key.array){
+            output.embed.description = `<#${out}>`;
+        }
+        if(key.dataType === "channel" && key.array){
+            let tmp: Array<string> = [];
+            out.forEach((x: string) => {
+                tmp.push(`<#${x}>`);
+            });
+            output.embed.description = tmp.join("\n");
+        }
         return output;
     }
 
