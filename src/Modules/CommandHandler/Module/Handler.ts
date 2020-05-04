@@ -168,17 +168,17 @@ class CommandHandler{
     guildCommandEnabled(guildConfig: Types.GuildConfig, command: Command): boolean{
         if(!guildConfig.commands){return true;}
         if(!guildConfig.commands[command.name]){return true;}
-        if(guildConfig.commands[command.name].enabled){return true;}
         if(command.alwaysEnabled){return true;}
-        return false;
+        if(guildConfig.commands[command.name].enabled !== undefined){return guildConfig.commands[command.name].enabled;}
+        return true;
     }
 
     guildModuleEnabled(guildConfig: Types.GuildConfig, module: Module): boolean{
         if(!guildConfig.modules){return true;}
         if(!guildConfig.modules[module.name]){return true;}
-        if(guildConfig.modules[module.name].enabled){return true;}
         if(module.alwaysEnabled){return true;}
-        return false;
+        if(guildConfig.modules[module.name].enabled !== undefined){return guildConfig.modules[module.name].enabled;}
+        return module.defaultStatus;
     }
 
     ignored(guildConfig: Types.GuildConfig, user: Member, channel: string): boolean{
