@@ -16,7 +16,7 @@ class MessageReactionAddHandler{
         const conf: GuildConfig = await this.managers.guild.getConfig(msg.channel.guild.id);
 
         //starboard
-        if(conf.modules.starboard !== undefined && conf.modules.starboard.enabled){
+        if(conf.modules?.starboard !== undefined && conf.modules?.starboard.enabled){
             const starboard: Module | undefined = this.modules.get("starboard");
             if(starboard !== undefined){
                 starboard.Star(this, msg, emote, userID, conf, "add");

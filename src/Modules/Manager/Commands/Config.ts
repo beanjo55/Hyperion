@@ -146,6 +146,14 @@ class Config extends Command{
                 if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
                 data[key.id] = chan;
             }
+            if(key.dataType === "boolean"){
+                if(value.toLowerCase() === "true" || value.toLowerCase() === "yes" || value === "1"){data[key.id] = true;}else{
+                    if(value.toLowerCase() === "false" || value.toLowerCase() === "no" || value === "0"){data[key.id] = false;}else{
+                        return "Invalid boolean value given";
+                    }
+                }
+                
+            }
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
