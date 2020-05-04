@@ -2,6 +2,7 @@ import {logger} from "./Logger";
 const fs = require("fs");
 // eslint-disable-next-line no-unused-vars
 import {HyperionInterface, ConfigOp} from "../../types";
+// eslint-disable-next-line no-unused-vars
 import {ConfigKey as configkey} from "../../types";
 const { inspect } = require("util");
 // eslint-disable-next-line no-unused-vars
