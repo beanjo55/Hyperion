@@ -23,6 +23,10 @@ class MongoGuildManager{
         }
     }
 
+    async exists(guildID: string){
+        return await this.model.exists({guild: guildID});
+    }
+
     async getPrefix(guildID: string): Promise<string>{
         const doc: Types.GuildConfig = await this.getConfig(guildID);
         if(!doc){return "%";}
