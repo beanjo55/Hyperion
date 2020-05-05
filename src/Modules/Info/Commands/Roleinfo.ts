@@ -43,7 +43,7 @@ class Roleinfo extends Command{
             embed: {
                 color: color,
                 footer: {
-                    text: role.id
+                    text: `ID: ${role.id}`
                 },
                 timestamp: new Date,
                 title: `Role Info - ${role.name}`,
@@ -86,6 +86,13 @@ class Roleinfo extends Command{
                 ]
             }
         };
+        if(role.color !== 0){
+            data.embed.fields.push({
+                name: "Color",
+                value: `${role.color}`,
+                inline: true
+            });
+        }
         return data;
 
     }

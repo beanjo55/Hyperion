@@ -29,7 +29,7 @@ class Serverinfo extends Command{
                     url: ctx.guild.iconURL
                 },
                 footer: {
-                    text: ctx.guild.id
+                    text: `ID: ${ctx.guild.id}`
                 },
                 fields: [
                     {
@@ -83,7 +83,7 @@ class Serverinfo extends Command{
             });
         }
         if(rolelist.length > 1020){
-            data.embed.fields.push({name: `Roles [${ctx.guild.roles.size-1}]`, value: `${ctx.guild.roles.size} Roles`, inline: false});
+            data.embed.fields.push({name: `Roles [${ctx.guild.roles.size-1}]`, value: `${ctx.guild.roles.size-1} Roles`, inline: false});
         }else{
             if(ctx.guild.roles.size === 0){
                 data.embed.fields.push({name: "Roles", value: "This server has no roles", inline: false});
