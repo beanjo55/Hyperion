@@ -20,7 +20,11 @@ class MessageCreateHandler{
         const fetchguild: HyperionGuild = (this.client.guilds.get(guild.id) as HyperionGuild);
         if(!fetchguild){return;}
         if(!fetchguild.fetched){
-            fetchguild.fetchAllMembers().catch((err: any) => this.logger.error(`failed to fetch guild ${guild.id}, error: ${inspect(err)}`));
+            try{
+                fetchguild.fetchAllMembers();
+            }catch(err){
+                this.logger.error(`failed to fetch guild ${guild.id}, error: ${inspect(err)}`);
+            }
             (this.client.guilds.get(guild.id) as HyperionGuild).fetched = true;
         }
         
