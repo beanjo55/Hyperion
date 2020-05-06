@@ -54,6 +54,7 @@ class Build extends Command{
                         console.log(error2);
                         return post.edit("Extract failed");
                     }
+                    if(buildNum === "latest"){return post.edit("Sucessfully downloaded and extracted latest build!");}
                     return post.edit(`Sucessfully downloaded and extracted build ${buildNum}!`);
                 });
             });
