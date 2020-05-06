@@ -20,6 +20,7 @@ class Prefix extends Command{
         if(!ctx.args[0]){
             return `The current prefix is \`${ctx.guildConfig.prefix}\``;
         }
+        if(ctx.args[0].length > 8){return "That prefix is too long";}
         try{
             await Hyperion.managers.guild.setPrefix(ctx.guild.id, ctx.args[0]);
         }catch{
