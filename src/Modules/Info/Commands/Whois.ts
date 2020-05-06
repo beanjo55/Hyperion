@@ -42,6 +42,8 @@ class Whois extends Command{
         }else{
             roleList.push("None");
         }
+        if(!color){color = Hyperion.defaultColor;}
+        if(color === 0){color = Hyperion.defaultColor;}
 
         let joinPos: any = ctx.guild.members.filter((m: Member) => !m.bot).sort((a: Member, b: Member) => a.joinedAt - b.joinedAt).map((m: Member) => m.id).indexOf(target.id) + 1;
 
