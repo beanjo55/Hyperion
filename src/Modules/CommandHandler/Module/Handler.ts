@@ -405,7 +405,7 @@ class CommandHandler{
             if(cmd.userperms.includes("mod")){info += "\n**Permission Level:** Moderator";}
         }
         if(cmd.hasSub){
-            info += `**Subcommands:**\n${cmd.helpSubcommands.replace(rx, ctx.guildConfig.prefix)}`;
+            info += `\n**Subcommands:**\n${cmd.helpSubcommands.replace(rx, ctx.guildConfig.prefix)}`;
         }
         info += `\n**Usage:**\n${cmd.helpUsage.replace(rx, ctx.guildConfig.prefix)}`;
         if(!cmd.noExample){

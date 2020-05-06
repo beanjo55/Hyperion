@@ -85,7 +85,7 @@ class Config extends Command{
     }
 
     listKeys(Hyperion: HyperionInterface, module: Module){
-        if(!module.configKeys){return "The module is marked as configurable, but has no keys to configure. Please contact a developer";}
+        if(!module.configKeys){return "The module is marked as configurable, but has no keys to configure.";}
         let output: Array<string> = module.configKeys.map((ck: ConfigKey) => `${ck.id}: ${ck.description}`);
         const data = {
             embed: {

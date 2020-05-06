@@ -29,7 +29,7 @@ class Sally extends Command{
 
             helpDetail: "Sends Sally, a cute chocolate lab",
             helpUsage: "{prefix}sally",
-            helpUsageExample: "{prefix}sally"
+            noExample: true
         });
     }
 
