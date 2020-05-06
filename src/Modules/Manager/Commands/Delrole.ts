@@ -32,7 +32,7 @@ class Delrole extends Command{
             target = ctx.guild.roles.get(ctx.msg.roleMentions[0]);
         }
         if(!target){
-            target = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(ctx.args[0].toLowerCase()));
+            target = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(ctx.args.join(" ").toLowerCase()));
         }
         if(!target){return "I couldnt find that role";}
 
