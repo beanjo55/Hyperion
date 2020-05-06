@@ -26,7 +26,7 @@ class Roleinfo extends Command{
             role = ctx.guild.roles.get(ctx.msg.roleMentions[0]);
         }
         if(!role){
-            role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(ctx.args[0].toLowerCase()));
+            role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(ctx.args.join(" ").toLowerCase()));
         }
         if(!role || role.id === ctx.guild.id){
             return "I couldnt find that role";
