@@ -5,6 +5,7 @@ import {configurableModules} from "../Module/ConfigHelper";
 // eslint-disable-next-line no-unused-vars
 import { Module, ConfigKey } from "../../../Core/Structures/Module";
 import {inspect} from "util";
+// eslint-disable-next-line no-unused-vars
 import { GuildChannel } from "eris";
 
 
