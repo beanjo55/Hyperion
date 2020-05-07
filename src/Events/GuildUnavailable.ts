@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import {HyperionInterface} from "../types";
-import {Guild} from 'eris';
+import {Guild} from "eris";
 class GuildUnavailableHandler{
     name: string;
     constructor(){

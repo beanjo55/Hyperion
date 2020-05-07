@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 import {HyperionInterface} from "../types";
 class ConnectHandler{
-    name: String;
+    name: string;
     constructor(){
         this.name = "connect";
     }

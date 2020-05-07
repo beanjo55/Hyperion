@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import {HyperionInterface} from "../types";
-import {Member, VoiceChannel} from 'eris';
+import {Member, VoiceChannel} from "eris";
 class VoiceChannelJoinHandler{
     name: string;
     constructor(){

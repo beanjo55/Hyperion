@@ -3,7 +3,7 @@ const { inspect } = require("util");
 import {HyperionInterface, HyperionGuild} from "../types";
 import {Message, Guild, TextChannel} from "eris";
 class MessageCreateHandler{
-    name: String;
+    name: string;
     constructor(){
         this.name = "messageCreate";
     }

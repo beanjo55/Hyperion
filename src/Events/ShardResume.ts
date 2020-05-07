@@ -1,6 +1,7 @@
+// eslint-disable-next-line no-unused-vars
 import {HyperionInterface} from "../types";
 class ShardResumeHandler{
-    name: String;
+    name: string;
     constructor(){
         this.name = "shardResume";
     }

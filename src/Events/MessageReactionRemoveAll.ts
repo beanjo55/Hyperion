@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import {HyperionInterface} from "../types";
-import {Message} from 'eris';
+import {Message} from "eris";
 class MessageReactionRemoveAllHandler{
     name: String;
     constructor(){

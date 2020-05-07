@@ -2,7 +2,7 @@
 
 import {HyperionInterface} from "../types";
 class WarnHandler{
-    name: String;
+    name: string;
     constructor(){
         this.name = "warn";
     }

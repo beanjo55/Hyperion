@@ -1,11 +1,12 @@
+/* eslint-disable no-unused-vars */
 import {HyperionInterface} from "../types";
-import {Channel} from 'eris';
+import {GuildChannel} from "eris";
 class ChannelUpdateHandler{
     name: string;
     constructor(){
         this.name = "channelUpdate";
     }
-    async handle(this: HyperionInterface, channel: Channel, oldChannel: any){
+    async handle(this: HyperionInterface, channel: GuildChannel, oldChannel: any){
 
     }
 }

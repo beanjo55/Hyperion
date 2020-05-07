@@ -4,11 +4,11 @@ import {Module} from "../Core/Structures/Module";
 import {Message, Emoji} from "eris";
 
 class MessageReactionAddHandler{
-    name: String;
+    name: string;
     constructor(){
         this.name = "messageReactionAdd";
     }
-    async handle(this: HyperionInterface, msg: Message, emote: Emoji, userID: String){
+    async handle(this: HyperionInterface, msg: Message, emote: Emoji, userID: string){
 
 
         //basics

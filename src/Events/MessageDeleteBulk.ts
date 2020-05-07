@@ -1,11 +1,12 @@
+/* eslint-disable no-unused-vars */
 import {HyperionInterface} from "../types";
-import {Message} from 'eris';
+import {Message} from "eris";
 class MessageDeleteBulkHandler{
     name: string;
     constructor(){
         this.name = "messageDeleteBulk";
     }
-    async handle(this: HyperionInterface, messages: Array<Message|Object>){
+    async handle(this: HyperionInterface, messages: Array<Message|any>){
 
     }
 }

@@ -3,11 +3,11 @@ import {HyperionInterface, GuildConfig} from "../types";
 import {Module} from "../Core/Structures/Module";
 import {Message, Emoji} from "eris";
 class MessageReactionRemoveHandler{
-    name: String;
+    name: string;
     constructor(){
         this.name = "messageReactionRemove";
     }
-    async handle(this: HyperionInterface, msg: Message, emote: Emoji, userID: String){
+    async handle(this: HyperionInterface, msg: Message, emote: Emoji, userID: string){
         //basics
         if(msg.channel.type !== 0){return;}
         const conf: GuildConfig = await this.managers.guild.getConfig(msg.channel.guild.id);

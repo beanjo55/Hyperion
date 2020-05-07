@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import {HyperionInterface} from "../types";
-import {Guild, Role} from 'eris';
+import {Guild, Role} from "eris";
 class GuildRoleUpdateHandler{
     name: string;
     constructor(){

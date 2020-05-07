@@ -2,7 +2,7 @@
 import {inspect} from "util";
 import {HyperionInterface} from "../types";
 class RawWSHandler{
-    name: String;
+    name: string;
     constructor(){
         this.name = "rawWS";
     }

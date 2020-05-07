@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import {HyperionInterface} from "../types";
-import {Guild, User} from 'eris';
+import {Guild, User} from "eris";
 class GuildBanAddHandler{
     name: string;
     constructor(){
