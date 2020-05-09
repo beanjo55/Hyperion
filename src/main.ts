@@ -44,7 +44,7 @@ const models = {
 };
 
 const listTokens = {
-    dbl: config.coreoptions.dblToken
+    dbl: config.coreOptions.dblToken
 };
 
 const utils: Utils = {
@@ -179,7 +179,7 @@ class hyperion implements HyperionInterface{
 
     async postDBL(){
         try{
-            await axios.post(`https://top.gg/api/bots${this.client.user.id}/stats`,{
+            await axios.post(`https://top.gg/api/bots/${this.client.user.id}/stats`,{
                 server_count: this.client.guilds.size,
                 shard_count: this.client.shards.size
             },
