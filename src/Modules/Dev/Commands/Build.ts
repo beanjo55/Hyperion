@@ -21,7 +21,7 @@ class Build extends Command{
     async execute(ctx: CommandContext, Hyperion: HyperionInterface){
         let buildNum: string = "latest";
         if(ctx.args[0] && !isNaN(Number(ctx.args[0]))){buildNum = ctx.args[0];}
-        const dir: string = `${__dirname}../../../../../`;
+        const dir: string = `${__dirname}../../../../`;
         const commandString: string = "cd " + dir
         + " | curl https://circleci.com/api/v1.1/project/github/beanjo55/Hyperion/" + buildNum + "/artifacts?circle-token=" + Hyperion.circleCIToken
         + " | grep -o 'https://[^\"]*'"
