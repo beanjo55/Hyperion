@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed, Member, User} from "eris";
+import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed, Member, User, Role} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
@@ -22,6 +22,8 @@ export interface CoreOptions{
     defaultColor: number;
     defaultLogLevel: number;
     circleCIToken: string;
+    init?: boolean;
+    dblToken: string;
 }
 
 export interface Managers{
@@ -29,29 +31,36 @@ export interface Managers{
     user: MUM;
 }
 
+export interface Utils{
+    hoistResolver: (msg: Message, search: string, members: Collection<Member>) => Member | undefined;
+    resolveUser: (msg: Message, search: string, members: Collection<Member>) => Member | undefined;
+    getColor: (roles: Collection<Role>, guildRoles: Collection<Role>) => number;
+    sortRoles: (userRoles: Array<string>, guildRoles: Collection<Role>) => Array<Role>;
+}
+
 export interface HyperionInterface {
     client: Client;
-    build: string;
+    readonly build: string;
     modules: Collection<Module>;
     sentry: any;
     commands: Collection<Command>;
     logger: any;
     bevents: any;
-    devPrefix: string;
-    modlist: Array<string>;
-    version: string;
-    adminPrefix: string;
-    defaultColor: number;
-    mongoOptions: mongoose.ConnectionOptions;
-    models: any;
+    readonly devPrefix: string;
+    readonly modlist: Array<string>;
+    readonly version: string;
+    readonly adminPrefix: string;
+    readonly defaultColor: number;
+    readonly mongoOptions: mongoose.ConnectionOptions;
+    readonly models: any;
     db: mongoose.Connection;
-    global: any;
+    global: GlobalConfig;
     handler?: any;
     logLevel: number;
     managers: Managers;
     stars: any;
     utils: any;
-    circleCIToken: string;
+    readonly circleCIToken: string;
     redis: IORedis.Redis;
 }
 
@@ -94,6 +103,8 @@ export interface StarboardConfig{
 export interface LogEvent {
     enabled: Boolean;
     channel: string;
+    ignoredRoles: Array<string>;
+    ignoredChannels: Array<string>;
 }
 
 export interface LoggingConfig{
@@ -102,6 +113,8 @@ export interface LoggingConfig{
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
     specifyChannels: Boolean;
+    newAccountAge: number;
+    showAvatar: boolean;
 
     banAdd: LogEvent;
     banRemove: LogEvent;
@@ -125,6 +138,7 @@ export interface LoggingConfig{
     guildUpdate: LogEvent;
     webhookUpdate: LogEvent;
     ghostReact: LogEvent;
+    [index: string]: any
 }
 
 export interface WelcomeConfig{
@@ -279,4 +293,14 @@ export interface ConfigKey{
     dataType: string;
     array: boolean;
     default: any;
+}
+
+export interface GlobalConfig{
+    sallyGameConsts: any;
+    gDisabledMods: Array<string>;
+    gDisabledCommands: Array<string>;
+    blacklist: Array<string>;
+    globalCooldown: number,
+    globalDisabledLogEvents: Array<string>;
+    data: any;
 }

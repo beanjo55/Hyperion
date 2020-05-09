@@ -27,6 +27,11 @@ const globalconf = new Schema({
         default: 1000
     },
 
+    globalDisabledLogEvents: {
+        type: Array,
+        default: []
+    },
+
     data: {
         type: Object,
         default: {}

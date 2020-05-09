@@ -1,7 +1,7 @@
 import {logger} from "./Logger";
 const fs = require("fs");
 // eslint-disable-next-line no-unused-vars
-import {HyperionInterface, ConfigOp} from "../../types";
+import {HyperionInterface, ConfigOp, GuildConfig} from "../../types";
 // eslint-disable-next-line no-unused-vars
 import {ConfigKey as configkey} from "../../types";
 const { inspect } = require("util");
@@ -131,6 +131,16 @@ export class Module{
     // eslint-disable-next-line no-unused-vars
     init(Hyperion: HyperionInterface){
 
+    }
+
+    async checkGuildEnabled(Hyperion: HyperionInterface, guildID: string): Promise<boolean>{
+        if(Hyperion.global.gDisabledMods.includes(this.name)){return false;}
+        const config: GuildConfig = await Hyperion.managers.guild.getConfig(guildID);
+        if(!config){return this.defualtState;}
+        if(!config.modules){return this.defualtState;}
+        if(!config.modules[this.name]){return this.defaultState;}
+        if(config.modules[this.name].enabled !== undefined){return config.modules[this.name].enabled;}
+        return this.defaultState;
     }
 }
 

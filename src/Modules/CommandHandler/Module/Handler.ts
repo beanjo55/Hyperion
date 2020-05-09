@@ -454,7 +454,7 @@ class CommandHandler{
 
         ctx.args = isolated.args;
         if(isolated.label.toLowerCase() === "help"){
-            this.checkCooldown(ctx.user.id, ({name: "help"} as Command), Hyperion.global.globalColldown);
+            this.checkCooldown(ctx.user.id, ({name: "help"} as Command), Hyperion.global.globalCooldown);
             return await ctx.channel.createMessage(this.sendHelp(ctx, Hyperion));
         }
         const command: Command | undefined = this.findCommand(isolated.label, Hyperion);

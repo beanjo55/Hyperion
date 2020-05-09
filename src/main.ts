@@ -13,11 +13,12 @@ import {Module} from "./Core/Structures/Module.js";
 import {Command} from "./Core/Structures/Command.js";
 import {logger} from "./Core/Structures/Logger";
 import {default as Redis} from "ioredis";
+import {default as axios} from "axios";
 
 import mongoose = require("mongoose");
 const config = require("../config.json");
 
-import {CoreOptions, HyperionInterface, Managers} from "./types";
+import {CoreOptions, HyperionInterface, Managers, GlobalConfig, Utils} from "./types";
 
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
@@ -42,30 +43,41 @@ const models = {
     starred: starModel
 };
 
+const listTokens = {
+    dbl: config.coreoptions.dblToken
+};
+
+const utils: Utils = {
+    hoistResolver: HoistUserResolver,
+    resolveUser: userResolver,
+    sortRoles: sortRoles,
+    getColor: getColor
+};
 
 class hyperion implements HyperionInterface{
     client: Eris.Client;
-    build: string;
+    readonly build: string;
     modules: Collection<Module>;
     sentry: any;
     commands: Collection<Command>;
     logger: any;
     bevents: any;
-    devPrefix: string;
-    modlist: Array<string>;
-    version: string;
-    adminPrefix: string;
-    defaultColor: number;
-    mongoOptions: mongoose.ConnectionOptions;
-    models: any;
+    readonly devPrefix: string;
+    readonly modlist: Array<string>;
+    readonly version: string;
+    readonly adminPrefix: string;
+    readonly defaultColor: number;
+    readonly mongoOptions: mongoose.ConnectionOptions;
+    readonly models: any;
     db: mongoose.Connection;
-    global: any;
+    global!: GlobalConfig;
     logLevel: number
     managers: Managers;
     stars: any;
     utils: any;
-    circleCIToken: string;
+    readonly circleCIToken: string;
     redis: Redis.Redis;
+    private listTokens: {[key: string]: string};
 
     constructor(token: string, erisOptions: Eris.ClientOptions, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions){
         this.client = new Client(token, erisOptions);
@@ -91,14 +103,18 @@ class hyperion implements HyperionInterface{
         this.managers = {guild: new MGM, user: new MUM};
         this.stars = {};
         this.circleCIToken = coreOptions.circleCIToken;
-        this.utils = {hoistResolver: HoistUserResolver, sortRoles: sortRoles, getColor: getColor, resolveUser: userResolver};
+        this.utils = utils;
         this.redis = new Redis();
+        this.listTokens = listTokens;
 
     }
     async init(){
         await this.loadMods();
         await this.loadEvents();
-        this.global = await this.models.global.findOne({}).lean().exec();
+        await this.models.global.findOne({}).lean().exec().then((g: GlobalConfig | null) => {
+            if(g === null){throw new Error("Unable to get global config");}
+            this.global = g;
+        });
     }
 
     async loadEvent(eventfile: string){
@@ -160,10 +176,33 @@ class hyperion implements HyperionInterface{
         });
         return mongoose.connection;
     }
+
+    async postDBL(){
+        try{
+            await axios.post(`https://top.gg/api/bots${this.client.user.id}/stats`,{
+                server_count: this.client.guilds.size,
+                shard_count: this.client.shards.size
+            },
+            {
+                headers: {
+                    Authorization: this.listTokens.dbl
+                }
+            });
+            this.logger.success("Hyperion", "DBL Post", "Posted stats to DBL!");
+        }catch(err){
+            this.logger.warn("Hyperion", "DBL Post", `Failed to post stats to DBL, error: ${err}`);
+        }
+    }
 }
 
 
 async function start(){
+    if(config.coreOptions.init !== undefined && config.coreOptions.init === true){
+        await models.global.create({});
+        await models.user.create({user: "253233185800847361", acks: {developer: true}});
+        console.log("Generated new global config. Dont forget to change \"init\" to false. Exiting");
+        process.exit(0);
+    }
     const Hyperion = new hyperion(config.token, config.erisOptions, config.coreOptions, config.mongoLogin, config.mongoOptions);
     Hyperion.init().then(() => {
         Hyperion.client.connect();

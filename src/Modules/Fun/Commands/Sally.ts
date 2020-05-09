@@ -2,7 +2,7 @@ import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
 
-const sallys = ["https://cdn.discordapp.com/attachments/225182513465786369/660282554649149490/image0.jpg",
+export const sallys = ["https://cdn.discordapp.com/attachments/225182513465786369/660282554649149490/image0.jpg",
     "https://cdn.discordapp.com/attachments/225182513465786369/660188937704308778/image0.jpg",
     "https://cdn.discordapp.com/attachments/225182513465786369/660123365570510878/image0.jpg",
     "https://cdn.discordapp.com/attachments/648349778429739009/659358356376649728/image0.jpg",

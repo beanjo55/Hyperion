@@ -185,12 +185,20 @@ class StarboardConfig implements Types.StarboardConfig{
     }
 }
 
-class LoggingConfig implements Types.LoggingConfig{
+const defaultLog: Types.LogEvent = {
+    enabled: false,
+    channel: "default",
+    ignoredRoles: [],
+    ignoredChannels: []
+};
+export class LoggingConfig implements Types.LoggingConfig{
     logChannel: string;
     ghostReactTime: Number;
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
     specifyChannels: Boolean;
+    newAccountAge: number;
+    showAvatar: boolean;
     banAdd: Types.LogEvent;
     banRemove: Types.LogEvent;
     memberAdd: Types.LogEvent;
@@ -213,35 +221,38 @@ class LoggingConfig implements Types.LoggingConfig{
     guildUpdate: Types.LogEvent;
     webhookUpdate: Types.LogEvent;
     ghostReact: Types.LogEvent;
+    [index: string]: any
     constructor(data: Partial<Types.LoggingConfig>){
         this.logChannel = data.logChannel ?? "";
         this.ghostReactTime = data.ghostReactTime ?? 3;
         this.ignoredChannels = data.ignoredChannels ?? [];
         this.ignoredRoles = data.ignoredRoles ?? [];
         this.specifyChannels = data.specifyChannels ?? false;
+        this.newAccountAge = data.newAccountAge ?? 0;
+        this.showAvatar = data.showAvatar ?? false;
 
-        this.banAdd = data.banAdd ?? {enabled: false, channel: "default"};
-        this.banRemove = data.banRemove ?? {enabled: false, channel: "default"};
-        this.memberAdd = data.memberAdd ?? {enabled: false, channel: "default"};
-        this.memberRemove = data.memberRemove ?? {enabled: false, channel: "default"};
-        this.messageDelete = data.messageDelete ?? {enabled: false, channel: "default"};
-        this.messageEdit = data.messageEdit ?? {enabled: false, channel: "default"};
-        this.bulkDelete = data.bulkDelete ?? {enabled: false, channel: "default"};
-        this.roleAdd = data.roleAdd ?? {enabled: false, channel: "default"};
-        this.roleUpdate = data.roleUpdate ?? {enabled: false, channel: "default"};
-        this.roleDelete = data.roleDelete ?? {enabled: false, channel: "default"};
-        this.channelAdd = data.channelAdd ?? {enabled: false, channel: "default"};
-        this.channelUpdate = data.channelUpdate ?? {enabled: false, channel: "default"};
-        this.channelDelete = data.channelDelete ?? {enabled: false, channel: "default"};
-        this.memberRoleAdd = data.memberRoleAdd ?? {enabled: false, channel: "default"};
-        this.memberRoleRemove = data.memberRoleRemove ?? {enabled: false, channel: "default"};
-        this.memberNicknameChange = data.memberNicknameChange ?? {enabled: false, channel: "default"};
-        this.voiceJoin = data.voiceJoin ?? {enabled: false, channel: "default"};
-        this.voiceSwitch = data.voiceSwitch ?? {enabled: false, channel: "default"};
-        this.voiceLeave = data.voiceLeave ?? {enabled: false, channel: "default"};
-        this.guildUpdate = data.guildUpdate ?? {enabled: false, channel: "default"};
-        this.webhookUpdate = data.webhookUpdate ?? {enabled: false, channel: "default"};
-        this.ghostReact = data.ghostReact ?? {enabled: false, channel: "default"};
+        this.banAdd = data.banAdd ?? defaultLog;
+        this.banRemove = data.banRemove ?? defaultLog;
+        this.memberAdd = data.memberAdd ?? defaultLog;
+        this.memberRemove = data.memberRemove ?? defaultLog;
+        this.messageDelete = data.messageDelete ?? defaultLog;
+        this.messageEdit = data.messageEdit ?? defaultLog;
+        this.bulkDelete = data.bulkDelete ?? defaultLog;
+        this.roleAdd = data.roleAdd ?? defaultLog;
+        this.roleUpdate = data.roleUpdate ?? defaultLog;
+        this.roleDelete = data.roleDelete ?? defaultLog;
+        this.channelAdd = data.channelAdd ?? defaultLog;
+        this.channelUpdate = data.channelUpdate ?? defaultLog;
+        this.channelDelete = data.channelDelete ?? defaultLog;
+        this.memberRoleAdd = data.memberRoleAdd ?? defaultLog;
+        this.memberRoleRemove = data.memberRoleRemove ?? defaultLog;
+        this.memberNicknameChange = data.memberNicknameChange ?? defaultLog;
+        this.voiceJoin = data.voiceJoin ?? defaultLog;
+        this.voiceSwitch = data.voiceSwitch ?? defaultLog;
+        this.voiceLeave = data.voiceLeave ?? defaultLog;
+        this.guildUpdate = data.guildUpdate ?? defaultLog;
+        this.webhookUpdate = data.webhookUpdate ?? defaultLog;
+        this.ghostReact = data.ghostReact ?? defaultLog;
     }
 }
 
