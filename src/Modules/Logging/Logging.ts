@@ -4,16 +4,25 @@ import {HyperionInterface, GuildConfig, LogEvent} from "../../types";
 // eslint-disable-next-line no-unused-vars
 import { Guild, Member, User, Message, VoiceChannel, Role, GuildChannel, Emoji, TextChannel, Embed } from "eris";
 import {LoggingConfig} from "../../Core/DataManagers/MongoGuildManager";
-
+import {default as msc} from "pretty-ms";
 class Logging extends Module{
     constructor(){
         super({
             name: "logging",
-            hasCommands: false,
+            hasCommands: true,
             friendlyName: "Logging",
             dirname: __dirname,
             defaultStatus: false,
-            subscribedEvents: ["messageDelete", "messageUpdate", "messageDeleteBulk"]
+            subscribedEvents: [
+                "messageDelete",
+                "messageUpdate", 
+                "messageDeleteBulk", 
+                "guildMemberAdd",
+                "guildMemberRemove",
+                "guildBanAdd",
+                "guildBanRemove",
+                "guildMemberUpdate"
+            ]
         });
     }
 
@@ -91,22 +100,115 @@ class Logging extends Module{
         if(config.showAvatar){
             data.embed.thumbnail = {url: member.avatarURL};
         }
+
+        if(config.newAccountAge > 0 && ((Date.now() - member.createdAt) < config.newAccountAge)){
+            data.embed.description += `\n\n**New Account: Created ${msc(Date.now() - member.createdAt)} ago**`;
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for member join, ${err}`);
+        }
     }
 
     async guildMemberRemove(Hyperion: HyperionInterface, guild: Guild, member: Member | any){
-        
+        if(!await this.preCheck(Hyperion, guild, "memberRemove", undefined, undefined)){return;}
+        let channelObj = await this.testChannel(Hyperion, guild, "memberRemove");
+        if(!channelObj){return;}
+
+        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        const data: {embed: Partial<Embed>} = {
+            embed: {
+                title: "Member Leave",
+                color: Hyperion.defaultColor,
+                footer: {
+                    text: `ID: ${member.id}`
+                },
+                timestamp: new Date,
+                description: `${member.mention} - ${member.username}#${member.discriminator}`
+            }
+        };
+
+        if(config.showAvatar && member.avatarURL){
+            data.embed.thumbnail = {url: member.avatarURL};
+        }
+
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for member leave, ${err}`);
+        }
     }
 
     async guildMemberUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any){
-        
+        if(!oldMember || (!oldMember.nick && !oldMember.roles)){return;}
+        if(member.roles !== oldMember.roles){this.guildMemberRolesUpdate(Hyperion, guild, member, oldMember);}
+        if(member.nick !== oldMember.nick){this.guildMemberNickUpdate(Hyperion, guild, member, oldMember);}
     }
 
     async guildBanAdd(Hyperion: HyperionInterface, guild: Guild, user: User){
+        if(!await this.preCheck(Hyperion, guild, "banAdd", undefined, undefined)){return;}
+        let channelObj = await this.testChannel(Hyperion, guild, "banAdd");
+        if(!channelObj){return;}
 
+        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        const data: {embed: Partial<Embed>} = {
+            embed: {
+                title: "Member Banned",
+                color: Hyperion.defaultColor,
+                footer: {
+                    text: `ID: ${user.id}`
+                },
+                timestamp: new Date,
+                description: `${user.mention} - ${user.username}#${user.discriminator}`
+            }
+        };
+
+        if(config.showAvatar && user.avatarURL){
+            data.embed.thumbnail = {url: user.avatarURL};
+        }
+
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for ban add, ${err}`);
+        }
     }
 
     async guildBanRemove(Hyperion: HyperionInterface, guild: Guild, user: User){
-        
+        if(!await this.preCheck(Hyperion, guild, "banRemove", undefined, undefined)){return;}
+        let channelObj = await this.testChannel(Hyperion, guild, "banRemove");
+        if(!channelObj){return;}
+
+        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        const data: {embed: Partial<Embed>} = {
+            embed: {
+                title: "Member Unbanned",
+                color: Hyperion.defaultColor,
+                footer: {
+                    text: `ID: ${user.id}`
+                },
+                timestamp: new Date,
+                description: `${user.mention} - ${user.username}#${user.discriminator}`
+            }
+        };
+
+        if(config.showAvatar && user.avatarURL){
+            data.embed.thumbnail = {url: user.avatarURL};
+        }
+
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for ban remove, ${err}`);
+        }
     }
 
 
@@ -397,7 +499,77 @@ class Logging extends Module{
     }
 
     async guildMemberNickUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any){
+        if(!await this.preCheck(Hyperion, guild, "memberNicknameChange", undefined, undefined)){return;}
+        let channelObj = await this.testChannel(Hyperion, guild, "memberNicknameChange");
+        if(!channelObj){return;}
 
+        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        let field: Array<{name: string, value: string, inline: boolean}> = [];
+        const data: {embed: Partial<Embed>} = {
+            embed: {
+                title: "Member Nickname update",
+                color: Hyperion.defaultColor,
+                footer: {
+                    text: `ID: ${member.id}`
+                },
+                timestamp: new Date,
+                description: `${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})`,
+                fields: field
+            }
+        };
+
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: member.avatarURL};
+        }
+        
+        if(member.nick === null && oldMember.nick !== null){
+            data.embed.fields?.push({
+                name: "Old Nickname",
+                value: `${oldMember.nick}`,
+                inline: false
+            });
+
+            data.embed.fields?.push({
+                name: "New Nickname",
+                value: "None",
+                inline: false
+            });
+        }
+
+        if(member.nick !== null && oldMember.nick === null){
+            data.embed.fields?.push({
+                name: "Old Nickname",
+                value: "None",
+                inline: false
+            });
+
+            data.embed.fields?.push({
+                name: "New Nickname",
+                value: `${member.nick}`,
+                inline: false
+            });
+        }
+
+        if(member.nick !== null && oldMember.nick !== null){
+            data.embed.fields?.push({
+                name: "Old Nickname",
+                value: `${oldMember.nick}`,
+                inline: false
+            });
+
+            data.embed.fields?.push({
+                name: "New Nickname",
+                value: `${member.nick}`,
+                inline: false
+            });
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for member nickname change, ${err}`);
+        }
     }
 }
 export default Logging;

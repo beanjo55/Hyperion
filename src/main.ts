@@ -32,6 +32,9 @@ import {hur as HoistUserResolver} from "./Core/Utils/Resolvers";
 import {ur as userResolver} from "./Core/Utils/Resolvers";
 import {sr as sortRoles} from "./Core/Utils/Roles";
 import {gc as getColor} from "./Core/Utils/Roles";
+import {resolveTextChannel} from "./Core/Utils/Channels";
+import {resolveVoiceChannel} from "./Core/Utils/Channels";
+import {resolveCategory} from "./Core/Utils/Channels";
 import IORedis = require("ioredis");
 
 const models = {
@@ -51,7 +54,12 @@ const utils: Utils = {
     hoistResolver: HoistUserResolver,
     resolveUser: userResolver,
     sortRoles: sortRoles,
-    getColor: getColor
+    getColor: getColor,
+    resolveCategory: resolveCategory,
+    resolveTextChannel: resolveTextChannel,
+    resolveVoicechannel: resolveVoiceChannel,
+    input2boolean: input2boolean
+
 };
 
 class hyperion implements HyperionInterface{
@@ -74,7 +82,7 @@ class hyperion implements HyperionInterface{
     logLevel: number
     managers: Managers;
     stars: any;
-    utils: any;
+    utils: Utils;
     readonly circleCIToken: string;
     redis: Redis.Redis;
     private listTokens: {[key: string]: string};
@@ -209,4 +217,10 @@ async function start(){
     });
 }
 
+function input2boolean(input: string): boolean | undefined{
+    input = input.toLowerCase().trim();
+    if(input === "yes" || input === "true"){return true;}
+    if(input === "no" || input === "false"){return false;}
+    return;
+}
 //hi wuper

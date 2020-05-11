@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed, Member, User, Role} from "eris";
+import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed, Member, User, Role, Channel, GuildTextableChannel, VoiceChannel, CategoryChannel} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
@@ -32,10 +32,14 @@ export interface Managers{
 }
 
 export interface Utils{
-    hoistResolver: (msg: Message, search: string, members: Collection<Member>) => Member | undefined;
-    resolveUser: (msg: Message, search: string, members: Collection<Member>) => Member | undefined;
-    getColor: (roles: Collection<Role>, guildRoles: Collection<Role>) => number;
-    sortRoles: (userRoles: Array<string>, guildRoles: Collection<Role>) => Array<Role>;
+    hoistResolver(msg: Message, search: string, members: Collection<Member>): Member | undefined;
+    resolveUser(msg: Message, search: string, members: Collection<Member>): Member | undefined;
+    getColor(roles: Collection<Role>, guildRoles: Collection<Role>): number;
+    sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>): Array<Role>;
+    resolveTextChannel(guild: Guild, msg: Message, search: string): GuildTextableChannel | undefined;
+    resolveVoicechannel(guild: Guild, msg: Message, search: string): VoiceChannel | undefined;
+    resolveCategory(guild: Guild, msg: Message, search: string): CategoryChannel | undefined;
+    input2boolean(input: string): boolean | undefined;
 }
 
 export interface HyperionInterface {
@@ -59,7 +63,7 @@ export interface HyperionInterface {
     logLevel: number;
     managers: Managers;
     stars: any;
-    utils: any;
+    utils: Utils;
     readonly circleCIToken: string;
     redis: IORedis.Redis;
 }
