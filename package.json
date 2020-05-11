@@ -1,6 +1,6 @@
 {
   "name": "hyperion",
-  "version": "2.1.5",
+  "version": "2.2.0",
   "description": "a shitty discord bot",
   "main": "main.js",
   "dependencies": {
