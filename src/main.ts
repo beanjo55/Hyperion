@@ -41,7 +41,7 @@ const models = {
 const listTokens = {
     dbl: config.coreOptions?.dblToken,
     glenn: config.coreOptions?.glennToken,
-    dboats: config.coreoptions?.dboatsToken
+    dboats: config.coreOptions?.dboatsToken
 };
 
 function input2boolean(input: string): boolean | undefined{
@@ -237,7 +237,7 @@ class HyperionC implements HyperionInterface{
             },
             {
                 headers: {
-                    Authentication: this.listTokens.glenn
+                    Authorization: this.listTokens.glenn
                 }
             });
             this.logger.success("Hyperion", "Glenn Post", "Posted stats to Glenn!");
