@@ -5,7 +5,7 @@ class ShardDisconnectHandler{
     constructor(){
         this.name = "shardDisconnect";
     }
-    async handle(this: HyperionInterface, err: Error, shardID: Number){
+    async handle(this: HyperionInterface, err: Error, shardID: number): Promise<void>{
         this.logger.warn("Hyperion", "Sharding", `Shard ${shardID} disconnected, ${err}`);
     }
 }

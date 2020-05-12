@@ -8,8 +8,9 @@ class GuildMemberUpdateHandler{
     constructor(){
         this.name = "guildMemberUpdate";
     }
-    async handle(this: HyperionInterface, guild: Guild, member: Member, oldMember: any){
-        let subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async handle(this: HyperionInterface, guild: Guild, member: Member, oldMember: any): Promise<void>{
+        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
         subscribed.forEach((m: Module) => {
             m.guildMemberUpdate(this, guild, member, oldMember);
         });

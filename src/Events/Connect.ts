@@ -5,7 +5,7 @@ class ConnectHandler{
     constructor(){
         this.name = "connect";
     }
-    async handle(this: HyperionInterface, shardID: Number){
+    async handle(this: HyperionInterface, shardID: number): Promise<void>{
         this.logger.info("Hyperion", "Sharding", `Shard ${shardID} has connected`);
     }
 }

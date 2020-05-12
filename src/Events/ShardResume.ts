@@ -5,7 +5,7 @@ class ShardResumeHandler{
     constructor(){
         this.name = "shardResume";
     }
-    async handle(this: HyperionInterface, shardID: Number){
+    async handle(this: HyperionInterface, shardID: number): Promise<void>{
         this.logger.success("Hyperion", "Sharding", `Shard ${shardID} resumed`);
     }
 }

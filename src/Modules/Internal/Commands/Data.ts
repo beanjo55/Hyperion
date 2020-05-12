@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
+
 import {HyperionInterface, CommandContext} from "../../../types";
 
 class Data extends Command{
@@ -17,8 +17,9 @@ class Data extends Command{
         });
     }
 
-    // eslint-disable-next-line no-unused-vars
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
         return "stub";
     }
 }

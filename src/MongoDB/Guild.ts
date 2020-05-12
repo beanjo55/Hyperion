@@ -1,4 +1,4 @@
-const {Schema, model} = require("mongoose");
+import {Schema, model} from "mongoose";
 
 
 const guildconf = new Schema({
@@ -108,4 +108,4 @@ const guildconf = new Schema({
     autoIndex: true
 });
 
-export default new model("guild", guildconf);
+export default model("guild", guildconf);

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {HyperionInterface, CommandContext} from "../../../types";
-const { exec } = require("child_process");
+import {exec} from "child_process";
 
 class Restart extends Command{
     constructor(){
@@ -20,10 +21,10 @@ class Restart extends Command{
         });
     }
 
-    // eslint-disable-next-line no-unused-vars
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<void>{
         await ctx.channel.createMessage("Restarting").catch(() => {});
-        // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         exec("pm2 restart 0", (error: any, stdout: any) => {});
     }
 }

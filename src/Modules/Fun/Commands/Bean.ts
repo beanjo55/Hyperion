@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
-import {HyperionInterface} from "../../../types";
+import {HyperionInterface, CommandContext} from "../../../types";
+import { Embed } from "eris";
 class Bean extends Command{
     constructor(){
         super({
@@ -12,8 +12,7 @@ class Bean extends Command{
         });
     }
 
-    // eslint-disable-next-line no-unused-vars
-    async execute(ctx: any, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>}>{
         const data = {
             content: ctx.args.join(" "),
             embed: {

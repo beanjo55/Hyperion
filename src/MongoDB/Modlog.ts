@@ -1,4 +1,4 @@
-const {Schema, model} = require("mongoose");
+import {Schema, model} from "mongoose";
 const modlog = new Schema({
 
     guild: {
@@ -83,4 +83,4 @@ const modlog = new Schema({
     autoIndex: true,
     minimize: false
 });
-export default new model("modlog", modlog);
+export default model("modlog", modlog);

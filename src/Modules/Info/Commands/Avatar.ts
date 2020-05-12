@@ -1,8 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
-// eslint-disable-next-line no-unused-vars
-import {Member} from "eris";
+import {Member, Embed} from "eris";
 
 class Avatar extends Command{
     constructor(){
@@ -17,7 +15,7 @@ class Avatar extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
         let target: Member | undefined;
         if(ctx.args[0]){
             target = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
@@ -33,6 +31,7 @@ class Avatar extends Command{
                 color: Hyperion.defaultColor,
                 author: {
                     name: `Avatar for ${target.username}#${target.discriminator}`,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
                     icon_url: target.avatarURL
                 },
                 image: {

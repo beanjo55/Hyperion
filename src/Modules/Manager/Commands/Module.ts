@@ -1,7 +1,8 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
+import {Module as module} from "../../../Core/Structures/Module";
 import {CommandContext, HyperionInterface} from "../../../types";
 import {toggleableModules} from "../Module/ConfigHelper";
+import { Embed } from "eris";
 
 const rx1 = new RegExp("true", "gm");
 const rx2 = new RegExp("false", "gm");
@@ -20,20 +21,20 @@ class Module extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
 
-        let toggleable = toggleableModules(Hyperion.modules);
-        let list = toggleable.map((m: any) => m.name);
+        const toggleable = toggleableModules(Hyperion.modules);
+        const list = toggleable.map((m: module) => m.name);
         let outlist: Array<string> = list;
-        let fromconf: Array<string> = [];
+        const fromconf: Array<string> = [];
         if(ctx.guildConfig && ctx.guildConfig.modules){
             outlist = [];
-            let modulesconf = Object.getOwnPropertyNames(ctx.guildConfig.modules);
+            const modulesconf = Object.getOwnPropertyNames(ctx.guildConfig.modules);
             modulesconf.forEach(m => {
                 outlist.push(`${m} - ${ctx.guildConfig.modules[m].enabled}`);
                 fromconf.push(m);
             });
-            toggleable.forEach((t: any) => {
+            toggleable.forEach((t: module) => {
                 if(!fromconf.includes(t.name)){
                     outlist.push(`${t.name} - ${t.defaultStatus}`);
                 }
@@ -50,11 +51,13 @@ class Module extends Command{
             };
             return data;
         }
-        let name = ctx.args[0].toLowerCase();
+        const name = ctx.args[0].toLowerCase();
         if(!list.includes(name)){return "I cant find a toggleable module by that name";}
         if(ctx.guildConfig && ctx.guildConfig.modules){
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if((ctx.guildConfig.modules as any)[name] !== undefined){
-                let oldstate = (ctx.guildConfig.modules as any)[name].enabled;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const oldstate = (ctx.guildConfig.modules as any)[name].enabled;
                 try{
                     await Hyperion.managers.guild.updateModuleStates(ctx.guild.id, name, !oldstate, Hyperion.modules);
                 }catch(err){
@@ -64,7 +67,7 @@ class Module extends Command{
                 return "Success!";
             }
         }
-        let mod = Hyperion.modules.get(name);
+        const mod = Hyperion.modules.get(name);
         if(!mod){return "I couldnt find that module";}
         try{
             await Hyperion.managers.guild.updateModuleStates(ctx.guild.id, name, !mod.default, Hyperion.modules);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
 
 import {HyperionInterface} from "../types";
@@ -7,7 +8,7 @@ class VoiceChannelLeaveHandler{
     constructor(){
         this.name = "voiceChannelLeave";
     }
-    async handle(this: HyperionInterface, member: Member, oldChannel: VoiceChannel){
+    async handle(this: HyperionInterface, member: Member, oldChannel: VoiceChannel): Promise<void>{
 
     }
 }

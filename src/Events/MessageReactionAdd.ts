@@ -8,7 +8,7 @@ class MessageReactionAddHandler{
     constructor(){
         this.name = "messageReactionAdd";
     }
-    async handle(this: HyperionInterface, msg: Message, emote: Emoji, userID: string){
+    async handle(this: HyperionInterface, msg: Message, emote: Emoji, userID: string): Promise<void>{
 
 
         //basics

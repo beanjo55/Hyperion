@@ -6,7 +6,7 @@ class GuildDeleteHandler{
     constructor(){
         this.name = "guildDelete";
     }
-    async handle(this: HyperionInterface, guild: Guild){
+    async handle(this: HyperionInterface, guild: Guild): Promise<void>{
         this.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
             embeds: [
                 {

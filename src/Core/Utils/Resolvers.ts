@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import {Guild, Member, Role, Message, Collection} from "eris";
+import {Member, Role, Message, Collection} from "eris";
 
 
 
@@ -31,17 +31,17 @@ function hoistUserResolver(msg: Message, search: string, members: Collection<Mem
         return undefined;
     }
 
-    let guild = msg.channel.guild;
-    let hroles: Array<Role> = guild.roles.filter((r: Role) => r.hoist);
+    const guild = msg.channel.guild;
+    const hroles: Array<Role> = guild.roles.filter((r: Role) => r.hoist);
     hroles.sort((a: Role, b: Role) => b.position - a.position);
     for(let i = 0; i < hroles.length; i++){
-        let r: Role = hroles[i];
-        let tempColl = new Collection(Member);
-        let tempArr = members.filter((m: Member) => m.roles.includes(r.id));
+        const r: Role = hroles[i];
+        const tempColl = new Collection(Member);
+        const tempArr = members.filter((m: Member) => m.roles.includes(r.id));
         tempArr.forEach((m: Member) => {
             tempColl.add(m);
         });
-        let pass: Member | undefined = resolveUser(msg, search, tempColl);
+        const pass: Member | undefined = resolveUser(msg, search, tempColl);
 
         if(pass !== undefined){return pass;}
     }

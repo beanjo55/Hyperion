@@ -8,8 +8,8 @@ class GuildBanAddHandler{
     constructor(){
         this.name = "guildBanAdd";
     }
-    async handle(this: HyperionInterface, guild: Guild, user: User){
-        let subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
+    async handle(this: HyperionInterface, guild: Guild, user: User): Promise<void>{
+        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
         subscribed.forEach((m: Module) => {
             m.guildBanAdd(this, guild, user);
         });

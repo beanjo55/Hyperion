@@ -1,6 +1,6 @@
 import signale from "signale";
 
-function error(name: string, subprefix: string, message: string){
+function error(name: string, subprefix: string, message: string): void{
     if(subprefix){
         message = `[${subprefix}] ${message}`;
     }
@@ -10,7 +10,7 @@ function error(name: string, subprefix: string, message: string){
     });
 }
 
-function fatal(name: string, subprefix: string, message: string){
+function fatal(name: string, subprefix: string, message: string): void{
     if(subprefix){
         message = `[${subprefix}] ${message}`;
     }
@@ -20,7 +20,7 @@ function fatal(name: string, subprefix: string, message: string){
     });
 }
 
-function debug(name: string, subprefix: string, message: string){
+function debug(name: string, subprefix: string, message: string): void{
     if(subprefix){
         message = `[${subprefix}] ${message}`;
     }
@@ -30,7 +30,7 @@ function debug(name: string, subprefix: string, message: string){
     });
 }
 
-function warn(name: string, subprefix: string, message: string){
+function warn(name: string, subprefix: string, message: string): void{
     if(subprefix){
         message = `[${subprefix}] ${message}`;
     }
@@ -40,7 +40,7 @@ function warn(name: string, subprefix: string, message: string){
     });
 }
 
-function info(name: string, subprefix: string, message: string){
+function info(name: string, subprefix: string, message: string): void{
     if(subprefix){
         message = `[${subprefix}] ${message}`;
     }
@@ -50,7 +50,7 @@ function info(name: string, subprefix: string, message: string){
     });
 }
 
-function success(name: string, subprefix: string, message: string){
+function success(name: string, subprefix: string, message: string): void{
     if(subprefix){
         message = `[${subprefix}] ${message}`;
     }

@@ -5,117 +5,9 @@ import {Embed, Collection} from "eris";
 import {Command} from "../Structures/Command";
 import {Module} from "../Structures/Module";
 
-class MongoGuildManager{
-    model: any;
-    constructor(){
-        this.model = guildmodel;
-    }
-
-    async createConfig(guildID: string): Promise<Types.GuildConfig>{
-        return await this.model.create({guild: guildID});
-    }
-
-    async getConfig(guildID: string): Promise<Types.GuildConfig>{
-        if(await this.model.exists({guild: guildID})){
-            return await this.model.findOne({guild: guildID}).lean().exec();
-        }else{
-            return await this.createConfig(guildID);
-        }
-    }
-
-    async exists(guildID: string){
-        return await this.model.exists({guild: guildID});
-    }
-
-    async getPrefix(guildID: string): Promise<string>{
-        const doc: Types.GuildConfig = await this.getConfig(guildID);
-        if(!doc){return "%";}
-        if(!doc.prefix){return "%";}
-        if(doc.prefix === ""){return "%";}
-        return doc.prefix;
-    }
-
-    async setPrefix(guildID: string, newPrefix: string){
-        return await this.model.updateOne({guild: guildID}, {prefix: newPrefix});
-    }
-
-    async getMods(guildID: string): Promise<Array<string>>{
-        const guildConfig: Types.GuildConfig = await this.getConfig(guildID);
-        if(!guildConfig.mod){return [];}
-        if(!guildConfig.mod.modRoles){return [];}
-        return guildConfig.mod.modRoles;
-    }
-
-    validateModuleState(state: boolean, module: string, modules: Collection<Module>){
-        const mod: undefined | Module = modules.get(module);
-        if(mod === undefined){return {code: 1, payload: "No matching module found"};}
-        if(mod.private){return {code: 1, payload: "Module is private and not stored in config"};}
-        if(!state && mod.alwaysEnabled){return {code: 1, payload: "This module is always enabled and may not be disabled"};}
-        return {code: 0, payload: new ModuleConfig({enabled: state}, mod.defaultStatus)};
-    }
-
-    validateCommandState(data: any, command: string, commands: Collection<Command>){
-        const cmd: Command | undefined = commands.get(command);
-        if(!cmd){return {code: 1, payload: "Invalid command"};}
-        const cmdConfig = new CommandConfig(data);
-        if(!cmdConfig.enabled && cmd.alwaysEnabled){return {code: 1, payload: "This command can not be disabled"};}
-        if(cmd.internal || cmd.dev || cmd.admin || cmd.support){return {code: 1, payload: "This command is private and can not be configured per server"};}
-        return {code: 0, payload: new CommandConfig(data)};
-    }
-
-    async updateModuleStates(guildID: string, newMod: string, newState: boolean, modules: Collection<Module>){
-        let guilddata = await this.model.findOne({guild: guildID}, "modules").lean().exec();
-        if(!guilddata.modules){return {code: 1, payload: "An error occured"};}
-        const validated: any = this.validateModuleState(newState, newMod, modules);
-        if(validated.code !== 0){return validated;}
-        const temp: any ={};
-        temp[newMod] = validated.payload;
-        const merged = this.merge(guilddata.modules, temp);
-        return await this.model.updateOne({guild: guildID}, {modules: merged}).exec();
-    }
-
-    async updateCommands(guildID: string, newCmd: string, data: any, commands: Collection<Command>){
-        let guilddata = await this.model.findOne({guild: guildID}, "commands").lean().exec();
-        if(!guilddata.commands){return {code: 1, payload: "An error occured"};}
-        const validated: any = this.validateCommandState(data, newCmd, commands);
-        if(validated.code !== 0){return validated;}
-        let temp: any = {};
-        temp[newCmd] = validated.payload;
-        let merged: any = this.merge(guilddata.commands, temp);
-        return await this.model.updateOne({guild: guildID}, {commands: merged}).exec();
-    }
-
-    async updateModuleConfig(guildID: string, mod: string, data: any){
-        if(!Object.getOwnPropertyNames(nameConfigMap).includes(mod)){
-            return {code: 1, payload: "No matching module found"};
-        }
-        let guilddata = await this.model.findOne({guild: guildID}, mod).lean().exec();
-        if(!guilddata[mod]){return {code: 1, payload: "An error occured"};}
-        let merged: any = this.merge(guilddata[mod], data);
-        const validated: any = new nameConfigMap[mod](merged);
-        let update: any = {};
-        update[mod] = validated;
-        return await this.model.updateOne({guild: guildID}, update).exec();
-    }
-
-    async update(guildID: string, update: any){
-        return await this.model.updateOne({guild: guildID}, update).exec();
-    }
-    
-    merge(oldData: any, newData: any){
-        const newProps: Array<string> = Object.getOwnPropertyNames(newData);
-        newProps.forEach((prop: string) => {
-            oldData[prop] = newData[prop];
-        });
-        return oldData;
-    }
-}
-
-
-
 
 class CommandConfig implements Types.CommandConfig{
-    enabled: Boolean;
+    enabled: boolean;
     allowedRoles: Array<string>;
     disabledRoles: Array<string>;
     allowedChannels: Array<string>;
@@ -138,7 +30,7 @@ class CommandConfig implements Types.CommandConfig{
 }
 
 class ModuleConfig implements Types.ModuleConfig{
-    enabled: Boolean;
+    enabled: boolean;
     constructor(data: Types.ModuleConfig, defState: boolean){
         this.enabled = data.enabled ?? defState;
     }
@@ -147,12 +39,12 @@ class ModuleConfig implements Types.ModuleConfig{
 class ModConfig implements Types.ModConfig{
     modRoles: Array<string>;
     protectedRoles: Array<string>;
-    deleteAfter: Number;
+    deleteAfter: number;
     modLogChannel: string;
-    requireReason: Boolean;
-    requireMuteTime: Boolean;
-    deleteOnBan: Boolean;
-    deleteCommand: Boolean;
+    requireReason: boolean;
+    requireMuteTime: boolean;
+    deleteOnBan: boolean;
+    deleteCommand: boolean;
     constructor(data: Partial<Types.ModConfig>){
         this.modRoles = data.modRoles ?? [];
         this.protectedRoles = data.protectedRoles ?? [];
@@ -171,7 +63,7 @@ class StarboardConfig implements Types.StarboardConfig{
     starChannel: string;
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
-    selfStar: Boolean;
+    selfStar: boolean;
     customStar: string;
     starCount: number;
     constructor(data: Partial<Types.StarboardConfig>){
@@ -193,10 +85,10 @@ const defaultLog: Types.LogEvent = {
 };
 export class LoggingConfig implements Types.LoggingConfig{
     logChannel: string;
-    ghostReactTime: Number;
+    ghostReactTime: number;
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
-    specifyChannels: Boolean;
+    specifyChannels: boolean;
     newAccountAge: number;
     showAvatar: boolean;
     banAdd: Types.LogEvent;
@@ -221,6 +113,7 @@ export class LoggingConfig implements Types.LoggingConfig{
     guildUpdate: Types.LogEvent;
     webhookUpdate: Types.LogEvent;
     ghostReact: Types.LogEvent;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any
     constructor(data: Partial<Types.LoggingConfig>){
         this.logChannel = data.logChannel ?? "";
@@ -260,7 +153,7 @@ class WelcomeConfig implements Types.WelcomeConfig{
     messageType: string;
     content: string | Embed;
     channel?: string;
-    dm: Boolean;
+    dm: boolean;
     constructor(data: Partial<Types.WelcomeConfig>){
         this.content = data.content ?? "";
         this.channel = data.channel ?? "";
@@ -271,9 +164,9 @@ class WelcomeConfig implements Types.WelcomeConfig{
 
 class TagConfig implements Types.TagConfig{
     allowedEditRoles: Array<string>;
-    limitEdit: Boolean;
-    delete: Boolean;
-    tags: Array<Types.tag>;
+    limitEdit: boolean;
+    delete: boolean;
+    tags: Array<Types.Tag>;
     constructor(data: Partial<Types.TagConfig>){
         this.allowedEditRoles = data.allowedEditRoles ?? [];
         this.limitEdit = data.limitEdit ?? false;
@@ -283,9 +176,11 @@ class TagConfig implements Types.TagConfig{
 }
 
 class RankConfig implements Types.RankConfig{
-    limitOne: Boolean;
-    limitOnePerGroup: Boolean;
+    limitOne: boolean;
+    limitOnePerGroup: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ranks: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rankGroups: any;
     constructor(data: Partial<Types.RankConfig>){
         this.limitOne = data.limitOne ?? false;
@@ -297,9 +192,11 @@ class RankConfig implements Types.RankConfig{
 }
 
 class RRConfig implements Types.RRConfig{
-    limitOne: Boolean;
-    limitOnePerGroup: Boolean;
+    limitOne: boolean;
+    limitOnePerGroup: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rr: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rrGroups: any;
     constructor(data: Partial<Types.RRConfig>){
         this.limitOne = data.limitOne ?? false;
@@ -311,8 +208,9 @@ class RRConfig implements Types.RRConfig{
 }
 
 class AutoroleConfig implements Types.AutoroleConfig{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     autoroles: any;
-    removePrevious: Boolean;
+    removePrevious: boolean;
     constructor(data: Partial<Types.AutoroleConfig>){
         this.autoroles = data.autoroles ?? {};
         this.removePrevious = data.removePrevious ?? false;
@@ -327,6 +225,8 @@ class SocialConfig implements Types.SocialConfig{
         this.levelupChannel = data.levelupChannel ?? "";
     }
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nameConfigMap: any = {
     mod: ModConfig,
     command: CommandConfig,
@@ -340,4 +240,124 @@ const nameConfigMap: any = {
     social: SocialConfig,
     autorole: AutoroleConfig
 };
+
+class MongoGuildManager{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    model: any;
+    constructor(){
+        this.model = guildmodel;
+    }
+
+    async createConfig(guildID: string): Promise<Types.GuildConfig>{
+        return await this.model.create({guild: guildID});
+    }
+
+    async getConfig(guildID: string): Promise<Types.GuildConfig>{
+        if(await this.model.exists({guild: guildID})){
+            return await this.model.findOne({guild: guildID}).lean().exec();
+        }else{
+            return await this.createConfig(guildID);
+        }
+    }
+
+    async exists(guildID: string): Promise<boolean>{
+        return await this.model.exists({guild: guildID});
+    }
+
+    async getPrefix(guildID: string): Promise<string>{
+        const doc: Types.GuildConfig = await this.getConfig(guildID);
+        if(!doc){return "%";}
+        if(!doc.prefix){return "%";}
+        if(doc.prefix === ""){return "%";}
+        return doc.prefix;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setPrefix(guildID: string, newPrefix: string): Promise<any>{
+        return await this.model.updateOne({guild: guildID}, {prefix: newPrefix});
+    }
+
+    async getMods(guildID: string): Promise<Array<string>>{
+        const guildConfig: Types.GuildConfig = await this.getConfig(guildID);
+        if(!guildConfig.mod){return [];}
+        if(!guildConfig.mod.modRoles){return [];}
+        return guildConfig.mod.modRoles;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    validateModuleState(state: boolean, module: string, modules: Collection<Module>): any{
+        const mod: undefined | Module = modules.get(module);
+        if(mod === undefined){return {code: 1, payload: "No matching module found"};}
+        if(mod.private){return {code: 1, payload: "Module is private and not stored in config"};}
+        if(!state && mod.alwaysEnabled){return {code: 1, payload: "This module is always enabled and may not be disabled"};}
+        return {code: 0, payload: new ModuleConfig({enabled: state}, mod.defaultStatus)};
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    validateCommandState(data: any, command: string, commands: Collection<Command>): any{
+        const cmd: Command | undefined = commands.get(command);
+        if(!cmd){return {code: 1, payload: "Invalid command"};}
+        const cmdConfig = new CommandConfig(data);
+        if(!cmdConfig.enabled && cmd.alwaysEnabled){return {code: 1, payload: "This command can not be disabled"};}
+        if(cmd.internal || cmd.dev || cmd.admin || cmd.support){return {code: 1, payload: "This command is private and can not be configured per server"};}
+        return {code: 0, payload: new CommandConfig(data)};
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async updateModuleStates(guildID: string, newMod: string, newState: boolean, modules: Collection<Module>): Promise<any>{
+        const guilddata = await this.model.findOne({guild: guildID}, "modules").lean().exec();
+        if(!guilddata.modules){return {code: 1, payload: "An error occured"};}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const validated: any = this.validateModuleState(newState, newMod, modules);
+        if(validated.code !== 0){return validated;}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const temp: any ={};
+        temp[newMod] = validated.payload;
+        const merged = this.merge(guilddata.modules, temp);
+        return await this.model.updateOne({guild: guildID}, {modules: merged}).exec();
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async updateCommands(guildID: string, newCmd: string, data: any, commands: Collection<Command>): Promise<any>{
+        const guilddata = await this.model.findOne({guild: guildID}, "commands").lean().exec();
+        if(!guilddata.commands){return {code: 1, payload: "An error occured"};}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const validated: any = this.validateCommandState(data, newCmd, commands);
+        if(validated.code !== 0){return validated;}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const temp: any = {};
+        temp[newCmd] = validated.payload;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const merged: any = this.merge(guilddata.commands, temp);
+        return await this.model.updateOne({guild: guildID}, {commands: merged}).exec();
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async updateModuleConfig(guildID: string, mod: string, data: any): Promise<any>{
+        if(!Object.getOwnPropertyNames(nameConfigMap).includes(mod)){
+            return {code: 1, payload: "No matching module found"};
+        }
+        const guilddata = await this.model.findOne({guild: guildID}, mod).lean().exec();
+        if(!guilddata[mod]){return {code: 1, payload: "An error occured"};}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const merged: any = this.merge(guilddata[mod], data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const validated: any = new nameConfigMap[mod](merged);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const update: any = {};
+        update[mod] = validated;
+        return await this.model.updateOne({guild: guildID}, update).exec();
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async update(guildID: string, update: any): Promise<any>{
+        return await this.model.updateOne({guild: guildID}, update).exec();
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    merge(oldData: any, newData: any): any{
+        const newProps: Array<string> = Object.getOwnPropertyNames(newData);
+        newProps.forEach((prop: string) => {
+            oldData[prop] = newData[prop];
+        });
+        return oldData;
+    }
+}
+
+
+
+
+
 export {MongoGuildManager as manager};

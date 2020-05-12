@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import {Client, Collection, Guild, Message, Emoji, TextChannel, Embed, Member, User, Role, Channel, GuildTextableChannel, VoiceChannel, CategoryChannel} from "eris";
+import {Client, Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
@@ -46,9 +46,12 @@ export interface HyperionInterface {
     client: Client;
     readonly build: string;
     modules: Collection<Module>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sentry: any;
     commands: Collection<Command>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     logger: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bevents: any;
     readonly devPrefix: string;
     readonly modlist: Array<string>;
@@ -56,12 +59,13 @@ export interface HyperionInterface {
     readonly adminPrefix: string;
     readonly defaultColor: number;
     readonly mongoOptions: mongoose.ConnectionOptions;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     readonly models: any;
     db: mongoose.Connection;
     global: GlobalConfig;
-    handler?: any;
     logLevel: number;
     managers: Managers;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stars: any;
     utils: Utils;
     readonly circleCIToken: string;
@@ -75,37 +79,37 @@ export interface CommandConfig{
     disabledRoles: Array<string>;
     allowedChannels: Array<string>;
     disabledChannels: Array<string>;
-    enabled: Boolean;
+    enabled: boolean;
     subcommands?: Array<CommandConfig>;
     name?: string;
 }
 
 export interface ModuleConfig{
-    enabled: Boolean;
+    enabled: boolean;
 }
 
 export interface ModConfig{
     modRoles: Array<string>;
     protectedRoles: Array<string>;
-    deleteAfter: Number;
+    deleteAfter: number;
     modLogChannel: string;
-    requireReason: Boolean;
-    requireMuteTime: Boolean;
-    deleteOnBan: Boolean;
-    deleteCommand: Boolean;
+    requireReason: boolean;
+    requireMuteTime: boolean;
+    deleteOnBan: boolean;
+    deleteCommand: boolean;
 }
 
 export interface StarboardConfig{
     starChannel: string;
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
-    selfStar: Boolean;
+    selfStar: boolean;
     customStar: string;
     starCount: number;
 }
 
 export interface LogEvent {
-    enabled: Boolean;
+    enabled: boolean;
     channel: string;
     ignoredRoles: Array<string>;
     ignoredChannels: Array<string>;
@@ -113,10 +117,10 @@ export interface LogEvent {
 
 export interface LoggingConfig{
     logChannel: string;
-    ghostReactTime: Number;
+    ghostReactTime: number;
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
-    specifyChannels: Boolean;
+    specifyChannels: boolean;
     newAccountAge: number;
     showAvatar: boolean;
 
@@ -142,17 +146,18 @@ export interface LoggingConfig{
     guildUpdate: LogEvent;
     webhookUpdate: LogEvent;
     ghostReact: LogEvent;
-    [index: string]: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [index: string]: any;
 }
 
 export interface WelcomeConfig{
     messageType: string;
     content: string | Embed;
     channel?: string;
-    dm: Boolean;
+    dm: boolean;
 }
 
-export interface tag {
+export interface Tag {
     name: string;
     author: string;
     date: number;
@@ -164,28 +169,33 @@ export interface tag {
 
 export interface TagConfig{
     allowedEditRoles: Array<string>;
-    limitEdit: Boolean;
-    delete: Boolean;
-    tags: Array<tag>;
+    limitEdit: boolean;
+    delete: boolean;
+    tags: Array<Tag>;
 }
 
 export interface RankConfig{
-    limitOne: Boolean;
-    limitOnePerGroup: Boolean;
+    limitOne: boolean;
+    limitOnePerGroup: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ranks: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rankGroups: any;
 }
 
 export interface RRConfig{
-    limitOne: Boolean;
-    limitOnePerGroup: Boolean;
+    limitOne: boolean;
+    limitOnePerGroup: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rr: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rrGroups: any;
 }
 
 export interface AutoroleConfig{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     autoroles: any;
-    removePrevious: Boolean
+    removePrevious: boolean;
 }
 
 export interface SocialConfig{
@@ -194,8 +204,9 @@ export interface SocialConfig{
 }
 
 export interface Status{
-    code: Number;
+    code: number;
     error?: Error | string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     payload?: any;
 }
 
@@ -209,6 +220,7 @@ export interface GuildConfig {
     guild: string;
     prefix: string;
     updatedAt: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     modules: any;
     reactionRoles: RRConfig;
     autoroles: AutoroleConfig;
@@ -218,6 +230,7 @@ export interface GuildConfig {
     logging: LoggingConfig;
     welcome: WelcomeConfig;
     mod: ModConfig;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     commands: any;
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
@@ -259,7 +272,7 @@ export interface CommandContext{
 
 export interface UserConfig{
     user: string;
-    level: number,
+    level: number;
     exp: number;
     money: number;
     rep: number;
@@ -271,6 +284,7 @@ export interface UserConfig{
     color?: string;
     friends: Array<string>;
     partner?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
     acks: AckInterface;
     bio: string;
@@ -296,15 +310,17 @@ export interface ConfigKey{
     friendlyName: string;
     dataType: string;
     array: boolean;
-    default: any;
+    default: unknown;
 }
 
 export interface GlobalConfig{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sallyGameConsts: any;
     gDisabledMods: Array<string>;
     gDisabledCommands: Array<string>;
     blacklist: Array<string>;
-    globalCooldown: number,
+    globalCooldown: number;
     globalDisabledLogEvents: Array<string>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
 }

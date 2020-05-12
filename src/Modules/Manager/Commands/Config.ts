@@ -1,12 +1,9 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
-import {HyperionInterface, CommandContext, ConfigOp, GuildConfig} from "../../../types";
+import {HyperionInterface, CommandContext, GuildConfig} from "../../../types";
 import {configurableModules} from "../Module/ConfigHelper";
-// eslint-disable-next-line no-unused-vars
 import { Module, ConfigKey } from "../../../Core/Structures/Module";
 import {inspect} from "util";
-// eslint-disable-next-line no-unused-vars
-import { GuildChannel } from "eris";
+import { GuildChannel, Embed } from "eris";
 
 
 const opmap = ["get", "set", "add", "remove", "clear"];
@@ -28,30 +25,30 @@ class Config extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>} | undefined>{
         if(!ctx.args[0]){
             return this.listModules(ctx, Hyperion);
         }
         if(ctx.args[0] && !ctx.args[1]){
-            let mod = this.validateModule(Hyperion, ctx.args[0]);
+            const mod = this.validateModule(Hyperion, ctx.args[0]);
             if(typeof(mod) === "string"){return mod;}
             return this.listKeys(Hyperion, mod);
         }
 
         if((ctx.args[0] && ctx.args[1]) && !ctx.args[2]){
-            let mod = this.validateModule(Hyperion, ctx.args[0]);
+            const mod = this.validateModule(Hyperion, ctx.args[0]);
             if(typeof(mod) === "string"){return mod;}
-            let key = this.validateKey(mod, ctx.args[1]);
+            const key = this.validateKey(mod, ctx.args[1]);
             if(typeof(key) === "string"){return key;}
             return this.listOps(Hyperion, key);
         }
 
         if((ctx.args[0] && ctx.args[1] && ctx.args[2]) && !ctx.args[3]){
-            let mod = this.validateModule(Hyperion, ctx.args[0]);
+            const mod = this.validateModule(Hyperion, ctx.args[0]);
             if(typeof(mod) === "string"){return mod;}
-            let key = this.validateKey(mod, ctx.args[1]);
+            const key = this.validateKey(mod, ctx.args[1]);
             if(typeof(key) === "string"){return key;}
-            let op = this.validateOp(ctx.args[2]);
+            const op = this.validateOp(ctx.args[2]);
             if(typeof(op) === "string"){return op;}
             if(op === 0){
                 return await this.getVal(ctx, Hyperion, mod, key);
@@ -62,16 +59,16 @@ class Config extends Command{
             return this.listType(key);
         }
 
-        let mod = this.validateModule(Hyperion, ctx.args[0]);
+        const mod = this.validateModule(Hyperion, ctx.args[0]);
         if(typeof(mod) === "string"){return mod;}
-        let key = this.validateKey(mod, ctx.args[1]);
+        const key = this.validateKey(mod, ctx.args[1]);
         if(typeof(key) === "string"){return key;}
-        let op = this.validateOp(ctx.args[2]);
+        const op = this.validateOp(ctx.args[2]);
         if(typeof(op) === "string"){return op;}
         return await this.doOp(ctx, Hyperion, mod, key, op, ctx.args.slice(3).join(" "));
     }
 
-    listModules(ctx: CommandContext, Hyperion: HyperionInterface){
+    listModules(ctx: CommandContext, Hyperion: HyperionInterface): {embed: Partial<Embed>}{
         const confMods = configurableModules(Hyperion.modules).map((m: Module) => m.friendlyName);
 
         const data = {
@@ -85,9 +82,9 @@ class Config extends Command{
         return data;
     }
 
-    listKeys(Hyperion: HyperionInterface, module: Module){
+    listKeys(Hyperion: HyperionInterface, module: Module): string | {embed: Partial<Embed>}{
         if(!module.configKeys){return "The module is marked as configurable, but has no keys to configure.";}
-        let output: Array<string> = module.configKeys.map((ck: ConfigKey) => `${ck.id}: ${ck.description}`);
+        const output: Array<string> = module.configKeys.map((ck: ConfigKey) => `${ck.id}: ${ck.description}`);
         const data = {
             embed: {
                 title: `${module.friendlyName} Configuration`,
@@ -99,8 +96,8 @@ class Config extends Command{
         return data;
     }
 
-    listOps(Hyperion: HyperionInterface, key: ConfigKey){
-        let output: Array<string> = [];
+    listOps(Hyperion: HyperionInterface, key: ConfigKey): {embed: Partial<Embed>}{
+        const output: Array<string> = [];
         key.ops.forEach((op: number) => {
             output.push(opmap[op]);
         });
@@ -115,7 +112,7 @@ class Config extends Command{
         return data;
     }
 
-    listType(key: ConfigKey){
+    listType(key: ConfigKey): string{
         if(!key){return "How did you get here? key is undefined";}
         if(key.array){
             return `${key.friendlyName} is an array of ${key.dataType}s`;
@@ -123,16 +120,17 @@ class Config extends Command{
         return `${key.friendlyName} is a ${key.dataType}`;
     }
 
-    async doOp(ctx: CommandContext, Hyperion: HyperionInterface, module: Module, key: ConfigKey, op: number, value: string){
+    async doOp(ctx: CommandContext, Hyperion: HyperionInterface, module: Module, key: ConfigKey, op: number, value: string): Promise<string | undefined>{
         if(!key.ops.includes(op)){return "That operation is not valid for this key";}
-        let guilddata = await Hyperion.managers.guild.getConfig(ctx.guild.id);
+        const guilddata = await Hyperion.managers.guild.getConfig(ctx.guild.id);
         if(!guilddata){return "There was an error getting the guild data";}
 
         if(op === 1){
-            let data: any = {};
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data: any = {};
             data[key.id] = value;
             if(key.dataType === "number"){
-                let num = Number(value);
+                const num = Number(value);
                 if(isNaN(num)){return "That isnt a valid number";}
                 data[key.id] = num;
             }
@@ -165,9 +163,11 @@ class Config extends Command{
         }
 
         if(op === 2){
-            let old = (guilddata as any)[module.name][key.id];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const old = (guilddata as any)[module.name][key.id];
             if(!old || !old[0]){
-                let data: any = {};
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const data: any = {};
                 data[key.id] = [value];
                 if(key.dataType === "channel"){
                     let chan = ctx.guild.channels.get(value)?.id;
@@ -202,7 +202,8 @@ class Config extends Command{
             }else{
                 old.push(value);
             }
-            let data: any = {};
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data: any = {};
             data[key.id] = old;
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
@@ -214,7 +215,8 @@ class Config extends Command{
         }
 
         if(op === 3){
-            let old = (guilddata as any)[module.name][key.id];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const old = (guilddata as any)[module.name][key.id];
             if(!old || !old[0]){return "No values were set, so there is nothing to remove";}
             if(key.dataType === "channel"){
                 let chan = ctx.guild.channels.get(value)?.id;
@@ -228,11 +230,14 @@ class Config extends Command{
                 value = chan;
             }
             if(!old.includes(value)){return "That value isnt part of that key";}
-            let newarr: Array<any> = [];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const newarr: Array<any> = [];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             old.forEach((val: any) => {
                 if(val !== value){newarr.push(val);}
             });
-            let data: any = {};
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data: any = {};
             data[key.id] = newarr;
 
             try{
@@ -245,10 +250,11 @@ class Config extends Command{
         }
     }
 
-    async getVal(ctx: CommandContext, Hyperion: HyperionInterface, module: Module, key: ConfigKey){
-        let data: GuildConfig = await Hyperion.managers.guild.getConfig(ctx.guild.id);
+    async getVal(ctx: CommandContext, Hyperion: HyperionInterface, module: Module, key: ConfigKey): Promise<string | {embed: Partial<Embed>}>{
+        const data: GuildConfig = await Hyperion.managers.guild.getConfig(ctx.guild.id);
         if(!data){return "There was an error getting the guild data";}
-        let out = (data as any)[module.name][key.id];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const out = (data as any)[module.name][key.id];
         if(!out){return "This value hasnt been set";}
         const output = {
             embed: {
@@ -262,7 +268,7 @@ class Config extends Command{
             output.embed.description = `<#${out}>`;
         }
         if(key.dataType === "channel" && key.array){
-            let tmp: Array<string> = [];
+            const tmp: Array<string> = [];
             out.forEach((x: string) => {
                 tmp.push(`<#${x}>`);
             });
@@ -271,9 +277,10 @@ class Config extends Command{
         return output;
     }
 
-    async reset(ctx: CommandContext, Hyperion: HyperionInterface, module: Module, key: ConfigKey){
+    async reset(ctx: CommandContext, Hyperion: HyperionInterface, module: Module, key: ConfigKey): Promise<string>{
         if(key.array){
-            let data: any = {};
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data: any = {};
             data[key.id] = [];
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
@@ -283,7 +290,8 @@ class Config extends Command{
             }
             return "Success!";
         }
-        let data: any = {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = {};
         data[key.id] = key.default;
         try{
             Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
@@ -308,12 +316,12 @@ class Config extends Command{
     validateKey(module: Module, input: string): string | ConfigKey{
         if(!module){return "Module is undefined, how did you get here <:borking:694988763226701884>";}
         if(!module.configKeys){return "The module has no keys, how did you get here <:borking:694988763226701884>";}
-        let key = module.configKeys.find((ck: ConfigKey) => ck.id.toLowerCase() === input.toLowerCase());
+        const key = module.configKeys.find((ck: ConfigKey) => ck.id.toLowerCase() === input.toLowerCase());
         if(!key){return "I couldnt find a key by that name in that module";}
         return key;
     }
 
-    validateOp(input: string){
+    validateOp(input: string): string | number{
         input = input.toLowerCase();
         if(input === "set"){return 1;}
         if(input === "add"){return 2;}

@@ -5,7 +5,8 @@ class DebugHandler{
     constructor(){
         this.name = "debug";
     }
-    async handle(this: HyperionInterface, message: string, shardID: Number){
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async handle(this: HyperionInterface, message: string, shardID: number): Promise<void>{
         if(this.logLevel<5){return;}
         if(message.toLowerCase().includes("duplicate presence")){return;}
         this.logger.info("Hyperion", "Debug", message);

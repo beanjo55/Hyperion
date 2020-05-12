@@ -1,4 +1,4 @@
-const {Schema, model} = require("mongoose");
+import {Schema, model} from "mongoose";
 
 const globalconf = new Schema({
 
@@ -41,4 +41,4 @@ const globalconf = new Schema({
     strict: false
 });
 
-export default new model("global", globalconf);
+export default model("global", globalconf);

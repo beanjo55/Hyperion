@@ -1,7 +1,7 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
-import {HyperionInterface} from "../../../types";
-const { inspect } = require("util");
+import {HyperionInterface, CommandContext} from "../../../types";
+import { Embed } from "eris";
+import {inspect} from "util";
 
 
 
@@ -26,8 +26,7 @@ class Eval extends Command{
         });
 
     }
-    async execute(ctx: any, Hyperion: HyperionInterface){
-        //console.log(ctx.args)
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
         const code = ctx.args.join(" ");
        
         try{
@@ -37,11 +36,11 @@ class Eval extends Command{
             }
             return await this.evalresult(ctx, evaled, Hyperion);
         }catch(err){
-            return await this.evalerror(ctx, err, Hyperion);
+            return this.evalerror(err, Hyperion);
         }
     }
 
-    async clean(text: string, ctx: any, Hyperion: HyperionInterface){
+    clean(text: string, Hyperion: HyperionInterface): string{
         const rx = new RegExp((Hyperion.client.token as string), "gim");
         const circlerx = new RegExp((Hyperion.circleCIToken as string), "gim");
         if (typeof(text) === "string"){
@@ -52,14 +51,15 @@ class Eval extends Command{
         }
     }
 
-    async evalresult(ctx: any, result: string, Hyperion: HyperionInterface){
-        const output = await this.clean(result, ctx, Hyperion);
+    async evalresult(ctx: CommandContext, result: string, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
+        const output = this.clean(result, Hyperion);
         if(output.length > 1990){
             console.log(output);
             return "The output was too long, it was sent to the console log";
         }
         const data ={
             embed: {
+                // eslint-disable-next-line @typescript-eslint/camelcase
                 author: { name: "Eval Results", icon_url: ctx.user.avatarURL },
                 description: "```js\n" + output + "```",
                 color: Hyperion.defaultColor,
@@ -69,8 +69,8 @@ class Eval extends Command{
         return data;
     }
 
-    async evalerror(ctx: any, result: string, Hyperion: HyperionInterface){
-        return "`ERROR`\n```xl\n" + await this.clean(result, ctx, Hyperion) + "```";
+    evalerror(result: string, Hyperion: HyperionInterface): string{
+        return "`ERROR`\n```xl\n" + this.clean(result, Hyperion) + "```";
     }
 
 }
@@ -83,7 +83,7 @@ class AsyncEval extends Eval{
         this.aliases = ["a"];
     }
 
-    async execute(ctx: any, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
         const code = "async function run(ctx){" + ctx.args.slice(1).join(" ") + "}; run(ctx)";
         try{
             let evaled = await eval(code);
@@ -92,7 +92,7 @@ class AsyncEval extends Eval{
             }
             return await this.evalresult(ctx, evaled, Hyperion);
         }catch(err){
-            return await this.evalerror(ctx, err, Hyperion);
+            return this.evalerror(err, Hyperion);
         }
 
     }

@@ -1,5 +1,4 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
 
 class Bio extends Command{
@@ -14,13 +13,13 @@ class Bio extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
         if(ctx.args.length === 0){
-            let current = await Hyperion.managers.user.getBio(ctx.user.id);
+            const current = await Hyperion.managers.user.getBio(ctx.user.id);
             if(!current || current === ""){return "You dont have a bio set";}
             return `Your current bio is: ${current}`;
         }
-        let bio = ctx.args.join(" ");
+        const bio = ctx.args.join(" ");
         if(bio.length > 1020){
             return "That bio is too long, try a shorter one";
         }

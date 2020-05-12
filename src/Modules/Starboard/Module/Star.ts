@@ -3,7 +3,43 @@ import {HyperionInterface, GuildConfig} from "../../../types";
 import {Message, MessageContent, Emoji} from "eris";
 import {default as starModel} from "../../../MongoDB/Starred";
 
-async function star(Hyperion: HyperionInterface, omsg: Message, emote: Emoji, userID: string, conf: GuildConfig, op: string){
+
+async function updatePost(Hyperion: HyperionInterface, sentMessage: Message, newCount: number): Promise<void>{
+    sentMessage.edit({content: `${newCount}⭐`, embed: sentMessage.embeds[0]});
+}
+
+
+
+async function createPost(Hyperion: HyperionInterface, starred: Message, conf: GuildConfig, count: number): Promise<Message | undefined>{
+
+    if(starred.channel.type !== 0){return;}
+    const msglink = `https://discordapp.com/channels/${starred.channel.guild.id}/${starred.channel.id}/${starred.id}`;
+    const Starpost: MessageContent = {
+        content: `${count}⭐`,
+        embed: {
+            color: Hyperion.defaultColor,
+            timestamp: new Date,
+            description: `**[Original Message](${msglink})**\n${starred.channel.mention}\n${starred.cleanContent}`,
+            author: {
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                icon_url: starred.author.avatarURL,
+                name: `${starred.author.username}#${starred.author.discriminator}`
+            }
+        }
+    };
+    if(starred.attachments && starred.attachments[0]){
+        if(starred.attachments[0].url.endsWith(".png") || starred.attachments[0].url.endsWith(".gif") || starred.attachments[0].url.endsWith(".jpg")){
+            if(!Starpost.embed){return;}
+            Starpost.embed.image = {url: starred.attachments[0].url};
+        }
+    }
+    return await Hyperion.client.createMessage(conf.starboard.starChannel, Starpost);
+
+}
+
+
+async function star(Hyperion: HyperionInterface, omsg: Message, emote: Emoji, userID: string, conf: GuildConfig, op: string): Promise<void | undefined>{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let msg: any;
     if(!omsg.author){
         msg = await omsg.channel.getMessage(omsg.id);
@@ -34,6 +70,7 @@ async function star(Hyperion: HyperionInterface, omsg: Message, emote: Emoji, us
             updatePost(Hyperion, Hyperion.stars[msg.id].msg, Hyperion.stars[msg.id].count);
         }else{
             if(await starModel.exists({message: msg.id})){
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const oldPostID: any = await starModel.findOne({message: msg.id}).lean().exec();
                 if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
                 const channel = msg.channel.guild.channels.get(conf.starboard.starChannel);
@@ -48,33 +85,7 @@ async function star(Hyperion: HyperionInterface, omsg: Message, emote: Emoji, us
     }
 }
 
-async function createPost(Hyperion: HyperionInterface, starred: Message, conf: GuildConfig, count: number): Promise<Message | undefined>{
 
-    if(starred.channel.type !== 0){return;}
-    const msglink: string = `https://discordapp.com/channels/${starred.channel.guild.id}/${starred.channel.id}/${starred.id}`;
-    let Starpost: MessageContent = {
-        content: `${count}⭐`,
-        embed: {
-            color: Hyperion.defaultColor,
-            timestamp: new Date,
-            description: `**[Original Message](${msglink})**\n${starred.channel.mention}\n${starred.cleanContent}`,
-            author: {
-                icon_url: starred.author.avatarURL,
-                name: `${starred.author.username}#${starred.author.discriminator}`
-            }
-        }
-    };
-    if(starred.attachments && starred.attachments[0]){
-        if(starred.attachments[0].url.endsWith(".png") || starred.attachments[0].url.endsWith(".gif") || starred.attachments[0].url.endsWith(".jpg")){
-            if(!Starpost.embed){return;}
-            Starpost.embed.image = {url: starred.attachments[0].url};
-        }
-    }
-    return await Hyperion.client.createMessage(conf.starboard.starChannel, Starpost);
 
-}
 
-async function updatePost(Hyperion: HyperionInterface, sentMessage: Message, newCount: number){
-    sentMessage.edit({content: `${newCount}⭐`, embed: sentMessage.embeds[0]});
-}
 export default star;

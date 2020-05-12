@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
-const { exec } = require("child_process");
+import {exec} from "child_process";
+import { Message } from "eris";
 
 
 class Build extends Command{
@@ -18,10 +19,10 @@ class Build extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
-        let buildNum: string = "latest";
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<Message|void>{
+        let buildNum = "latest";
         if(ctx.args[0] && !isNaN(Number(ctx.args[0]))){buildNum = ctx.args[0];}
-        const dir: string = `${__dirname}../../../../`;
+        const dir = `${__dirname}../../../../`;
         const commandString: string = "cd " + dir
         + " | curl https://circleci.com/api/v1.1/project/github/beanjo55/Hyperion/" + buildNum + "/artifacts?circle-token=" + Hyperion.circleCIToken
         + " | grep -o 'https://[^\"]*'"
@@ -34,21 +35,21 @@ class Build extends Command{
         //+ " | rm -rf built.tar"
         //+ " | rm -Rf oldBuild/";
 
-        let message: string = "";
+        let message = "";
         if(buildNum === "latest"){
             message = "Downloading latest build from CircleCI";
         }else{
             message = `Downloading build ${buildNum} from CircleCI`;
         }
-        let post = await ctx.channel.createMessage(message);
+        const post = await ctx.channel.createMessage(message);
         try{
-            // eslint-disable-next-line no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             exec(commandString, (error: any, stdout: any) =>{
                 if(error){
                     console.log(error);
                     return post.edit("Download failed");
                 }
-                // eslint-disable-next-line no-unused-vars
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 exec(stage2, (error2: any, stdout2: any) => {
                     if(error2){
                         console.log(error2);

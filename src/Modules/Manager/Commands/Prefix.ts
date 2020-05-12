@@ -1,5 +1,4 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {HyperionInterface, CommandContext} from "../../../types";
 
 
@@ -16,7 +15,7 @@ class Prefix extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
         if(!ctx.args[0]){
             return `The current prefix is \`${ctx.guildConfig.prefix}\``;
         }

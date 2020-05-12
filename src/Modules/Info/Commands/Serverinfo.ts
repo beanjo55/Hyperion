@@ -2,7 +2,7 @@ import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
 // eslint-disable-next-line no-unused-vars
-import { Role } from "eris";
+import { Role, Embed, GuildChannel } from "eris";
 
 class Serverinfo extends Command{
     constructor(){
@@ -16,9 +16,9 @@ class Serverinfo extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
-        let rolelist = ctx.guild.roles.filter((r: Role) => r.id !== ctx.guild.id).sort((a, b) => b.position - a.position).map((r: Role) => r.mention).join(" ");
-        let owner = ctx.guild.members.get(ctx.guild.ownerID);
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | undefined>{
+        const rolelist = ctx.guild.roles.filter((r: Role) => r.id !== ctx.guild.id).sort((a, b) => b.position - a.position).map((r: Role) => r.mention).join(" ");
+        const owner = ctx.guild.members.get(ctx.guild.ownerID);
         if(!owner){return;}
         const data = {
             embed: {
@@ -54,22 +54,22 @@ class Serverinfo extends Command{
                     },
                     {
                         name: "Text Channels",
-                        value: `${ctx.guild.channels.filter((c: any) => c.type === 0).length} Text Channels`,
+                        value: `${ctx.guild.channels.filter((c: GuildChannel) => c.type === 0).length} Text Channels`,
                         inline: true
                     },
                     {
                         name: "Voice Channels",
-                        value: `${ctx.guild.channels.filter((c: any) => c.type === 2).length} Voice Channels`,
+                        value: `${ctx.guild.channels.filter((c: GuildChannel) => c.type === 2).length} Voice Channels`,
                         inline: true
                     },
                     {
                         name: "News Channels",
-                        value: `${ctx.guild.channels.filter((c: any) => c.type === 5).length} News Channels`,
+                        value: `${ctx.guild.channels.filter((c: GuildChannel) => c.type === 5).length} News Channels`,
                         inline: true
                     },
                     {
                         name: "Channel Categories",
-                        value: `${ctx.guild.channels.filter((c: any) => c.type === 4).length} Categories`,
+                        value: `${ctx.guild.channels.filter((c: GuildChannel) => c.type === 4).length} Categories`,
                         inline: true
                     }
                 ]

@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {HyperionInterface} from "../types";
 import {Member, VoiceChannel} from "eris";
 class VoiceChannelSwitchHandler{
@@ -6,7 +6,7 @@ class VoiceChannelSwitchHandler{
     constructor(){
         this.name = "voiceChannelSwitch";
     }
-    async handle(this: HyperionInterface, member: Member, newChannel: VoiceChannel, oldChannel: VoiceChannel){
+    async handle(this: HyperionInterface, member: Member, newChannel: VoiceChannel, oldChannel: VoiceChannel): Promise<void>{
 
     }
 }

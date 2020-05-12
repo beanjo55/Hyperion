@@ -6,7 +6,7 @@ class GuildCreateHandler{
     constructor(){
         this.name = "guildCreate";
     }
-    async handle(this: HyperionInterface, guild: Guild){
+    async handle(this: HyperionInterface, guild: Guild): Promise<void>{
         if(!await this.managers.guild.exists(guild.id)){
             this.managers.guild.createConfig(guild.id);
         }

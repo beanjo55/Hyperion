@@ -1,8 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
-// eslint-disable-next-line no-unused-vars
-import { Role, Member } from "eris";
+import { Role, Member, Embed } from "eris";
 
 class Roleinfo extends Command{
     constructor(){
@@ -16,7 +14,7 @@ class Roleinfo extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
         if(!ctx.args[0]){
             return "You need to tell me a role";
         }

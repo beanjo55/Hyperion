@@ -36,12 +36,6 @@ export interface ModuleKeys{
     description: string;
 }
 
-export namespace ConfigKeys{
-    export interface starboard{
-
-    }
-}
-
 
 function configurableModules(modules: Collection<Module>): Array<Module>{
     return modules.filter((m: Module) => !m.private && m.hasCfg);
@@ -51,17 +45,6 @@ function configurableModules(modules: Collection<Module>): Array<Module>{
 function toggleableModules(modules: Collection<Module>): Array<Module> {
     return modules.filter((m: Module) => !m.private && !m.alwaysEnabled);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

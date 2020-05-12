@@ -1,19 +1,21 @@
 /* eslint-disable no-unused-vars */
-const { inspect } = require("util");
+import {inspect} from "util";
 import {HyperionInterface, HyperionGuild} from "../types";
-import {Message, Guild, TextChannel} from "eris";
+import {Message, Guild} from "eris";
+import {Module} from "../Core/Structures/Module";
+const eventName = "messageCreate";
 class MessageCreateHandler{
     name: string;
     constructor(){
         this.name = "messageCreate";
     }
 
-    async handle(this: HyperionInterface, msg: Message){
+    async handle(this: HyperionInterface, msg: Message): Promise<void>{
         
-        if(msg.channel.type !== 0){
+        if(!(msg.channel.type === 0 || msg.channel.type === 5)){
             return;
         }
-        let guild: Guild = msg.channel.guild;
+        const guild: Guild = msg.channel.guild;
         if(msg.author.bot){
             return;
         }
@@ -28,8 +30,11 @@ class MessageCreateHandler{
             (this.client.guilds.get(guild.id) as HyperionGuild).fetched = true;
         }
         
-
-        this.handler.handler(msg, this);
+        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
+        subscribed.forEach((m: Module) => {
+            m.messageCreate(this, msg);
+        });
+        //this.handler.handler(msg, this);
         //msg.channel.createMessage("```js\n" + inspect(await this.handler(msg), {depth: 1}) + "```");
     }
 }

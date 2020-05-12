@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
+import { Embed } from "eris";
 
 class Invite extends Command{
     constructor(){
@@ -14,13 +14,14 @@ class Invite extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>}>{
         const data = {
             embed: {
                 timestamp: new Date(),
                 color: Hyperion.defaultColor,
                 author: {
                     name: "Hyperion Invite",
+                    // eslint-disable-next-line @typescript-eslint/camelcase
                     icon_url: Hyperion.client.user.avatarURL
                 },
                 description: "[You can invite Hyperion Here!](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&permissions=939912310&scope=bot)"

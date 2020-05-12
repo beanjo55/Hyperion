@@ -1,5 +1,4 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
 
 
@@ -17,17 +16,17 @@ class Setnick extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
-        let bot = ctx.guild.members.get(Hyperion.client.user.id);
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+        const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "A cache error occured";}
         if(!bot.permission.has("manageNicknames")){return "I dont have permissions to manage nicknames";}
         if(bot.roles.length === 0){return "Due to discord permissions, I need to have a higher role than someone to manage their nickname. I cant do that with no roles";}
         if(!ctx.args[0]){return "Please specify a user";}
-        let target = Hyperion.utils.resolveUser(ctx.msg, ctx.args[0], ctx.guild.members);
+        const target = Hyperion.utils.resolveUser(ctx.msg, ctx.args[0], ctx.guild.members);
         if(!target){return "I couldnt find that user";}
 
-        let botroles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
-        let userroles = Hyperion.utils.sortRoles(target.roles, ctx.guild.roles);
+        const botroles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
+        const userroles = Hyperion.utils.sortRoles(target.roles, ctx.guild.roles);
 
         if(botroles[0].position === userroles[0].position){return "I cant manage nicknames of users with the same highest role as me";}
         if(botroles[0].position < userroles[0].position){return "I cant manage nicknames of users with a higher role than my highest role";}

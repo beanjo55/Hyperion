@@ -5,7 +5,7 @@ class ShardReadyHandler{
     constructor(){
         this.name = "shardReady";
     }
-    async handle(this: HyperionInterface, shardID: Number){
+    async handle(this: HyperionInterface, shardID: number): Promise<void>{
         this.logger.success("Hyperion", "Sharding", `Shard ${shardID} ready!`);
     }
 }

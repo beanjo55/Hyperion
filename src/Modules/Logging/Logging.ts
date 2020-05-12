@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {Module} from "../../Core/Structures/Module";
 // eslint-disable-next-line no-unused-vars
 import {HyperionInterface, GuildConfig, LogEvent} from "../../types";
@@ -47,10 +50,10 @@ class Logging extends Module{
 
     async preCheck(Hyperion: HyperionInterface, guild: Guild, eventName: string, roles?: Array<string>, channel?: string): Promise<boolean>{
         if(!await this.checkGuildEnabled(Hyperion, guild.id)){return false;}
-        let econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
+        const econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
         if(!econfig){return false;}
         if(!econfig.enabled){return false;}
-        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
         if(roles){
             if(config?.ignoredRoles?.some((r: string) => roles.indexOf(r) >= 0)){return false;}
             if(econfig?.ignoredRoles?.some((r: string) => roles.indexOf(r) >= 0)){return false;}
@@ -63,27 +66,27 @@ class Logging extends Module{
     }
 
     async testChannel(Hyperion: HyperionInterface, guild: Guild, eventName: string): Promise<TextChannel|undefined>{
-        let econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
+        const econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
         if(!econfig?.channel){return;}
         let channel: string = econfig.channel;
         if(channel === "default"){
-            let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+            const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
             if(!config){return;}
             channel = config?.logChannel;
             if(!channel){return;}
         }
-        let chanObj = guild.channels.get(channel);
+        const chanObj = guild.channels.get(channel);
         if(!(chanObj?.type === 0)){return;}
         return chanObj;
     }
 
     //GUILD MEMBER
-    async guildMemberAdd(Hyperion: HyperionInterface, guild: Guild, member: Member){
+    async guildMemberAdd(Hyperion: HyperionInterface, guild: Guild, member: Member): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "memberAdd", undefined, undefined)){return;}
-        let channelObj = await this.testChannel(Hyperion, guild, "memberAdd");
+        const channelObj = await this.testChannel(Hyperion, guild, "memberAdd");
         if(!channelObj){return;}
 
-        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
 
         const data: {embed: Partial<Embed>} = {
             embed: {
@@ -112,12 +115,13 @@ class Logging extends Module{
         }
     }
 
-    async guildMemberRemove(Hyperion: HyperionInterface, guild: Guild, member: Member | any){
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async guildMemberRemove(Hyperion: HyperionInterface, guild: Guild, member: Member | any): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "memberRemove", undefined, undefined)){return;}
-        let channelObj = await this.testChannel(Hyperion, guild, "memberRemove");
+        const channelObj = await this.testChannel(Hyperion, guild, "memberRemove");
         if(!channelObj){return;}
-
-        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        if(await Hyperion.redis.get(`${guild.id}:${member.id}:banAdd`) !== null){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
 
         const data: {embed: Partial<Embed>} = {
             embed: {
@@ -143,18 +147,20 @@ class Logging extends Module{
         }
     }
 
-    async guildMemberUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any){
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async guildMemberUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any): Promise<void | undefined>{
         if(!oldMember || (!oldMember.nick && !oldMember.roles)){return;}
         if(member.roles !== oldMember.roles){this.guildMemberRolesUpdate(Hyperion, guild, member, oldMember);}
         if(member.nick !== oldMember.nick){this.guildMemberNickUpdate(Hyperion, guild, member, oldMember);}
     }
 
-    async guildBanAdd(Hyperion: HyperionInterface, guild: Guild, user: User){
+    async guildBanAdd(Hyperion: HyperionInterface, guild: Guild, user: User): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "banAdd", undefined, undefined)){return;}
-        let channelObj = await this.testChannel(Hyperion, guild, "banAdd");
+        Hyperion.redis.set(`${guild.id}:${user.id}:banAdd`, "yes", "EX", 5);
+        const channelObj = await this.testChannel(Hyperion, guild, "banAdd");
         if(!channelObj){return;}
 
-        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
 
         const data: {embed: Partial<Embed>} = {
             embed: {
@@ -180,12 +186,12 @@ class Logging extends Module{
         }
     }
 
-    async guildBanRemove(Hyperion: HyperionInterface, guild: Guild, user: User){
+    async guildBanRemove(Hyperion: HyperionInterface, guild: Guild, user: User): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "banRemove", undefined, undefined)){return;}
-        let channelObj = await this.testChannel(Hyperion, guild, "banRemove");
+        const channelObj = await this.testChannel(Hyperion, guild, "banRemove");
         if(!channelObj){return;}
 
-        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
 
         const data: {embed: Partial<Embed>} = {
             embed: {
@@ -214,14 +220,15 @@ class Logging extends Module{
 
 
     //MESSGAES
-    async messageDelete(Hyperion: HyperionInterface, msg: Message | any){
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async messageDelete(Hyperion: HyperionInterface, msg: Message | any): Promise<void | undefined>{
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
         if(msg.author && msg.author.bot){return;}
-        let guild = msg.channel.guild;
+        const guild = msg.channel.guild;
         if(!await this.preCheck(Hyperion, guild, "messageDelete", msg.channel.id, msg?.member?.roles)){return;}
-        let channelObj = await this.testChannel(Hyperion, guild, "messageDelete");
+        const channelObj = await this.testChannel(Hyperion, guild, "messageDelete");
         if(!channelObj){return;}
-        let field: Array<{name: string, value: string, inline: boolean}> = [];
+        const field: Array<{name: string; value: string; inline: boolean}> = [];
         const data = {
             embed: {
                 timestamp: new Date,
@@ -307,18 +314,19 @@ class Logging extends Module{
         }
     }
 
-    async messageUpdate(Hyperion: HyperionInterface, msg: Message | any, oldMessage: any){
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async messageUpdate(Hyperion: HyperionInterface, msg: Message | any, oldMessage: any): Promise<void | undefined>{
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
         if(msg.author && msg.author.bot){return;}
-        let guild = msg.channel.guild;
+        const guild = msg.channel.guild;
 
         if(oldMessage?.embeds){
             if(!oldMessage.embeds[0] && msg.embeds[0]){return;}
         }
         if(!await this.preCheck(Hyperion, guild, "messageEdit", msg.channel.id, msg?.member?.roles)){return;}
-        let channelObj = await this.testChannel(Hyperion, guild, "messageEdit");
+        const channelObj = await this.testChannel(Hyperion, guild, "messageEdit");
         if(!channelObj){return;}
-        let field: Array<{name: string, value: string, inline: boolean}> = [];
+        const field: Array<{name: string; value: string; inline: boolean}> = [];
         const data = {
             embed: {
                 timestamp: new Date,
@@ -387,12 +395,13 @@ class Logging extends Module{
         }
     }
 
-    async messageDeleteBulk(Hyperion: HyperionInterface, messages: Array<Message|any>){
-        let msg = messages[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async messageDeleteBulk(Hyperion: HyperionInterface, messages: Array<Message|any>): Promise<void | undefined>{
+        const msg = messages[0];
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
-        let guild = msg.channel.guild;
+        const guild = msg.channel.guild;
         if(!await this.preCheck(Hyperion, guild, "bulkDelete", msg.channel.id, msg?.member?.roles)){return;}
-        let channelObj = await this.testChannel(Hyperion, guild, "bulkDelete");
+        const channelObj = await this.testChannel(Hyperion, guild, "bulkDelete");
         if(!channelObj){return;}
 
         const data = {
@@ -437,6 +446,7 @@ class Logging extends Module{
         
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async roleUpdate(Hyperion: HyperionInterface, guild: Guild, role: Role, oldRole: any){
         
     }
@@ -452,6 +462,7 @@ class Logging extends Module{
         
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async channelUpdate(Hyperion: HyperionInterface, guild: Guild, channel: GuildChannel, oldChannel: any){
         
     }
@@ -459,10 +470,12 @@ class Logging extends Module{
 
 
     //MISC
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async webhooksUpdate(Hyperion: HyperionInterface, data: any, channelID: string, guildID: string){
 
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async guildUpdate(Hyperion: HyperionInterface, guild: Guild, oldGuild: any){
 
     }
@@ -486,6 +499,7 @@ class Logging extends Module{
 
 
     //CUSTOM
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async system(Hyperion: HyperionInterface, message: any){
 
     }
@@ -494,18 +508,20 @@ class Logging extends Module{
 
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async guildMemberRolesUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any){
 
     }
 
-    async guildMemberNickUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any){
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async guildMemberNickUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "memberNicknameChange", undefined, undefined)){return;}
-        let channelObj = await this.testChannel(Hyperion, guild, "memberNicknameChange");
+        const channelObj = await this.testChannel(Hyperion, guild, "memberNicknameChange");
         if(!channelObj){return;}
 
-        let config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
 
-        let field: Array<{name: string, value: string, inline: boolean}> = [];
+        const field: Array<{name: string; value: string; inline: boolean}> = [];
         const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Member Nickname update",

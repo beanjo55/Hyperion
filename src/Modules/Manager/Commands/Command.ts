@@ -1,8 +1,8 @@
-import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
+import {Command as command} from "../../../Core/Structures/Command";
 import { CommandContext, HyperionInterface } from "../../../types";
 
-class command extends Command{
+
+class Command extends command{
     constructor(){
         super({
             name: "command",
@@ -16,17 +16,19 @@ class command extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
         if(!ctx.args[0]){return "please specify a command to toggle";}
-        let name = ctx.args[0].toLowerCase();
+        const name = ctx.args[0].toLowerCase();
         let cmd = Hyperion.commands.get(name);
         if(!cmd){
-            cmd = Hyperion.commands.find((c: Command) => c.aliases.includes(name));
+            cmd = Hyperion.commands.find((c: command) => c.aliases.includes(name));
         }
         if(!cmd){return "I couldnt find a command by that name";}
         if(cmd.alwaysEnabled){return "This command is always enabled for diagnostic and internal reasons, it may not be disabled";}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if(ctx.guildConfig && ctx.guildConfig.commands && (ctx.guildConfig.commands as any)[cmd.name]){
-            let state = !(ctx.guildConfig.commands as any)[cmd.name].enabled;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const state = !(ctx.guildConfig.commands as any)[cmd.name].enabled;
             try{
                 await Hyperion.managers.guild.updateCommands(ctx.guild.id, cmd.name, {enabled: state}, Hyperion.commands);
             }catch(err){
@@ -45,4 +47,4 @@ class command extends Command{
         
     }
 }
-export default command;
+export default Command;

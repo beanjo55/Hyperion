@@ -1,13 +1,11 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
-import {HyperionInterface, CommandContext, UserConfig} from "../../../types";
-// eslint-disable-next-line no-unused-vars
+import {HyperionInterface, CommandContext} from "../../../types";
 import {Member} from "eris";
 import {default as msc} from "pretty-ms";
-const day: number = 86400000;
+const day = 86400000;
 import {randomInt} from "mathjs";
-const upper: number = 350;
-const lower: number = 150;
+const upper = 350;
+const lower = 150;
 
 class Daily extends Command{
     constructor(){
@@ -21,10 +19,10 @@ class Daily extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
         const payout: number = randomInt(lower, upper);
         const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
-        let time: number = await Hyperion.managers.user.getDailyTime(ctx.user.id);
+        const time: number = await Hyperion.managers.user.getDailyTime(ctx.user.id);
         if(ctx.args[0] && ctx.args[0].toLowerCase() === "check"){
             if(Date.now() - time <= day){
                 return `You can collect or give daily money in ${msc(day - (Date.now()-time))}`;

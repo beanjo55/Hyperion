@@ -1,6 +1,7 @@
 import {Command} from "../../../Core/Structures/Command";
-const { exec } = require("child_process");
-const { inspect } = require("util");
+import {exec} from "child_process";
+import {inspect} from "util";
+import { CommandContext, HyperionInterface } from "../../../types";
 
 class Exec extends Command{
     constructor(){
@@ -20,9 +21,11 @@ class Exec extends Command{
         });
     }
 
-    async execute(ctx: any){
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | void>{
         
         try{
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             exec(ctx.args.join(" "), (error: any, stdout: any) => {
                 const outputType = error || stdout;
                 let output = outputType;
@@ -38,17 +41,17 @@ class Exec extends Command{
             });
             
         }catch(err){
-            return {status: {code: 2, error: err}, payload: "Something went wrong"};
+            return "Something went wrong";
         }
         
     }
-
-    _getMaxDepth(toInspect: any, toEval: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _getMaxDepth(toInspect: any, toEval: any): number | undefined{
         let maxDepth = 10;
         for (let i = 0; i < 10; i++) {
             if (inspect(toInspect, { depth: i }).length > (1980 - toEval.length)) {
                 maxDepth = i - 1;
-                return ;
+                return;
             }
         }
         return maxDepth;

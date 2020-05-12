@@ -5,17 +5,17 @@ import {Role, Collection} from "eris";
 
 
 function sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>): Array<Role>{
-    let userRolesObject: Array<Role> = [];
+    const userRolesObject: Array<Role> = [];
     userRoles.forEach((uRole: string) => {
-        let temp = guildRoles.get(uRole);
+        const temp = guildRoles.get(uRole);
         if(temp !== undefined){userRolesObject.push(temp);}
     });
     return userRolesObject.sort((a, b) => b.position - a.position);
 }
 
 function getColor(roles: Collection<Role>, guildRoles: Collection<Role>): number{
-    let colored = roles.filter((r: Role) => r.color !== 0).map((r: Role) => r.id);
-    let sorted = sortRoles(colored, guildRoles);
+    const colored = roles.filter((r: Role) => r.color !== 0).map((r: Role) => r.id);
+    const sorted = sortRoles(colored, guildRoles);
     if(!sorted){return 0;}
     if(!sorted[0]){return 0;}
     return sortRoles(colored, guildRoles)[0].color;

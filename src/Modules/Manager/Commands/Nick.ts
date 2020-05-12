@@ -1,5 +1,4 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
 
 
@@ -18,8 +17,8 @@ class Nick extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
-        let bot = ctx.guild.members.get(Hyperion.client.user.id);
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+        const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "A cache error occured";}
         if(!bot.permission.has("changeNickname")){return "I dont have permissions to change my own nickname";}
         if(!ctx.args[0]){

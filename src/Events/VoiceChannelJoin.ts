@@ -6,7 +6,8 @@ class VoiceChannelJoinHandler{
     constructor(){
         this.name = "voiceChannelJoin";
     }
-    async handle(this: HyperionInterface, member: Member, newChannel: VoiceChannel){
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async handle(this: HyperionInterface, member: Member, newChannel: VoiceChannel): Promise<void>{
 
     }
 }

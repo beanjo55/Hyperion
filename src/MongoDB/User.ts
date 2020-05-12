@@ -1,4 +1,4 @@
-const {Schema, model} = require("mongoose");
+import {Schema, model} from "mongoose";
 
 const userinfo = new Schema({
 
@@ -100,4 +100,4 @@ const userinfo = new Schema({
     autoIndex: true
 });
 
-export default new model("user", userinfo);
+export default model("user", userinfo);

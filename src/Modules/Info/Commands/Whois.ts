@@ -2,7 +2,7 @@ import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
 // eslint-disable-next-line no-unused-vars
-import {Member, Role, Collection} from "eris";
+import {Member, Role, Collection, Embed} from "eris";
 
 
 class Whois extends Command{
@@ -18,7 +18,7 @@ class Whois extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
         let target: Member | undefined;
         if(ctx.args[0]){
             target = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
@@ -28,13 +28,13 @@ class Whois extends Command{
 
         if(!target){return "Who?";}
         
-        let roleList: Array<String> = [];
+        const roleList: Array<string> = [];
         let color = Hyperion.defaultColor;
         if(target.roles){
             const roleObj = Hyperion.utils.sortRoles(target.roles, ctx.guild.roles);
-            let temp = new Collection(Role);
+            const temp = new Collection(Role);
             roleObj.forEach((r: Role) => {temp.add(r);});
-            let tColor = Hyperion.utils.getColor(temp, ctx.guild.roles);
+            const tColor = Hyperion.utils.getColor(temp, ctx.guild.roles);
             if(tColor !== 0){ color = tColor;}
             roleObj.forEach((r: Role) => {
                 roleList.push(r.mention);
@@ -44,7 +44,7 @@ class Whois extends Command{
         }
         if(!color){color = Hyperion.defaultColor;}
         if(color === 0){color = Hyperion.defaultColor;}
-
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let joinPos: any = ctx.guild.members.filter((m: Member) => !m.bot).sort((a: Member, b: Member) => a.joinedAt - b.joinedAt).map((m: Member) => m.id).indexOf(target.id) + 1;
 
         if(joinPos === undefined){joinPos = "N/A";}
@@ -55,13 +55,14 @@ class Whois extends Command{
         if(rep === undefined){rep = 0;}
         if(given === undefined){given = 0;}
         if(money === undefined){money = 0;}
-
-        let data: any = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = {
             embed: {
                 thumbnail: {url: target.avatarURL},
                 description: "",
                 author: {
                     name: `${target.username}#${target.discriminator}`,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
                     icon_url: target.avatarURL
                 },
                 footer: {
@@ -121,7 +122,7 @@ class Whois extends Command{
             });
         }
 
-        let roleString = roleList.join(" ");
+        const roleString = roleList.join(" ");
         if(roleString.length > 0){
             data.embed.fields.push({
                 name: "Roles",
@@ -131,7 +132,7 @@ class Whois extends Command{
         
         
         const acks = await Hyperion.managers.user.getAcks(target.id);
-        let ack: Array<string> = [];
+        const ack: Array<string> = [];
         if(acks.owner){ack.push("Owner");}
         if(acks.developer){ack.push("Developer");}
         if(acks.admin){ack.push("Global Admin");}
@@ -149,7 +150,7 @@ class Whois extends Command{
                 if(target.permission.has("manageGuild")){
                     ack.push("Server Manager");
                 }else{
-                    let mods = await Hyperion.managers.guild.getMods(ctx.guild.id);
+                    const mods = await Hyperion.managers.guild.getMods(ctx.guild.id);
                     for(let i = 0; i < mods.length; i++){
                         if(target.roles.includes(mods[i])){
                             ack.push("Server Moderator");

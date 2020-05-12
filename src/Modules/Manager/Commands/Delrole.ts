@@ -1,7 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
-// eslint-disable-next-line no-unused-vars
 import { Role } from "eris";
 
 class Delrole extends Command{
@@ -19,13 +17,13 @@ class Delrole extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
-        let bot = ctx.guild.members.get(Hyperion.client.user.id);
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+        const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "A cache error occured";}
         if(!bot.permission.has("manageRoles")){return "I need the `Manage Roles` permission to delete roles";}
         if(bot.roles.length === 0){return "Due to discord permissions, i need to be above a role to manage it. I cant do that with no roles";}
 
-        let botroles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
+        const botroles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
 
         let target = ctx.guild.roles.get(ctx.args[0]);
         if(!target && ctx.msg.roleMentions && ctx.msg.roleMentions[0]){

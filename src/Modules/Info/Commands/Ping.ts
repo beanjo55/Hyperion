@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
-import {HyperionInterface} from "../../../types";
+import {HyperionInterface, CommandContext} from "../../../types";
+import { Message } from "eris";
 
 class Ping extends Command{
     constructor(){
@@ -18,9 +18,9 @@ class Ping extends Command{
         });
     }
 
-    // eslint-disable-next-line no-unused-vars
-    async execute(ctx: any, Hyperion: HyperionInterface){
-        return await ctx.channel.createMessage("Ping?").then((msg: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<Message>{
+        return await ctx.channel.createMessage("Ping?").then((msg: Message) => {
             return msg.edit(`Pong! ${msg.timestamp-ctx.msg.timestamp}ms`);
         });
     }

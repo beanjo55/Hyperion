@@ -1,8 +1,9 @@
 import {Command} from "../../../Core/Structures/Command";
-const os = require("os");
-const msc = require("pretty-ms");
+import {default as os} from "os";
+import {default as msc} from "pretty-ms";
 // eslint-disable-next-line no-unused-vars
-import {HyperionInterface} from "../../../types";
+import {HyperionInterface, CommandContext} from "../../../types";
+import { Embed } from "eris";
 
 class Stats extends Command{
     constructor(){
@@ -17,8 +18,8 @@ class Stats extends Command{
         });
     }
 
-    async execute(ctx: any, Hyperion: HyperionInterface): Promise<any>{
-        let data = {
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>}>{
+        const data = {
             embed:{
                 title: "Hyperion Stats",
                 color: Hyperion.defaultColor,

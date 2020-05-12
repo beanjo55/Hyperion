@@ -1,10 +1,8 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
-import {HyperionInterface, CommandContext, UserConfig} from "../../../types";
-// eslint-disable-next-line no-unused-vars
+import {HyperionInterface, CommandContext} from "../../../types";
 import {Member} from "eris";
 import {default as msc} from "pretty-ms";
-const day: number = 86400000;
+const day = 86400000;
 
 class Rep extends Command{
     constructor(){
@@ -17,9 +15,9 @@ class Rep extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
         const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
-        let time: number = await Hyperion.managers.user.getRepTime(ctx.user.id);
+        const time: number = await Hyperion.managers.user.getRepTime(ctx.user.id);
         if(ctx.args.length === 0){
             if(Date.now() - time <= day){
                 return `You can give more rep in ${msc(day - (Date.now()-time))}`;

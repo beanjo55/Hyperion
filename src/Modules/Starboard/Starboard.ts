@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {Module, ConfigKey} from "../../Core/Structures/Module";
-// eslint-disable-next-line no-unused-vars
 import {HyperionInterface, GuildConfig} from "../../types";
-// eslint-disable-next-line no-unused-vars
 import { Message, Emoji, Collection } from "eris";
 
 class Starboard extends Module{
@@ -18,7 +18,7 @@ class Starboard extends Module{
     }
 
     loadKeys(): Collection<ConfigKey>{
-        let col = new Collection(ConfigKey);
+        const col = new Collection(ConfigKey);
         col.add(new ConfigKey({
             parent: this.name,
             id: "starChannel",
@@ -64,11 +64,11 @@ class Starboard extends Module{
         return col;
     }
 
-    async reactionAdd(Hyperion: HyperionInterface, guildConfig: GuildConfig, msg: Message, emote: Emoji, user: string){
+    async reactionAdd(Hyperion: HyperionInterface, guildConfig: GuildConfig, msg: Message, emote: Emoji, user: string): Promise<void>{
 
     }
 
-    async reactionRemove(Hyperion: HyperionInterface, guildConfig: GuildConfig, msg: Message, emote: Emoji, user: string){
+    async reactionRemove(Hyperion: HyperionInterface, guildConfig: GuildConfig, msg: Message, emote: Emoji, user: string): Promise<void>{
         
     }
 }

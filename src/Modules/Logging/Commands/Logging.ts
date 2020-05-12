@@ -1,8 +1,8 @@
 import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
-// eslint-disable-next-line no-unused-vars
-import { GuildChannel } from "eris";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { GuildChannel, Embed } from "eris";
 import { LoggingConfig } from "../../../Core/DataManagers/MongoGuildManager";
 
 const eventNames: Array<string> = [
@@ -15,7 +15,6 @@ const eventNames: Array<string> = [
     "bulkDelete",
     "memberNicknameChange"
 ];
-const settingNames: Array<string> = ["logChannel", "ignoredChannels", "showAvatar", "enable", "disable"];
 const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar", "enable", "disable"];
 
 
@@ -32,13 +31,13 @@ class Logging extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
         if(!ctx.args[0]){
             return await this.showOverallSettings(ctx, Hyperion);
         }
         if(!settingNamesL.includes(ctx.args[0].toLowerCase())){return "I dont know what that setting is";}
         if(ctx.args[0].toLowerCase() === "logchannel"){
-            let channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
+            const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
             if(!channel){return "Im not sure what that channel is";}
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {logChannel: channel.id});
@@ -50,14 +49,14 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "ignoredchannels"){
-            let channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
+            const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
             if(!channel){return "Im not sure what that channel is";}
 
-            let config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
-            let size = config.ignoredChannels.length;
+            const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
+            const size = config.ignoredChannels.length;
             if(config.ignoredChannels !== []){
                 if(config.ignoredChannels.includes(channel.id)){
-                    let index: number = config.ignoredChannels.indexOf(channel.id);
+                    const index: number = config.ignoredChannels.indexOf(channel.id);
                     config.ignoredChannels.splice(index, 1);
                 }else{
                     config.ignoredChannels.push(channel.id);
@@ -79,7 +78,7 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "showavatar"){
-            let result = Hyperion.utils.input2boolean(ctx.args[1]);
+            const result = Hyperion.utils.input2boolean(ctx.args[1]);
             if(!result){return "Im not sure what you are trying to say, try yes or no";}
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {showAvatar: result});
@@ -91,13 +90,14 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "enable"){
-            let config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
+            const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
             if(!eventNames.map((e: string) => e.toLowerCase()).includes(ctx.args[1].toLowerCase())){return "I dont know what event that is";}
-            let name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
+            const name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
             if(config[name]?.enabled === true){
                 return "that event is already enabled";
             }
-            let data: any = {};
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data: any = {};
             data[name] = {enabled: true, channel: "default"};
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", data);
@@ -109,13 +109,14 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "disable"){
-            let config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
+            const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
             if(!eventNames.map((e: string) => e.toLowerCase()).includes(ctx.args[1].toLowerCase())){return "I dont know what event that is";}
-            let name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
+            const name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
             if(config[name]?.enabled === false){
                 return "that event is already disabled";
             }
-            let data: any = {};
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const data: any = {};
             data[name] = {enabled: false, channel: "default"};
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", data);
@@ -125,23 +126,24 @@ class Logging extends Command{
             }
             return "The event was disabled";
         }
+        return "this should never be reached";
     }
 
-    async showOverallSettings(ctx: CommandContext, Hyperion: HyperionInterface){
-        let config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
+    async showOverallSettings(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
+        const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
         if(!config){return "An error occured";}
         const chanObj = ctx.guild.channels.get(config.logChannel);
-        let channelName: string = "Not Set";
+        let channelName = "Not Set";
         if(chanObj){channelName = chanObj.mention;}
-        let ignoredChannels: string = "None Set";
+        let ignoredChannels= "None Set";
         if(config.ignoredChannels){
             ignoredChannels = config.ignoredChannels.map((C: string) => ctx.guild.channels.get(C)?.mention).join(", ");
         }
-        let showAv: string = "No";
+        let showAv = "No";
         if(config?.showAvatar === true){showAv = "Yes";}
 
-        let enabled: string = "";
-        let disabled: string = "";
+        let enabled = "";
+        let disabled = "";
         Object.getOwnPropertyNames(config).forEach((name: string) => {
             if(eventNames.includes(name)){
                 if(config[name].enabled === true){
@@ -164,7 +166,7 @@ class Logging extends Command{
         if(disabled === ""){disabled = "None";}
         if(ignoredChannels === ""){ignoredChannels = "None";}
 
-        const data = {
+        const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Logging Configuration",
                 color: Hyperion.defaultColor,

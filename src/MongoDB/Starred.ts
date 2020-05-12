@@ -1,4 +1,4 @@
-const {Schema, model} = require("mongoose");
+import {Schema, model} from "mongoose";
 
 const starred = new Schema({
     guild: {
@@ -21,4 +21,4 @@ const starred = new Schema({
     autoIndex: true  
 });
 
-export default new model("Starred", starred);
+export default  model("Starred", starred);

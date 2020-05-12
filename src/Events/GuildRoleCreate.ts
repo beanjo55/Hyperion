@@ -1,4 +1,5 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-empty-function */
 import {HyperionInterface} from "../types";
 import {Guild, Role} from "eris";
 class GuildRoleCreateHandler{
@@ -6,7 +7,7 @@ class GuildRoleCreateHandler{
     constructor(){
         this.name = "guildRoleCreate";
     }
-    async handle(this: HyperionInterface, guild: Guild, role: Role){
+    async handle(this: HyperionInterface, guild: Guild, role: Role): Promise<void>{
 
     }
 }

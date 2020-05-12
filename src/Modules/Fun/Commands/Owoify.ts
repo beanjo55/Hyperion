@@ -1,12 +1,11 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {HyperionInterface, CommandContext} from "../../../types";
 const owoify = require("owoify-js").default;
-
-const _clean = (text: any) => {
-    let rx = /`/g;
-    let rx2 = /\*/g;
-    let rx3 = /\*/g;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const _clean = (text: any): string => {
+    const rx = /`/g;
+    const rx2 = /\*/g;
+    const rx3 = /\*/g;
     
     if (typeof(text) === "string")
         return text.replace(rx, "\\`").replace(rx2, "\\*").replace(rx3, "\\*");
@@ -30,8 +29,8 @@ class Owoify extends Command{
         });
     }
 
-    // eslint-disable-next-line no-unused-vars
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
         let text = "";
         let output = "";
         const randomInt = Math.floor(Math.random() * options.length);

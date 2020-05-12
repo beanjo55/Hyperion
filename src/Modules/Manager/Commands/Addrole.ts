@@ -1,5 +1,4 @@
 import {Command} from "../../../Core/Structures/Command";
-// eslint-disable-next-line no-unused-vars
 import {CommandContext, HyperionInterface} from "../../../types";
 
 
@@ -17,11 +16,11 @@ class Addrole extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
-        let bot = ctx.guild.members.get(Hyperion.client.user.id);
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+        const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "A cache error occured";}
         if(!bot.permission.has("manageRoles")){return "I need the `Manage Roles` permission to create roles";}
-        let input = ctx.args.join(" ");
+        const input = ctx.args.join(" ");
         if(!input.includes(",")){
             try{
                 ctx.guild.createRole({
@@ -33,10 +32,10 @@ class Addrole extends Command{
             }
             return "Successfully made the role!";
         }
-        let first = input.indexOf(",");
-        let second = input.lastIndexOf(",");
+        const first = input.indexOf(",");
+        const second = input.lastIndexOf(",");
         if(first === second){
-            let sub = input.substring(first+1).trim();
+            const sub = input.substring(first+1).trim();
             let color;
             if(sub.startsWith("#")){
                 color = parseInt(sub.substring(1), 16);
@@ -61,7 +60,7 @@ class Addrole extends Command{
             return "Successfully made the role!";
         }
 
-        let sub = input.substring(first+1, second).trim();
+        const sub = input.substring(first+1, second).trim();
         let color;
         if(sub.startsWith("#")){
             color = parseInt(sub.substring(1), 16);
@@ -75,7 +74,7 @@ class Addrole extends Command{
         }
         if(color === undefined){return "I couldnt understand that color";}
 
-        let subHoist = input.substring(second+1).trim().toLowerCase();
+        const subHoist = input.substring(second+1).trim().toLowerCase();
         let hoist;
         if(subHoist === "yes" || subHoist === "true"){hoist = true;}
         if(subHoist === "false" || subHoist === "no"){hoist = false;}

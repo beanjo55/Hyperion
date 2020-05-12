@@ -6,7 +6,8 @@ class RawWSHandler{
     constructor(){
         this.name = "rawWS";
     }
-    async handle(this: HyperionInterface, packet: any, shardID: Number){
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async handle(this: HyperionInterface, packet: any, shardID: number): Promise<void>{
         if(packet.op !== 7){return;}
         console.log(`Shard: ${shardID} packet: ${inspect(packet)}`);
     }

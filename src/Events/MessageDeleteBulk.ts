@@ -8,8 +8,9 @@ class MessageDeleteBulkHandler{
     constructor(){
         this.name = "messageDeleteBulk";
     }
-    async handle(this: HyperionInterface, messages: Array<Message|any>){
-        let subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async handle(this: HyperionInterface, messages: Array<Message|any>): Promise<void>{
+        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
         subscribed.forEach((m: Module) => {
             m.messageDeleteBulk(this, messages);
         });

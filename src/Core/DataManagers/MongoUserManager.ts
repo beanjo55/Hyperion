@@ -2,151 +2,6 @@ import {default as usermodel} from "../../MongoDB/User";
 // eslint-disable-next-line no-unused-vars
 import * as Types from "../../types";
 
-
-class MongoUserManager{
-    model: any
-    constructor(){
-        this.model = usermodel;
-    }
-
-    async createConfig(user: string){
-        return this.model.create({user: user});
-    }
-
-    async getUserConfig(user: string): Promise<Types.UserConfig>{
-        if(await this.model.exists({user: user})){
-            return await this.model.findOne({user: user}).lean().exec();
-        }else{
-            return await this.createConfig(user);
-        }
-    }
-
-    async ensureExists(user: string){
-        if(!await this.model.exists({user: user})){
-            return await this.createConfig(user);
-        }
-    }
-
-    async gotRep(user: string){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {$inc: {rep: 1}});
-    }
-
-    async getRep(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
-        return doc.rep;
-    }
-
-    async getMoney(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
-        return doc.money;
-    }
-
-
-    async setRep(user: string, amount: number){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {rep: amount});
-    }
-
-    async gaveRep(user: string){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {$inc: {repGiven: 1}});
-    }
-
-    async getGivenRep(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
-        return doc.repGiven;
-    }
-
-    async setGivenRep(user: string, amount: number){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {repGiven: amount});
-    }
-
-    async changeMoney(user: string, amount: number){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {$inc: {money: amount}});
-    }
-
-    async getRepTime(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
-        return doc.lastRepTime;
-    }
-
-    async getDailyTime(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
-        return doc.lastDailyTime;
-    }
-
-    async setRepTime(user: string){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {lastRepTime: Date.now()});
-    }
-
-    async setDailyTime(user: string){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {lastDailyTime: Date.now()});
-    }
-
-    async resetRepTime(user: string){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {lastRepTime: 0});
-    }
-
-    async resetDailyTime(user: string){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {lastDailyTime: 0});
-    }
-
-    async setAcks(user: string, data: Types.AckInterface){
-        let mdata = {};
-        const doc: Types.UserConfig | any = await this.getUserConfig(user);
-        if(doc){
-            mdata = this.merge(doc.acks, data);
-        }
-        const validated = new Acks(mdata);
-        return await this.model.updateOne({user: user}, {acks: validated});
-    }
-
-    async getAcks(user: string): Promise<Types.AckInterface>{
-        const doc: Types.UserConfig | any = await this.getUserConfig(user);
-        if(!doc){
-            doc.acks = {};
-        }
-        return new Acks(doc.acks);
-    }
-
-    async setPings(user: string, status: boolean){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {socailPings: status});
-    }
-
-    async getPingStatus(user: string): Promise<boolean>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
-        return doc.socialPings;
-    }
-
-    async getBio(user: string): Promise<string>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
-        this.model.updateOne({user: user});
-        return doc.bio;
-    }
-
-    async setBio(user: string, bio: string){
-        await this.ensureExists(user);
-        return await this.model.updateOne({user: user}, {bio: bio});
-    }
-
-    merge(oldData: any, newData: any){
-        const newProps: Array<string> = Object.getOwnPropertyNames(newData);
-        newProps.forEach((prop: string) => {
-            oldData[prop] = newData[prop];
-        });
-        return oldData;
-    }
-        
-}
-
 class Acks implements Types.AckInterface{
     contrib: boolean;
     friend: boolean;
@@ -166,6 +21,153 @@ class Acks implements Types.AckInterface{
         this.owner = data.owner ?? false;
         this.custom = data.custom ?? "";
     }
+}
+
+class MongoUserManager{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    model: any
+    constructor(){
+        this.model = usermodel;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async createConfig(user: string): Promise<any>{
+        return this.model.create({user: user});
+    }
+
+    async getUserConfig(user: string): Promise<Types.UserConfig>{
+        if(await this.model.exists({user: user})){
+            return await this.model.findOne({user: user}).lean().exec();
+        }else{
+            return await this.createConfig(user);
+        }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async ensureExists(user: string): Promise<any>{
+        if(!await this.model.exists({user: user})){
+            return await this.createConfig(user);
+        }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async gotRep(user: string): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {$inc: {rep: 1}});
+    }
+
+    async getRep(user: string): Promise<number>{
+        const doc: Types.UserConfig = await this.getUserConfig(user);
+        return doc.rep;
+    }
+
+    async getMoney(user: string): Promise<number>{
+        const doc: Types.UserConfig = await this.getUserConfig(user);
+        return doc.money;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setRep(user: string, amount: number): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {rep: amount});
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async gaveRep(user: string): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {$inc: {repGiven: 1}});
+    }
+
+    async getGivenRep(user: string): Promise<number>{
+        const doc: Types.UserConfig = await this.getUserConfig(user);
+        return doc.repGiven;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setGivenRep(user: string, amount: number): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {repGiven: amount});
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async changeMoney(user: string, amount: number): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {$inc: {money: amount}});
+    }
+
+    async getRepTime(user: string): Promise<number>{
+        const doc: Types.UserConfig = await this.getUserConfig(user);
+        return doc.lastRepTime;
+    }
+
+    async getDailyTime(user: string): Promise<number>{
+        const doc: Types.UserConfig = await this.getUserConfig(user);
+        return doc.lastDailyTime;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setRepTime(user: string): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {lastRepTime: Date.now()});
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setDailyTime(user: string): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {lastDailyTime: Date.now()});
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async resetRepTime(user: string): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {lastRepTime: 0});
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async resetDailyTime(user: string): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {lastDailyTime: 0});
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setAcks(user: string, data: Types.AckInterface): Promise<any>{
+        let mdata = {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const doc: Types.UserConfig | any = await this.getUserConfig(user);
+        if(doc){
+            mdata = this.merge(doc.acks, data);
+        }
+        const validated = new Acks(mdata);
+        return await this.model.updateOne({user: user}, {acks: validated});
+    }
+
+    async getAcks(user: string): Promise<Types.AckInterface>{
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const doc: Types.UserConfig | any = await this.getUserConfig(user);
+        if(!doc){
+            doc.acks = {};
+        }
+        return new Acks(doc.acks);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setPings(user: string, status: boolean): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {socailPings: status});
+    }
+
+    async getPingStatus(user: string): Promise<boolean>{
+        const doc: Types.UserConfig = await this.getUserConfig(user);
+        return doc.socialPings;
+    }
+
+    async getBio(user: string): Promise<string>{
+        const doc: Types.UserConfig = await this.getUserConfig(user);
+        this.model.updateOne({user: user});
+        return doc.bio;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async setBio(user: string, bio: string): Promise<any>{
+        await this.ensureExists(user);
+        return await this.model.updateOne({user: user}, {bio: bio});
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    merge(oldData: any, newData: any): any{
+        const newProps: Array<string> = Object.getOwnPropertyNames(newData);
+        newProps.forEach((prop: string) => {
+            oldData[prop] = newData[prop];
+        });
+        return oldData;
+    }
+        
 }
 
 export {MongoUserManager as manager};

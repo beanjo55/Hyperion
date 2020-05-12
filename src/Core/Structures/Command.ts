@@ -1,6 +1,5 @@
 import {Collection} from "eris";
-// eslint-disable-next-line no-unused-vars
-import {HyperionInterface} from "../../types";
+import {HyperionInterface, CommandContext} from "../../types";
 
 export class Command{
     name: string;
@@ -61,8 +60,9 @@ export class Command{
 
 
     //dummy default command 
-    // eslint-disable-next-line no-unused-vars
-    async execute(ctx: any, Hyperion: HyperionInterface): Promise<any|void>{
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<unknown>{
         throw new Error("Unimplemented command!");
     }
 

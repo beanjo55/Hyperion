@@ -8,8 +8,9 @@ class MessageUpdateHandler{
     constructor(){
         this.name = "messageUpdate";
     }
-    async handle(this: HyperionInterface, msg: Message, oldMessage: any){
-        let subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async handle(this: HyperionInterface, msg: Message, oldMessage: any): Promise<void>{
+        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
         subscribed.forEach((m: Module) => {
             m.messageUpdate(this, msg, oldMessage);
         });
