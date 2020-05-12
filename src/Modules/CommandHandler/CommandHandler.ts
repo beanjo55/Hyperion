@@ -333,8 +333,9 @@ class CommandHandler extends Module{
 
     async executeCommand(ctx: Types.CommandContext, Hyperion: Types.HyperionInterface): Promise<undefined | void>{
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await ctx.command.execute(ctx, Hyperion).then((result: any) => {
-            return this.commandSuccess(ctx, result, Hyperion);
+        await ctx.command.execute(ctx, Hyperion).then(async (result: any) => {
+            await this.commandSuccess(ctx, result, Hyperion);
+            return;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }).catch((err: any) => {
             if(this.logLevel >= 2 && err.toString().startsWith("Discord")){
