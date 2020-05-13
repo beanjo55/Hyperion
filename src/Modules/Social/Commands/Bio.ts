@@ -16,7 +16,7 @@ class Bio extends Command{
     async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
         if(ctx.args.length === 0){
             const current = await Hyperion.managers.user.getBio(ctx.user.id);
-            if(!current || current === ""){return "You dont have a bio set";}
+            if(!current || current === ""){return "You don\'t have a bio set";}
             return `Your current bio is: ${current}`;
         }
         const bio = ctx.args.join(" ");
