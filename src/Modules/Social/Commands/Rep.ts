@@ -29,7 +29,7 @@ class Rep extends Command{
             return `You can give more rep in ${msc(day - (Date.now()-time))}`;
         }
         if(!target){return "Who?";}
-        if(target.id === ctx.user.id){return "You cant rep yourself!";}
+        if(target.id === ctx.user.id){return "You can\'t rep yourself!";}
         Hyperion.managers.user.gotRep(target.id);
         Hyperion.managers.user.gaveRep(ctx.user.id);
         Hyperion.managers.user.setRepTime(ctx.user.id);
