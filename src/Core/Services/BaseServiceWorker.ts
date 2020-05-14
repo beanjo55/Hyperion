@@ -1,0 +1,69 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-mixed-spaces-and-tabs */
+import { ServiceWorkerIPC } from "./ServiceWorkerIPC";
+import { ShardManager } from "../Sharding/ShardManager";
+import { IPCEvents, IPCResult } from "../../types";
+
+
+
+
+
+
+export abstract class BaseServiceWorker {
+	/** The worker's service name */
+	public readonly name: string;
+	/** The worker's IPC client */
+	public readonly ipc: ServiceWorkerIPC;
+
+	public constructor(public manager: ShardManager) {
+	    this.name = String(process.env.SERVICE_NAME);
+	    this.ipc = new ServiceWorkerIPC(this, this.manager.ipcSocket);
+
+	    process.on("exit", () => {
+	        this.ipc.disconnect();
+	        process.exit(0);
+	    });
+	}
+
+	public async init(): Promise<void> {
+	    await this.ipc.init();
+
+	    await this.launch();
+	}
+
+	/** Notify the master process that this service is ready (required) */
+	protected sendReady(): Promise<unknown> {
+	    return this.ipc.server.send({ op: IPCEvents.READY, d: { name: this.name } });
+	}
+
+	/** Can be implemented to allow for graceful shutdown of the service */
+	public abstract shutdown(): Promise<void> | void;
+
+	/**
+	 * Is called after the worker is initialized with an IPC client. This method must be implemented.
+	 * @abstract
+	 */
+	protected abstract launch(): Promise<void> | void;
+
+	public async eval(script: string): Promise<any> {
+	    // eslint-disable-next-line no-eval
+	    return await eval(script);
+	}
+
+	/**
+	 * Is called when a SERVICE_COMMAND event is received.
+	 * If the event is receptive then an IPCResult must be returned.
+	 * @abstract
+	 */
+	public abstract async handleCommand(data: any, receptive: boolean): Promise<IPCResult | void>;
+
+	/** Formats data as a response to an IPC event or command */
+	public asResponse(data: any): any {
+	    return { success: true, d: data };
+	}
+
+	/** Formats an error as a response to an IPC event or command */
+	public asError(error: Error): any {
+	    return { success: false, d: { name: error.name, message: error.message, stack: error.stack } };
+	}
+}

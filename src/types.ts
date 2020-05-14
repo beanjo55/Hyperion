@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/interface-name-prefix */
 /* eslint-disable no-unused-vars */
-import {Client, Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel} from "eris";
+import {Client, Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, ClientOptions} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
 import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
 import mongoose from "mongoose";
 import IORedis from "ioredis";
+import { ClusterWorkerIPC } from "./Core/Cluster/ClusterWorkerIPC";
 
 
 export interface HyperionGuild extends Guild{
@@ -70,9 +72,19 @@ export interface HyperionInterface {
     utils: Utils;
     readonly circleCIToken: string;
     redis: IORedis.Redis;
+    redact(input: string): string;
+    postAll(): void;
+    postDBL(): void;
+    postGlenn(): void;
+    postDBoats(): void;
+    loadEvents(): void;
+    loadEvent(eventfile: string): void;
+    loadMod(modname: string): void;
+    loadMods(): void;
+    init(): void;
+    id: number;
+    ipc: ClusterWorkerIPC;
 }
-
-
 
 export interface CommandConfig{
     allowedRoles: Array<string>;
@@ -323,4 +335,164 @@ export interface GlobalConfig{
     globalDisabledLogEvents: Array<string>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
+}
+
+
+export enum IPCEvents {
+	EVAL = "eval",
+	SERVICE_EVAL = "serviceEval",
+	READY = "ready",
+	SHARD_READY = "shardReady",
+	SHARD_CONNECTED = "shardConnected",
+	SHARD_RESUMED = "shardResumed",
+	SHARD_DISCONNECTED = "shardDisconnected",
+	ERROR = "error",
+	SHUTDOWN = "shutdown",
+	GET = "get",
+	SET = "set",
+	FETCH_USER = "fetchUser",
+	FETCH_GUILD = "fetchGuild",
+	FETCH_CHANNEL = "fetchChannel",
+	SERVICE_COMMAND = "serviceCommand",
+	GET_STATS = "getStats"
+}
+
+export enum SharderEvents {
+	SERVICE_SPAWN = "serviceSpawn",
+	SERVICE_READY = "serviceReady",
+	CLUSTER_SPAWN = "clusterSpawn",
+	CLUSTER_READY = "clusterReady",
+	SHARD_CONNECTED = "shardConnected",
+	SHARD_READY = "shardReady",
+	SHARD_RESUMED = "shardResumed",
+	SHARD_DISCONNECT = "shardDisconnect",
+	STATS_UPDATED = "statsUpdated",
+	DEBUG = "debug",
+	ERROR = "error"
+}
+
+export interface IPCEvent {
+	op: IPCEvents;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	d?: any;
+}
+
+export interface IPCResult {
+	success: boolean;
+	d: unknown;
+}
+
+export interface IPCError {
+	name: string;
+	message: string;
+	stack?: string;
+}
+
+export interface IPCEvalResults {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	results: any[];
+	errors: IPCError[];
+}
+
+export interface ProcessStats {
+	/** https://nodejs.org/api/process.html#process_process_memoryusage */
+	memory: NodeJS.MemoryUsage;
+	/** https://nodejs.org/api/process.html#process_process_cpuusage_previousvalue */
+	cpu: NodeJS.CpuUsage;
+	discord?: {
+		guilds: number;
+		/** The current latency between the shard and Discord, in milliseconds */
+		latencies: number[];
+		/** How long in milliseconds the bot has been up for */
+        uptime: number;
+        users: number;
+	};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: string]: any;
+}
+
+export interface HyperionStats {
+	clusters: Record<number, ProcessStats>;
+	services: Record<string, ProcessStats>;
+	manager: ProcessStats;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: string]: any;
+}
+
+export interface ShardOptions {
+	first: number;
+	last: number;
+	total: number;
+}
+
+export interface ClusterOptions {
+	id: number;
+	shards: ShardOptions;
+}
+
+export interface ServiceOptions {
+	name: string;
+	/** How many milliseconds to wait for the service worker to be ready */
+	timeout?: number;
+}
+
+export interface SharderOptions {
+	/** Path to the js file for clusters to run */
+	path: string;
+	/** Discord bot token */
+	token: string;
+	/** Number of guilds each shard should have (at initial sharding) (Only used if shardCount is set to 'auto') */
+	guildsPerShard?: number;
+	/** Number of shards to create */
+	shardCount?: number | "auto";
+	/** Maximum number of clusters to create */
+	clusterCount?: number;
+	/** Options to pass to the Eris client constructor */
+	clientOptions?: ClientOptions;
+	/** How long to wait for a cluster to connect before throwing an error, multiplied by the number of thousands of guilds */
+	timeout?: number;
+	/** An array of arguments to pass to the cluster node processes */
+	nodeArgs?: string[];
+	/** The socket/port for IPC to run on */
+	ipcSocket?: string | number;
+	/** How often to update stats (in milliseconds) */
+    statsInterval?: number;
+    delay: number;
+}
+
+export interface SessionObject {
+	url: string;
+	shards: number;
+	session_start_limit: {
+		total: number;
+		remaining: number;
+        reset_after: number;
+        max_concurency: number;
+	};
+}
+
+export interface ClusterShardInfo {
+	/** First 0-indexed shard for this cluster */
+	first: number;
+	/** Last 0-indexed shard for this cluster */
+	last: number;
+	/** Total number of shards across all clusters */
+	total: number;
+}
+
+export interface ClusteringOptions{
+    clusters: number;
+    shards: number | "auto";
+    delay: number;
+}
+
+export interface MongoUpdateResult{
+    n: number;
+    nModified: number;
+    ok: number;
+    opTime?: Array<unknown>;
+    electionId?: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    operationTime?: any;
+    "$clusterTime": Array<unknown>;
 }

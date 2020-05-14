@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable no-unused-vars */
 import {default as fs} from "fs";
-import {Client, Collection} from "eris";
-import Eris from "eris";
+import {Collection} from "eris";
 import {Module} from "./Core/Structures/Module.js";
 import {Command} from "./Core/Structures/Command.js";
 import {logger} from "./Core/Structures/Logger";
 import {default as Redis} from "ioredis";
 import {default as axios} from "axios";
 import mongoose = require("mongoose");
-import {CoreOptions, HyperionInterface, Managers, GlobalConfig, Utils} from "./types";
+import {inspect} from "util";
+import {CoreOptions, HyperionInterface, Managers, GlobalConfig, Utils, HyperionStats, SharderEvents} from "./types";
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
 import {default as guilduser} from "./MongoDB/Guilduser";
@@ -24,6 +27,9 @@ import {gc as getColor} from "./Core/Utils/Roles";
 import {resolveTextChannel} from "./Core/Utils/Channels";
 import {resolveVoiceChannel} from "./Core/Utils/Channels";
 import {resolveCategory} from "./Core/Utils/Channels";
+import {BaseClusterWorker} from "./Core/Cluster/BaseClusterWorker";
+import {ShardManager} from "./Core/Sharding/ShardManager";
+
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const config = require("../config.json");
@@ -51,6 +57,8 @@ function input2boolean(input: string): boolean | undefined{
     return;
 }
 
+
+
 const utils: Utils = {
     hoistResolver: HoistUserResolver,
     resolveUser: userResolver,
@@ -63,8 +71,8 @@ const utils: Utils = {
 
 };
 
-class HyperionC implements HyperionInterface{
-    client: Eris.Client;
+
+export default class HyperionC extends BaseClusterWorker implements HyperionInterface{
     readonly build: string;
     modules: Collection<Module>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,9 +100,11 @@ class HyperionC implements HyperionInterface{
     readonly circleCIToken: string;
     redis: Redis.Redis;
     private listTokens: {[key: string]: string};
+    public stats!: HyperionStats;
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(token: string, erisOptions: any, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions){
-        this.client = new Client(token, erisOptions);
+    constructor(manager: ShardManager, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions,){
+        super(manager);
         this.build = coreOptions.build;
         this.modules = new Collection(Module);
         this.commands = new Collection(Command);
@@ -121,17 +131,37 @@ class HyperionC implements HyperionInterface{
         this.redis = new Redis({keyPrefix: `${this.build}:`});
         this.listTokens = listTokens;
 
+
     }
-    async init(): Promise<void>{
+
+    async launch(): Promise<void>{
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (process as NodeJS.EventEmitter).on("uncaughtException", (err: Error, origin: string) =>{
+            this.logger.fatal("Hyperion", "Uncaught Exception", "An uncaught execption was encountered");
+            this.logger.fatal("Hyperion", "Uncaught Exception Error", inspect(err));
+            this.logger.fatal("Hyperion", "Uncaught Exception Origin", inspect(origin));
+            this.sentry.captureExecption(err);
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (process as NodeJS.EventEmitter).on("unhandledRejection", (reason: Error | any) => {
+            this.logger.error("Hyperion", "Unhandled Rejection", "Encountered unhandled rejection");
+            this.logger.error("Hyperion", "Unhandled Rejection", inspect(reason));
+            this.sentry.captureException(reason);
+        });
         await this.loadMods();
         await this.loadEvents();
         await this.models.global.findOne({}).lean().exec().then((g: GlobalConfig | null) => {
             if(g === null){throw new Error("Unable to get global config");}
             this.global = g;
         });
+        this.manager.on(SharderEvents.STATS_UPDATED, (stats: HyperionStats) => {
+            console.log("cluster recieved stats update");
+            this.stats = stats;
+        });
+        this.client.connect();
     }
 
-    async loadEvent(eventfile: string): Promise<void>{
+    loadEvent(eventfile: string): void{
         try{
             const Event = require(`./Events/${eventfile}`).event;
             this.bevents[Event.name] = Event.handle.bind(this);
@@ -141,14 +171,14 @@ class HyperionC implements HyperionInterface{
         }
     }
 
-    async loadEvents(): Promise<void>{
+    loadEvents(): void{
         const eventfiles = fs.readdirSync(__dirname + "/Events");
         eventfiles.forEach(file => {
             this.loadEvent(file);
         });
     }
 
-    async loadMod(modname: string): Promise<void>{
+    loadMod(modname: string): void{
         try{
             const mod = require(`./Modules/${modname}/${modname}.js`).default;
             this.modules.add(new mod);
@@ -157,7 +187,7 @@ class HyperionC implements HyperionInterface{
         }
     }
 
-    async loadMods(): Promise<void>{
+    loadMods(): void{
         this.modlist.forEach(mod =>{
             this.loadMod(mod);
         });
@@ -246,9 +276,21 @@ class HyperionC implements HyperionInterface{
         }
     }
 
+    redact(input: string): string{
+        let output = input;
+        Object.getOwnPropertyNames(this.listTokens).forEach((t: string) => {
+            const rx = new RegExp(this.listTokens[t], "gmi");
+            output = output.replace(rx, "No");
+        });
+        const rx2 = new RegExp((config.token as string), "gmi");
+        const rx3 = new RegExp(this.circleCIToken, "gmi");
+        output = output.replace(rx2, "No").replace(rx3, "No");
+        return output;
+    }
+
 }
 
-
+/*
 async function start(): Promise<void>{
     if((config.coreOptions as CoreOptions).init !== undefined && (config.coreOptions as CoreOptions).init === true){
         await models.global.create({});
@@ -265,5 +307,5 @@ async function start(): Promise<void>{
 fs.readFile(`${__dirname}/v2.txt`, "utf8", function (error, data) {
     console.log(data);
     start();
-});
+});*/
 //hi wuper

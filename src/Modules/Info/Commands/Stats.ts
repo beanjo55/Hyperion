@@ -2,7 +2,7 @@ import {Command} from "../../../Core/Structures/Command";
 import {default as os} from "os";
 import {default as msc} from "pretty-ms";
 // eslint-disable-next-line no-unused-vars
-import {HyperionInterface, CommandContext} from "../../../types";
+import {HyperionInterface, CommandContext, IPCResult, HyperionStats} from "../../../types";
 import { Embed } from "eris";
 
 class Stats extends Command{
@@ -18,7 +18,27 @@ class Stats extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>}>{
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
+        let totalGuilds = 0;
+        let totalMem = 0;
+        let totalUsers = 0;
+        const fstats: IPCResult = (await Hyperion.ipc.getStats() as IPCResult);
+        if(!fstats?.success){
+            return "There was an error fetching stats";
+        }
+
+        const stats: HyperionStats = (fstats.d as HyperionStats);
+        const clusters = Object.getOwnPropertyNames(stats.clusters);
+        if(clusters.length !== 0){
+            totalMem += stats.manager.memory.rss/1024/1024;
+            clusters.forEach((c: string) => {
+            
+                totalMem += stats.clusters[Number(c)].memory.rss/1024/1024;
+                totalGuilds += stats.clusters[Number(c)]?.discord?.guilds ?? 0;
+                totalUsers += stats.clusters[Number(c)]?.discord?.users ?? 0;
+            });
+        }
+
         const data = {
             embed:{
                 title: "Hyperion Stats",
@@ -37,17 +57,12 @@ class Stats extends Command{
                     },
                     {
                         name: "Guilds",
-                        value: `${Hyperion.client.guilds.size}`,
+                        value: `${totalGuilds !== 0 ? totalGuilds: "I havent been up long enough to show some stats"}`,
                         inline: true
                     },
                     {
-                        name: "Users",
-                        value: `${Hyperion.client.users.size}`,
-                        inline: true
-                    },
-                    {
-                        name: "Uptime",
-                        value: `${msc(Hyperion.client.uptime)}`,
+                        name: "Lifetime Commands Used",
+                        value: `${await Hyperion.redis.get("lcr")}`,
                         inline: true
                     },
                     {
@@ -56,15 +71,26 @@ class Stats extends Command{
                         inline: true
                     },
                     {
-                        name: "RAM Usage",
-                        value: `${(process.memoryUsage().heapUsed/1024/1024).toFixed(2)}mb`,
+                        name: "Users",
+                        value: `${totalUsers !== 0 ? totalUsers: "I havent been up long enough to show some stats"}`,
                         inline: true
                     },
                     {
-                        name: "Lifetime Commands Used",
-                        value: `${await Hyperion.redis.get("lcr")}`,
+                        name: "Uptime",
+                        value: `${msc(Hyperion.client.uptime)}`,
+                        inline: true
+                    },
+                    {
+                        name: "Modules",
+                        value: `${Hyperion.modules.size}`,
+                        inline: true
+                    },
+                    {
+                        name: "RAM Usage",
+                        value: `${totalMem !== 0 ? totalMem.toFixed(2): "I havent been up long enough to show some stats"}mb`,
                         inline: true
                     }
+
                 ]
             }
         };

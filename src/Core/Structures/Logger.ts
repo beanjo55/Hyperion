@@ -2,7 +2,7 @@ import signale from "signale";
 
 function error(name: string, subprefix: string, message: string): void{
     if(subprefix){
-        message = `[${subprefix}] ${message}`;
+        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
     signale.error({
         prefix: `[${name}]`,
@@ -12,7 +12,7 @@ function error(name: string, subprefix: string, message: string): void{
 
 function fatal(name: string, subprefix: string, message: string): void{
     if(subprefix){
-        message = `[${subprefix}] ${message}`;
+        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
     signale.fatal({
         prefix: `[${name}]`,
@@ -22,7 +22,7 @@ function fatal(name: string, subprefix: string, message: string): void{
 
 function debug(name: string, subprefix: string, message: string): void{
     if(subprefix){
-        message = `[${subprefix}] ${message}`;
+        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
     signale.debug({
         prefix: `[${name}]`,
@@ -32,7 +32,7 @@ function debug(name: string, subprefix: string, message: string): void{
 
 function warn(name: string, subprefix: string, message: string): void{
     if(subprefix){
-        message = `[${subprefix}] ${message}`;
+        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
     signale.warn({
         prefix: `[${name}]`,
@@ -42,7 +42,7 @@ function warn(name: string, subprefix: string, message: string): void{
 
 function info(name: string, subprefix: string, message: string): void{
     if(subprefix){
-        message = `[${subprefix}] ${message}`;
+        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
     signale.info({
         prefix: `[${name}]`,
@@ -52,7 +52,7 @@ function info(name: string, subprefix: string, message: string): void{
 
 function success(name: string, subprefix: string, message: string): void{
     if(subprefix){
-        message = `[${subprefix}] ${message}`;
+        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
     signale.success({
         prefix: `[${name}]`,
