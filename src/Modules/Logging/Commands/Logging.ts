@@ -136,7 +136,8 @@ class Logging extends Command{
     }
 
     async showOverallSettings(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
-        const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
+        let config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
+        config = new LoggingConfig(config);
         if(!config){return "An error occured";}
         const chanObj = ctx.guild.channels.get(config.logChannel);
         let channelName = "Not Set";
