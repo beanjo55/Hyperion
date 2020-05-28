@@ -35,8 +35,10 @@ class Logging extends Command{
         if(!ctx.args[0]){
             return await this.showOverallSettings(ctx, Hyperion);
         }
+        
         if(!settingNamesL.includes(ctx.args[0].toLowerCase())){return "I dont know what that setting is";}
         if(ctx.args[0].toLowerCase() === "logchannel"){
+            if(!ctx.args[1]){return "Please specify a channel";}
             const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
             if(!channel){return "Im not sure what that channel is";}
             try{
@@ -49,6 +51,7 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "ignoredchannels"){
+            if(!ctx.args[1]){return "Please specify a channel";}
             const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
             if(!channel){return "Im not sure what that channel is";}
 
@@ -78,6 +81,7 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "showavatar"){
+            if(!ctx.args[1]){return "Please specify true/false or yes/no";}
             const result = Hyperion.utils.input2boolean(ctx.args[1]);
             if(!result){return "Im not sure what you are trying to say, try yes or no";}
             try{
@@ -90,6 +94,7 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "enable"){
+            if(!ctx.args[1]){return "Please specify an event";}
             const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
             if(!eventNames.map((e: string) => e.toLowerCase()).includes(ctx.args[1].toLowerCase())){return "I dont know what event that is";}
             const name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
@@ -109,6 +114,7 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "disable"){
+            if(!ctx.args[1]){return "Please specify an event";}
             const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
             if(!eventNames.map((e: string) => e.toLowerCase()).includes(ctx.args[1].toLowerCase())){return "I dont know what event that is";}
             const name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
