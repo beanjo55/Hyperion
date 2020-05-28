@@ -56,7 +56,7 @@ export class Cluster extends EventEmitter {
 	            this.worker.once("exit", exitListener);
 
 				// Send command to shut down
-				this.manager.ipc!.sendTo("cluster:" + this.id, { op: IPCEvents.SHUTDOWN });
+				this.manager.ipc!.sendTo("Cluster:" + this.id, { op: IPCEvents.SHUTDOWN });
 
 				if (timeout > 0)
 				    timeoutRef = setTimeout(() => {

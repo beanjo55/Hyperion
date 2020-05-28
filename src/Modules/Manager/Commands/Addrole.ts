@@ -71,6 +71,10 @@ class Addrole extends Command{
         if(!isNaN(Number(sub))){
             if(Number(sub) > 16777215 || Number(sub) < 0){return "I couldnt understand that color";}
             color = Number(sub);
+        }else{
+            if(!color){
+                color = parseInt(sub, 16);
+            }
         }
         if(color === undefined){return "I couldnt understand that color";}
 

@@ -16,7 +16,7 @@ class Devstats extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface){
+    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
         const fstats: IPCResult = (await Hyperion.ipc.getStats() as IPCResult);
         if(!fstats?.success){
             return "There was an error fetching stats";
