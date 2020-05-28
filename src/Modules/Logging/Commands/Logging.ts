@@ -25,9 +25,9 @@ class Logging extends Command{
             module: "logging",
             userperms: ["manager"],
             
-            helpDetail: "Configures the logging settings for the server",
-            helpUsage: "{prefix}logging WIP",
-            helpUsageExample: "{prefix}logging WIP"
+            helpDetail: "Configures the logging settings for the server, running the command with no nputs shows current settings",
+            helpUsage: "{prefix}logging\n{prefix}logging [setting] [value]\n{prefix}logging enable [event name]\n{prefix}logging disable [event name]",
+            helpUsageExample: "{prefix}logging logChannel #logs\n{prefix}logging enable messagedelete\n{prefix}logging disable messagedelete"
         });
     }
 
