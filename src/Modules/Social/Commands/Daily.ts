@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import {Member} from "eris";
 import {default as msc} from "pretty-ms";
 const day = 86400000;
@@ -19,7 +19,7 @@ class Daily extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const payout: number = randomInt(lower, upper);
         const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
         const time: number = await Hyperion.managers.user.getDailyTime(ctx.user.id);

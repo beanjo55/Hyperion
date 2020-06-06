@@ -1,16 +1,16 @@
 /* eslint-disable no-unused-vars */
-import {HyperionInterface, GuildConfig} from "../../../types";
+import {IHyperion, GuildConfig} from "../../../types";
 import {Message, MessageContent, Emoji} from "eris";
 import {default as starModel} from "../../../MongoDB/Starred";
 
 
-async function updatePost(Hyperion: HyperionInterface, sentMessage: Message, newCount: number): Promise<void>{
+async function updatePost(Hyperion: IHyperion, sentMessage: Message, newCount: number): Promise<void>{
     sentMessage.edit({content: `${newCount}⭐`, embed: sentMessage.embeds[0]});
 }
 
 
 
-async function createPost(Hyperion: HyperionInterface, starred: Message, conf: GuildConfig, count: number): Promise<Message | undefined>{
+async function createPost(Hyperion: IHyperion, starred: Message, conf: GuildConfig, count: number): Promise<Message | undefined>{
 
     if(starred.channel.type !== 0){return;}
     const msglink = `https://discordapp.com/channels/${starred.channel.guild.id}/${starred.channel.id}/${starred.id}`;
@@ -38,7 +38,7 @@ async function createPost(Hyperion: HyperionInterface, starred: Message, conf: G
 }
 
 
-async function star(Hyperion: HyperionInterface, omsg: Message, emote: Emoji, userID: string, conf: GuildConfig, op: string): Promise<void | undefined>{
+async function star(Hyperion: IHyperion, omsg: Message, emote: Emoji, userID: string, conf: GuildConfig, op: string): Promise<void | undefined>{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let msg: any;
     if(!omsg.author){
@@ -74,7 +74,7 @@ async function star(Hyperion: HyperionInterface, omsg: Message, emote: Emoji, us
                 const oldPostID: any = await starModel.findOne({message: msg.id}).lean().exec();
                 if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
                 const channel = msg.channel.guild.channels.get(conf.starboard.starChannel);
-                const oldPost: Message = await channel.getMessage(oldPostID.starpost);
+                const oldPost: Message = channel.messages.get(oldPostID.starpost) ?? await channel.getMessage(oldPostID.starpost);
                 updatePost(Hyperion, oldPost, Hyperion.stars[msg.id].count);
             }else{
                 const post: Message | undefined = await createPost(Hyperion, msg, conf, Hyperion.stars[msg.id].count);

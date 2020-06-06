@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import {Member} from "eris";
 import {default as msc} from "pretty-ms";
 const day = 86400000;
@@ -15,7 +15,7 @@ class Rep extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
         const time: number = await Hyperion.managers.user.getRepTime(ctx.user.id);
         if(ctx.args.length === 0){
@@ -29,7 +29,7 @@ class Rep extends Command{
             return `You can give more rep in ${msc(day - (Date.now()-time))}`;
         }
         if(!target){return "Who?";}
-        if(target.id === ctx.user.id){return "You can\'t rep yourself!";}
+        if(target.id === ctx.user.id){return "You can't rep yourself!";}
         Hyperion.managers.user.gotRep(target.id);
         Hyperion.managers.user.gaveRep(ctx.user.id);
         Hyperion.managers.user.setRepTime(ctx.user.id);

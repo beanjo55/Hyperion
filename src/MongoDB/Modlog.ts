@@ -1,4 +1,6 @@
-import {Schema, model} from "mongoose";
+/* eslint-disable @typescript-eslint/interface-name-prefix */
+/* eslint-disable @typescript-eslint/no-empty-interface */
+import {Schema, model, Document, Model} from "mongoose";
 const modlog = new Schema({
 
     guild: {
@@ -7,80 +9,111 @@ const modlog = new Schema({
         index: true
     },
 
-    kind: {
-        type: String,
-        required: true,
-        enum: [
-            "ban",
-            "banmatch",
-            "softban",
-            "unban",
-            "mute",
-            "unmute",
-            "warn",
-            "automute",
-            "note",
-            "rolepersist",
-            "temprole"
-        ]
-    },
-
-
-    //for warnings and notes, if the warn/note as been removed
-    removed: {
-        type: Boolean,
-        default: false
-    },
-
-    moderator: {
-        type: String,
-        required: true
-    },
-
-    //case num
-    //notes are prefixed with _ and counted separately
-    case: {
-        type: String,
-        index: true,
-        required: true
-    },
-
-    //reason
-    content: {
-        type: String
-    },
-
-
-    //time the log was created
-    time: {
-        type: Number,
-        default: Date.now()
-    },
-
-    //the length of the modlog, stored as the time after creation
-    limit: {
-        type: Number
-    },
-
-    //array of moderated users. normally just one except for ban match
     user: {
         type: String,
         required: true,
         index: true
     },
 
-    modName: {
+    moderator: {
+        type: String,
+        required: true,
+        index: true
+    },
+
+    mid: {
+        type: String,
+        required: true, 
+        unique: true
+    },
+
+    moderationType: {
         type: String,
         required: true
     },
 
-    //only for single cases (not ban match)
-    userName: {
+    caseNumber: {
+        type: Number,
+        required: true
+    },
+
+    reason: {
+        type: String
+    },
+
+    revoked: {
+        type: Boolean
+    },
+
+    expired: {
+        type: Boolean,
+        default: false
+    },
+
+    timeGiven: {
+        type: Number,
+        required: true
+    },
+
+    duration: {
+        type: Number
+    },
+
+    endTime: {
+        type: Number
+    },
+
+    removedRoles: {
+        type: Array
+    },
+
+    role: {
+        type: String
+    },
+
+    logPost: {
+        type: String
+    },
+
+    auto: {
+        type: Boolean,
+        default: false
+    },
+    stringLength: {
         type: String
     }
+    
+    
 
 },{
     autoIndex: true,
     minimize: false
 });
-export default model("modlog", modlog);
+modlog.index({guild: 1, user: 1});
+modlog.index({guild: 1, moderator: 1});
+modlog.index({guild: 1, caseNumber: 1});
+modlog.index({guild: 1, user: 1, moderationType: 1, auto: 1});
+modlog.index({guild: 1, user: 1, moderationType: 1});
+modlog.index({guild: 1, user: 1, auto: 1});
+export interface IModLog{
+    guild: string;
+    user: string;
+    moderator: string;
+    mid: string;
+    moderationType: string;
+    caseNumber: number;
+    reason?: string;
+    revoked?: boolean;
+    expired?: boolean;
+    timeGiven: number;
+    duration?: number;
+    endTime?: number;
+    removedRoles?: Array<string>;
+    role?: string;
+    logPost?: string;
+    auto: boolean;
+    stringLength?: string;
+}
+export interface IModLogDoc extends Document, IModLog{}
+export interface IModLogModel extends Model<IModLogDoc>{}
+export default model<IModLogDoc>("modlog", modlog);

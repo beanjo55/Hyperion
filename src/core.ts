@@ -36,16 +36,16 @@ async function start(): Promise<void>{
         path: __dirname + "/main.js",
         token: config.token,
         clientOptions: config.erisOptions,
-        shardCount: config.clusteringOptions.shards,
-        clusterCount: config.clusteringOptions.clusters,
-        delay: config.clusteringOptions.delay
+        shardCount: config.IClusteringOptions.shards,
+        clusterCount: config.IClusteringOptions.clusters,
+        delay: config.IClusteringOptions.delay
     });
     await manager.spawn();
     if (isMaster) {
         // Master process code here
         manager.on("error", error => {
-            if(error?.code === 1006){
-                console.error(error);
+            if(!error.toString().includes("1006")){
+                console.log(error);
             }}); // Not handling these errors will kill everything when any error is emitted
         manager.on("debug", message => {
             if(message !== "Updating stats"){

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {Command} from "../../../Core/Structures/Command";
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 import {exec} from "child_process";
 import { Message } from "eris";
 
@@ -19,7 +19,7 @@ class Build extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<Message|void>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<Message|void>{
         let buildNum = "latest";
         if(ctx.args[0] && !isNaN(Number(ctx.args[0]))){buildNum = ctx.args[0];}
         const dir = `${__dirname}../../../../`;

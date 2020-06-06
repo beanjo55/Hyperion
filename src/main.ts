@@ -9,9 +9,9 @@ import {Command} from "./Core/Structures/Command.js";
 import {logger} from "./Core/Structures/Logger";
 import {default as Redis} from "ioredis";
 import {default as axios} from "axios";
-import mongoose = require("mongoose");
+import {default as mongoose} from "mongoose";
 import {inspect} from "util";
-import {CoreOptions, HyperionInterface, Managers, GlobalConfig, Utils, HyperionStats, SharderEvents} from "./types";
+import {CoreOptions, IHyperion, IManagers, GlobalConfig, IUtils, ILogger} from "./types";
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
 import {default as guilduser} from "./MongoDB/Guilduser";
@@ -20,10 +20,14 @@ import {default as global} from "./MongoDB/Global";
 import {default as starModel} from "./MongoDB/Starred";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
 import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
-import {hur as HoistUserResolver} from "./Core/Utils/Resolvers";
-import {ur as userResolver} from "./Core/Utils/Resolvers";
+import {manager as MMLM} from "./Core/DataManagers/MongoModLogManager";
+import {hoistUserResolver} from "./Core/Utils/Resolvers";
+import {resolveUser as userResolver} from "./Core/Utils/Resolvers";
+import {banResolver} from "./Core/Utils/Resolvers";
+import {strictResolver} from "./Core/Utils/Resolvers";
 import {sr as sortRoles} from "./Core/Utils/Roles";
 import {gc as getColor} from "./Core/Utils/Roles";
+import {resolveRole} from "./Core/Utils/Roles";
 import {resolveTextChannel} from "./Core/Utils/Channels";
 import {resolveVoiceChannel} from "./Core/Utils/Channels";
 import {resolveCategory} from "./Core/Utils/Channels";
@@ -47,7 +51,8 @@ const models = {
 const listTokens = {
     dbl: config.coreOptions?.dblToken,
     glenn: config.coreOptions?.glennToken,
-    dboats: config.coreOptions?.dboatsToken
+    dboats: config.coreOptions?.dboatsToken,
+    botsGG: config.coreOptions?.botsGGToken
 };
 
 function input2boolean(input: string): boolean | undefined{
@@ -59,27 +64,29 @@ function input2boolean(input: string): boolean | undefined{
 
 
 
-const utils: Utils = {
-    hoistResolver: HoistUserResolver,
+const utils: IUtils = {
+    hoistResolver: hoistUserResolver,
     resolveUser: userResolver,
     sortRoles: sortRoles,
     getColor: getColor,
     resolveCategory: resolveCategory,
     resolveTextChannel: resolveTextChannel,
     resolveVoicechannel: resolveVoiceChannel,
-    input2boolean: input2boolean
-
+    input2boolean: input2boolean,
+    banResolver: banResolver,
+    strictResolver: strictResolver,
+    resolveRole: resolveRole
 };
 
 
-export default class HyperionC extends BaseClusterWorker implements HyperionInterface{
+export default class HyperionC extends BaseClusterWorker implements IHyperion{
     readonly build: string;
     modules: Collection<Module>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sentry: any;
     commands: Collection<Command>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    logger: any;
+    logger: ILogger;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bevents: any;
     readonly devPrefix: string;
@@ -93,14 +100,13 @@ export default class HyperionC extends BaseClusterWorker implements HyperionInte
     db: mongoose.Connection;
     global!: GlobalConfig;
     logLevel: number
-    managers: Managers;
+    managers: IManagers;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stars: any;
-    utils: Utils;
+    utils: IUtils;
     readonly circleCIToken: string;
     redis: Redis.Redis;
     private listTokens: {[key: string]: string};
-    public stats!: HyperionStats;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(manager: ShardManager, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions,){
@@ -124,7 +130,7 @@ export default class HyperionC extends BaseClusterWorker implements HyperionInte
         this.db = this.mongoDB(mongoLogin);
         this.version = require("../package.json").version;
         this.logLevel = coreOptions.defaultLogLevel;
-        this.managers = {guild: new MGM, user: new MUM};
+        this.managers = {guild: new MGM, user: new MUM, modlog: new MMLM};
         this.stars = {};
         this.circleCIToken = coreOptions.circleCIToken;
         this.utils = utils;
@@ -137,37 +143,41 @@ export default class HyperionC extends BaseClusterWorker implements HyperionInte
     async launch(): Promise<void>{
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (process as NodeJS.EventEmitter).on("uncaughtException", (err: Error, origin: string) =>{
-            this.logger.fatal("Hyperion", "Uncaught Exception", "An uncaught execption was encountered");
-            this.logger.fatal("Hyperion", "Uncaught Exception Error", inspect(err));
-            this.logger.fatal("Hyperion", "Uncaught Exception Origin", inspect(origin));
+            this.logger.fatal("Hyperion", "An uncaught execption was encountered", "Uncaught Exception");
+            this.logger.fatal("Hyperion", inspect(err), "Uncaught Exception Error");
+            this.logger.fatal("Hyperion", inspect(origin), "Uncaught Exception Origin");
             this.sentry.captureExecption(err);
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (process as NodeJS.EventEmitter).on("unhandledRejection", (reason: Error | any) => {
-            this.logger.error("Hyperion", "Unhandled Rejection", "Encountered unhandled rejection");
-            this.logger.error("Hyperion", "Unhandled Rejection", inspect(reason));
+            this.logger.error("Hyperion", "Encountered unhandled rejection", "Unhandled Rejection");
+            this.logger.error("Hyperion", inspect(reason), "Unhandled Rejection");
             this.sentry.captureException(reason);
         });
-        await this.loadMods();
-        await this.loadEvents();
+        this.loadMods();
+        this.loadEvents();
         await this.models.global.findOne({}).lean().exec().then((g: GlobalConfig | null) => {
             if(g === null){throw new Error("Unable to get global config");}
             this.global = g;
         });
-        this.manager.on(SharderEvents.STATS_UPDATED, (stats: HyperionStats) => {
-            console.log("cluster recieved stats update");
-            this.stats = stats;
-        });
         this.client.connect();
+    }
+
+    async reloadGlobal(): Promise<void>{
+        const newGlobal = await this.models.global.findOne({}).lean().exec();
+        if(!newGlobal){
+            throw new Error("Could not find new global, aborting!");
+        }
+        this.global = newGlobal;
     }
 
     loadEvent(eventfile: string): void{
         try{
-            const Event = require(`./Events/${eventfile}`).event;
+            const Event = require(`./Events/${eventfile}`).default ?? require(`./Events/${eventfile}`).event;
             this.bevents[Event.name] = Event.handle.bind(this);
             this.client.on(Event.name, this.bevents[Event.name]);
         }catch(err){
-            this.logger.error("Hyperion", "Event Loading", `Failed to load event ${eventfile}, error: ${err}`);
+            this.logger.error("Hyperion", `Failed to load event ${eventfile}, error: ${err}`, "Event Loading");
         }
     }
 
@@ -183,8 +193,21 @@ export default class HyperionC extends BaseClusterWorker implements HyperionInte
             const mod = require(`./Modules/${modname}/${modname}.js`).default;
             this.modules.add(new mod);
         }catch(err){
-            this.logger.error("Hyperion", "Module Loading", `Failed to load module ${modname}, error: ${err}`);
+            this.logger.error("Hyperion", `Failed to load module ${modname}, error: ${err}`, "Module Loading");
         }
+    }
+
+    reloadMod(modname: string): void{
+        if(!this.modules.has(modname)){throw new Error("Can not reload a module that doesnt exist!");}
+        delete require.cache[require.resolve(`./Modules/${modname}/${modname}.js`)];
+        this.loadMod(modname);
+    }
+
+    reloadEvent(eventname: string): void{
+        if(!this.bevents[eventname]){throw new Error("Can not reload an event that doesnt exist!");}
+        delete require.cache[require.resolve(`./events/${eventname.charAt(0).toUpperCase() + eventname.slice(1)}.js`)];
+        this.client.removeAllListeners(eventname);
+        this.loadEvent(eventname.charAt(0).toUpperCase() + eventname.slice(1));
     }
 
     loadMods(): void{
@@ -205,14 +228,14 @@ export default class HyperionC extends BaseClusterWorker implements HyperionInte
         
     }
 
-    mongoDB(mongoLogin: string): mongoose.Connection{
+    private mongoDB(mongoLogin: string): mongoose.Connection{
         this.mongoOptions.dbName = this.build;
         mongoose.connect(mongoLogin, this.mongoOptions);
         mongoose.connection.on("error", () => {
-            this.logger.error("MongoDB", "Connection", "Failed to connect to MongoDB");
+            this.logger.error("MongoDB", "Failed to connect to MongoDB", "Connection");
         });
         mongoose.connection.on("open", () => {
-            this.logger.success("MongoDB", "Connection", "Connected to MongoDB");
+            this.logger.success("MongoDB", "Connected to MongoDB", "Connection");
         });
         return mongoose.connection;
     }
@@ -221,6 +244,7 @@ export default class HyperionC extends BaseClusterWorker implements HyperionInte
         this.postDBL();
         this.postDBoats();
         this.postGlenn();
+        this.postBotsGG();
     }
 
     async postDBL(): Promise<void>{
@@ -236,9 +260,9 @@ export default class HyperionC extends BaseClusterWorker implements HyperionInte
                     Authorization: this.listTokens.dbl
                 }
             });
-            this.logger.success("Hyperion", "DBL Post", "Posted stats to DBL!");
+            this.logger.success("Hyperion", "Posted stats to DBL!", "DBL Post");
         }catch(err){
-            this.logger.warn("Hyperion", "DBL Post", `Failed to post stats to DBL, error: ${err}`);
+            this.logger.warn("Hyperion", `Failed to post stats to DBL, error: ${err}`, "DBL Post");
         }
     }
 
@@ -253,15 +277,15 @@ export default class HyperionC extends BaseClusterWorker implements HyperionInte
                     Authorization: this.listTokens.dboats
                 }
             });
-            this.logger.success("Hyperion", "DBoats Post", "Posted stats to DBoats!");
+            this.logger.success("Hyperion", "Posted stats to DBoats!", "DBoats Post");
         }catch(err){
-            this.logger.warn("Hyperion", "DBoats Post", `Failed to post stats to DBoats, error: ${err}`);
+            this.logger.warn("Hyperion", `Failed to post stats to DBoats, error: ${err}`, "DBoats Post");
         }
     }
 
     async postGlenn(): Promise<void>{
         try{
-            await axios.post(`https://glennbotlist.xyz/api/v2/bot/${this.client.user.id}/stats`,{
+            await axios.post(`https://glennbotlist.xyz/api/bot/${this.client.user.id}/stats`,{
                 serverCount: this.client.guilds.size,
                 shardCount: this.client.shards.size
             },
@@ -270,15 +294,33 @@ export default class HyperionC extends BaseClusterWorker implements HyperionInte
                     Authorization: this.listTokens.glenn
                 }
             });
-            this.logger.success("Hyperion", "Glenn Post", "Posted stats to Glenn!");
+            this.logger.success("Hyperion", "Posted stats to Glenn!", "Glenn Post");
         }catch(err){
-            this.logger.warn("Hyperion", "Glenn Post", `Failed to post stats to Glenn, error: ${err}`);
+            this.logger.warn("Hyperion", `Failed to post stats to Glenn, error: ${err}`, "Glenn Post");
+        }
+    }
+
+    async postBotsGG(): Promise<void>{
+        try{
+            await axios.post(`https://discord.bots.gg/api/v1/bots/${this.client.user.id}/stats`,{
+                guildCount: this.client.guilds.size,
+                shardCount: this.client.shards.size
+            },
+            {
+                headers: {
+                    Authorization: this.listTokens.botsGG
+                }
+            });
+            this.logger.success("Hyperion", "Posted stats to BotsGG!", "BotsGG Post");
+        }catch(err){
+            this.logger.warn("Hyperion", `Failed to post stats to BotsGG, error: ${err}`, "GleBotsGGnn Post");
         }
     }
 
     redact(input: string): string{
         let output = input;
         Object.getOwnPropertyNames(this.listTokens).forEach((t: string) => {
+            console.log(this.listTokens[t]);
             const rx = new RegExp(this.listTokens[t], "gmi");
             output = output.replace(rx, "No");
         });

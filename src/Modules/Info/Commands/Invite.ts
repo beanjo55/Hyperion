@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 import { Embed } from "eris";
 
 class Invite extends Command{
@@ -14,7 +14,7 @@ class Invite extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>}>{
         const data = {
             embed: {
                 timestamp: new Date(),

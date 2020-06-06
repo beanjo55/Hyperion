@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 
 class Data extends Command{
     constructor(){
@@ -19,7 +19,7 @@ class Data extends Command{
 
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         return "stub";
     }
 }

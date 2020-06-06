@@ -5,9 +5,11 @@ import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
 import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
+import {manager as MMLM} from "./Core/DataManagers/MongoModLogManager";
 import mongoose from "mongoose";
 import IORedis from "ioredis";
 import { ClusterWorkerIPC } from "./Core/Cluster/ClusterWorkerIPC";
+
 
 
 export interface HyperionGuild extends Guild{
@@ -28,12 +30,22 @@ export interface CoreOptions{
     dblToken: string;
 }
 
-export interface Managers{
+export interface IManagers{
     guild: MGM;
     user: MUM;
+    modlog: MMLM; 
 }
 
-export interface Utils{
+export interface ILogger{
+    debug(name: string, message: string, subprefix?: string): void;
+    error(name: string, message: string, subprefix?: string): void;
+    fatal(name: string, message: string, subprefix?: string): void;
+    info(name: string, message: string, subprefix?: string): void;
+    success(name: string, message: string, subprefix?: string): void;
+    warn(name: string, message: string, subprefix?: string): void;
+}
+
+export interface IUtils{
     hoistResolver(msg: Message, search: string, members: Collection<Member>): Member | undefined;
     resolveUser(msg: Message, search: string, members: Collection<Member>): Member | undefined;
     getColor(roles: Collection<Role>, guildRoles: Collection<Role>): number;
@@ -42,17 +54,19 @@ export interface Utils{
     resolveVoicechannel(guild: Guild, msg: Message, search: string): VoiceChannel | undefined;
     resolveCategory(guild: Guild, msg: Message, search: string): CategoryChannel | undefined;
     input2boolean(input: string): boolean | undefined;
+    strictResolver(search: string, members: Collection<Member>): Member | undefined;
+    banResolver(search: string, members: Collection<Member>, Hyperion: IHyperion): Promise<Member | User | undefined>;
+    resolveRole(input: string, roles: Collection<Role>): Role | undefined;
 }
 
-export interface HyperionInterface {
+export interface IHyperion {
     client: Client;
     readonly build: string;
     modules: Collection<Module>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sentry: any;
     commands: Collection<Command>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    logger: any;
+    logger: ILogger;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bevents: any;
     readonly devPrefix: string;
@@ -66,10 +80,10 @@ export interface HyperionInterface {
     db: mongoose.Connection;
     global: GlobalConfig;
     logLevel: number;
-    managers: Managers;
+    managers: IManagers;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stars: any;
-    utils: Utils;
+    utils: IUtils;
     readonly circleCIToken: string;
     redis: IORedis.Redis;
     redact(input: string): string;
@@ -109,6 +123,8 @@ export interface ModConfig{
     requireMuteTime: boolean;
     deleteOnBan: boolean;
     deleteCommand: boolean;
+    lastCase: number;
+    muteRole: string;
 }
 
 export interface StarboardConfig{
@@ -242,8 +258,7 @@ export interface GuildConfig {
     logging: LoggingConfig;
     welcome: WelcomeConfig;
     mod: ModConfig;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    commands: any;
+    commands: {[key: string]: CommandConfig};
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
     ignoredUsers: Array<string>;
@@ -260,9 +275,11 @@ export interface AckInterface{
     developer: boolean;
     owner: boolean;
     custom: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [index: string]: any;
 }
 
-export interface CommandContext{
+export interface ICommandContext{
     msg: Message;
     channel: TextChannel;
     guild: Guild;
@@ -425,7 +442,7 @@ export interface ShardOptions {
 	total: number;
 }
 
-export interface ClusterOptions {
+export interface IClusterOptions {
 	id: number;
 	shards: ShardOptions;
 }
@@ -436,7 +453,7 @@ export interface ServiceOptions {
 	timeout?: number;
 }
 
-export interface SharderOptions {
+export interface ISharderOptions {
 	/** Path to the js file for clusters to run */
 	path: string;
 	/** Discord bot token */
@@ -460,7 +477,7 @@ export interface SharderOptions {
     delay: number;
 }
 
-export interface SessionObject {
+export interface ISessionObject {
 	url: string;
 	shards: number;
 	session_start_limit: {
@@ -471,7 +488,7 @@ export interface SessionObject {
 	};
 }
 
-export interface ClusterShardInfo {
+export interface IClusterShardInfo {
 	/** First 0-indexed shard for this cluster */
 	first: number;
 	/** Last 0-indexed shard for this cluster */
@@ -480,13 +497,13 @@ export interface ClusterShardInfo {
 	total: number;
 }
 
-export interface ClusteringOptions{
+export interface IClusteringOptions{
     clusters: number;
     shards: number | "auto";
     delay: number;
 }
 
-export interface MongoUpdateResult{
+export interface IMongoUpdateResult{
     n: number;
     nModified: number;
     ok: number;
@@ -494,5 +511,27 @@ export interface MongoUpdateResult{
     electionId?: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     operationTime?: any;
-    "$clusterTime": Array<unknown>;
+    "$clusterTime"?: Array<unknown>;
 }
+
+export interface IModerationContext{
+    user: string;
+    member?: Member;
+    moderator: string;
+    moderationType: string;
+    reason?: string;
+    length?: number;
+    time: number;
+    case?: number;
+    auto: boolean;
+    role?: string;
+    removedRoles?: Array<string>;
+    guild: Guild;
+    mid?: string;
+    stringLength?: string;
+    moderationEnd?: boolean;
+}
+
+export type EmbedResponse = {embed: Partial<Embed>};
+export type Field = {name: string; value: string; inline: boolean};
+export type FieldArray = Array<Field>;

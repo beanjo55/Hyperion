@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 import {Module as module} from "../../../Core/Structures/Module";
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 import {toggleableModules} from "../Module/ConfigHelper";
 import { Embed } from "eris";
 
@@ -21,7 +21,7 @@ class Module extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
 
         const toggleable = toggleableModules(Hyperion.modules);
         const list = toggleable.map((m: module) => m.name);
@@ -61,7 +61,7 @@ class Module extends Command{
                 try{
                     await Hyperion.managers.guild.updateModuleStates(ctx.guild.id, name, !oldstate, Hyperion.modules);
                 }catch(err){
-                    Hyperion.logger.error("Hyperion", "Module toggle", `error toggling ${name}, error: ${err}`);
+                    Hyperion.logger.error("Hyperion", `error toggling ${name}, error: ${err}`, "Module toggle");
                     return "Something went wrong";
                 }
                 return "Success!";
@@ -72,7 +72,7 @@ class Module extends Command{
         try{
             await Hyperion.managers.guild.updateModuleStates(ctx.guild.id, name, !mod.default, Hyperion.modules);
         }catch(err){
-            Hyperion.logger.error("Hyperion", "Module toggle", `error toggling ${name}, error: ${err}`);
+            Hyperion.logger.error("Hyperion", `error toggling ${name}, error: ${err}`, "Module toggle");
             return "Something went wrong";
         }
         return "Success!";

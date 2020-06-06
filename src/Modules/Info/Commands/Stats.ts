@@ -2,7 +2,7 @@ import {Command} from "../../../Core/Structures/Command";
 import {default as os} from "os";
 import {default as msc} from "pretty-ms";
 // eslint-disable-next-line no-unused-vars
-import {HyperionInterface, CommandContext, IPCResult, HyperionStats} from "../../../types";
+import {IHyperion, ICommandContext, IPCResult, HyperionStats} from "../../../types";
 import { Embed } from "eris";
 
 class Stats extends Command{
@@ -18,7 +18,7 @@ class Stats extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
         let totalGuilds = 0;
         let totalMem = 0;
         let totalUsers = 0;

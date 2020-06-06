@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 import { Role } from "eris";
 
 class Delrole extends Command{
@@ -17,11 +17,11 @@ class Delrole extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "A cache error occured";}
         if(!bot.permission.has("manageRoles")){return "I need the `Manage Roles` permission to delete roles";}
-        if(bot.roles.length === 0){return "Due to discord permissions, i need to be above a role to manage it. I cant do that with no roles";}
+        if(bot.roles.length === 0){return "Due to discord permissions, I need to be above a role to manage it. I cant do that with no roles";}
 
         const botroles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
 
@@ -38,9 +38,9 @@ class Delrole extends Command{
         if(botroles[0].position === target.position){return "I cant manage roles that are my highest role";}
 
         try{
-            target.delete(`User: ${ctx.user.username}#${ctx.user.discriminator}`);
+            await target.delete(`User: ${ctx.user.username}#${ctx.user.discriminator}`);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Delrole", `Failed to delete role, command: ${ctx.msg.content}, error: ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to delete role, command: ${ctx.msg.content}, error: ${err}`, "Delrole");
             return "Something went wrong trying to delete that role";
         }
         return `Successfully deleted ${target.name}`;

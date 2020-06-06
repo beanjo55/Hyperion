@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import { Embed } from "eris";
 import {inspect} from "util";
 
@@ -26,7 +26,7 @@ class Eval extends Command{
         });
 
     }
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
         const code = ctx.args.join(" ");
        
         try{
@@ -40,7 +40,7 @@ class Eval extends Command{
         }
     }
 
-    clean(text: string, Hyperion: HyperionInterface): string{
+    clean(text: string, Hyperion: IHyperion): string{
         if (typeof(text) === "string"){
             return Hyperion.redact(text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203)));
         }else{
@@ -48,7 +48,7 @@ class Eval extends Command{
         }
     }
 
-    async evalresult(ctx: CommandContext, result: string, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
+    async evalresult(ctx: ICommandContext, result: string, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
         const output = this.clean(result, Hyperion);
         if(output.length > 1990){
             console.log(output);
@@ -66,7 +66,7 @@ class Eval extends Command{
         return data;
     }
 
-    evalerror(result: string, Hyperion: HyperionInterface): string{
+    evalerror(result: string, Hyperion: IHyperion): string{
         return "`ERROR`\n```xl\n" + this.clean(result, Hyperion) + "```";
     }
 
@@ -80,7 +80,7 @@ class AsyncEval extends Eval{
         this.aliases = ["a"];
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
         const code = "async function run(ctx){" + ctx.args.slice(1).join(" ") + "}; run(ctx)";
         try{
             let evaled = await eval(code);

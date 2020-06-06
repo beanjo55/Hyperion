@@ -1,6 +1,6 @@
 import signale from "signale";
 
-function error(name: string, subprefix: string, message: string): void{
+function error(name: string, message: string, subprefix?: string): void{
     if(subprefix){
         message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
@@ -10,7 +10,7 @@ function error(name: string, subprefix: string, message: string): void{
     });
 }
 
-function fatal(name: string, subprefix: string, message: string): void{
+function fatal(name: string, message: string, subprefix?: string): void{
     if(subprefix){
         message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
@@ -20,7 +20,7 @@ function fatal(name: string, subprefix: string, message: string): void{
     });
 }
 
-function debug(name: string, subprefix: string, message: string): void{
+function debug(name: string, message: string, subprefix?: string): void{
     if(subprefix){
         message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
@@ -30,7 +30,7 @@ function debug(name: string, subprefix: string, message: string): void{
     });
 }
 
-function warn(name: string, subprefix: string, message: string): void{
+function warn(name: string, message: string, subprefix?: string): void{
     if(subprefix){
         message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
@@ -40,7 +40,7 @@ function warn(name: string, subprefix: string, message: string): void{
     });
 }
 
-function info(name: string, subprefix: string, message: string): void{
+function info(name: string, message: string, subprefix?: string): void{
     if(subprefix){
         message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }
@@ -50,7 +50,7 @@ function info(name: string, subprefix: string, message: string): void{
     });
 }
 
-function success(name: string, subprefix: string, message: string): void{
+function success(name: string, message: string, subprefix?: string): void{
     if(subprefix){
         message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
     }

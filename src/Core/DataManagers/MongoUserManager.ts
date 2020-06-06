@@ -1,5 +1,4 @@
-import {default as usermodel} from "../../MongoDB/User";
-// eslint-disable-next-line no-unused-vars
+import {default as usermodel, IUser, IUserModel, IUserDoc} from "../../MongoDB/User";
 import * as Types from "../../types";
 
 class Acks implements Types.AckInterface{
@@ -11,6 +10,8 @@ class Acks implements Types.AckInterface{
     developer: boolean;
     owner: boolean;
     custom: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [index: string]: any;
     constructor(data: Partial<Types.AckInterface>){
         this.contrib = data.contrib ?? false;
         this.friend = data.friend ?? false;
@@ -24,105 +25,96 @@ class Acks implements Types.AckInterface{
 }
 
 class MongoUserManager{
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    model: any
+    model: IUserModel
     constructor(){
         this.model = usermodel;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async createConfig(user: string): Promise<any>{
+    async createConfig(user: string): Promise<IUserDoc>{
         return this.model.create({user: user});
     }
 
-    async getUserConfig(user: string): Promise<Types.UserConfig>{
+    async getUserConfig(user: string): Promise<IUser | null>{
         if(await this.model.exists({user: user})){
-            return await this.model.findOne({user: user}).lean().exec();
+            return await this.model.findOne({user: user}).lean<IUser>().exec();
         }else{
             return await this.createConfig(user);
         }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async ensureExists(user: string): Promise<any>{
+    async ensureExists(user: string): Promise<void>{
         if(!await this.model.exists({user: user})){
-            return await this.createConfig(user);
+            await this.createConfig(user);
         }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async gotRep(user: string): Promise<any>{
+    async gotRep(user: string): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {$inc: {rep: 1}});
     }
 
     async getRep(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
+        const doc = await this.getUserConfig(user);
+        if(!doc){ return 0; }
         return doc.rep;
     }
 
     async getMoney(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
+        const doc = await this.getUserConfig(user);
+        if(!doc){ return 0; }
         return doc.money;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async setRep(user: string, amount: number): Promise<any>{
+    async setRep(user: string, amount: number): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {rep: amount});
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async gaveRep(user: string): Promise<any>{
+    async gaveRep(user: string): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {$inc: {repGiven: 1}});
     }
 
     async getGivenRep(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
+        const doc = await this.getUserConfig(user);
+        if(!doc){ return 0; }
         return doc.repGiven;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async setGivenRep(user: string, amount: number): Promise<any>{
+    async setGivenRep(user: string, amount: number): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {repGiven: amount});
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async changeMoney(user: string, amount: number): Promise<any>{
+    async changeMoney(user: string, amount: number): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {$inc: {money: amount}});
     }
 
     async getRepTime(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
+        const doc = await this.getUserConfig(user);
+        if(!doc){ return 0; }
         return doc.lastRepTime;
     }
 
     async getDailyTime(user: string): Promise<number>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
+        const doc = await this.getUserConfig(user);
+        if(!doc){ return 0; }
         return doc.lastDailyTime;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async setRepTime(user: string): Promise<any>{
+    async setRepTime(user: string): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {lastRepTime: Date.now()});
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async setDailyTime(user: string): Promise<any>{
+    async setDailyTime(user: string): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {lastDailyTime: Date.now()});
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async resetRepTime(user: string): Promise<any>{
+    async resetRepTime(user: string): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {lastRepTime: 0});
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async resetDailyTime(user: string): Promise<any>{
+    async resetDailyTime(user: string): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {lastDailyTime: 0});
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async setAcks(user: string, data: Types.AckInterface): Promise<any>{
+    async setAcks(user: string, data: Partial<Types.AckInterface>): Promise<Types.IMongoUpdateResult>{
         let mdata = {};
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const doc: Types.UserConfig | any = await this.getUserConfig(user);
+        const doc = await this.getUserConfig(user);
         if(doc){
             mdata = this.merge(doc.acks, data);
         }
@@ -131,36 +123,35 @@ class MongoUserManager{
     }
 
     async getAcks(user: string): Promise<Types.AckInterface>{
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const doc: Types.UserConfig | any = await this.getUserConfig(user);
+        const doc = await this.getUserConfig(user);
         if(!doc){
-            doc.acks = {};
+            return new Acks({});
         }
         return new Acks(doc.acks);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async setPings(user: string, status: boolean): Promise<any>{
+    async setPings(user: string, status: boolean): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {socailPings: status});
     }
 
     async getPingStatus(user: string): Promise<boolean>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
+        const doc = await this.getUserConfig(user);
+        if(!doc){ return true; }
         return doc.socialPings;
     }
 
     async getBio(user: string): Promise<string>{
-        const doc: Types.UserConfig = await this.getUserConfig(user);
-        this.model.updateOne({user: user});
+        const doc = await this.getUserConfig(user);
+        this.model.updateOne({user: user}, {});
+        if(!doc){ return ""; }
         return doc.bio;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async setBio(user: string, bio: string): Promise<any>{
+    async setBio(user: string, bio: string): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {bio: bio});
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    merge(oldData: any, newData: any): any{
+
+    merge(oldData: {[key: string]: unknown}, newData: {[key: string]: unknown}): {[key: string]: unknown}{
         const newProps: Array<string> = Object.getOwnPropertyNames(newData);
         newProps.forEach((prop: string) => {
             oldData[prop] = newData[prop];
@@ -170,4 +161,4 @@ class MongoUserManager{
         
 }
 
-export {MongoUserManager as manager};
+export { MongoUserManager as manager };

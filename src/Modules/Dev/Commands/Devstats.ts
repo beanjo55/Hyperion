@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext, IPCResult, HyperionStats} from "../../../types";
+import {IHyperion, ICommandContext, IPCResult, HyperionStats} from "../../../types";
 import { Embed } from "eris";
 
 class Devstats extends Command{
@@ -16,7 +16,7 @@ class Devstats extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
         const fstats: IPCResult = (await Hyperion.ipc.getStats() as IPCResult);
         if(!fstats?.success){
             return "There was an error fetching stats";
@@ -24,6 +24,7 @@ class Devstats extends Command{
 
         const stats: HyperionStats = (fstats.d as HyperionStats);
         const clusters = Object.getOwnPropertyNames(stats.clusters);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const services = Object.getOwnPropertyNames(stats.services);
         const fields: Array<{name: string; value: string; inline: boolean}> = [];
         const data: {embed: Partial<Embed>} = {

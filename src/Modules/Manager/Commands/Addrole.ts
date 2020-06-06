@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 
 
 class Addrole extends Command{
@@ -16,18 +16,18 @@ class Addrole extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "A cache error occured";}
         if(!bot.permission.has("manageRoles")){return "I need the `Manage Roles` permission to create roles";}
         const input = ctx.args.join(" ");
         if(!input.includes(",")){
             try{
-                ctx.guild.createRole({
+                await ctx.guild.createRole({
                     name: input
                 }, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
             }catch(err){
-                Hyperion.logger.warn("Hyperion", "Addrole", `Failed to create role, ${ctx.msg.content}, error: ${err}`);
+                Hyperion.logger.warn("Hyperion", `Failed to create role, ${ctx.msg.content}, error: ${err}`, "Addrole");
                 return "There was an error creating the role";
             }
             return "Successfully made the role!";
@@ -49,12 +49,12 @@ class Addrole extends Command{
             }
             if(color === undefined){return "I couldnt understand that color";}
             try{
-                ctx.guild.createRole({
+                await ctx.guild.createRole({
                     name: input.substring(0, first),
                     color: color
                 }, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
             }catch(err){
-                Hyperion.logger.warn("Hyperion", "Addrole", `Failed to create role, ${ctx.msg.content}, error: ${err}`);
+                Hyperion.logger.warn("Hyperion", `Failed to create role, ${ctx.msg.content}, error: ${err}`, "Addrole");
                 return "There was an error creating the role";
             }
             return "Successfully made the role!";
@@ -84,13 +84,13 @@ class Addrole extends Command{
         if(subHoist === "false" || subHoist === "no"){hoist = false;}
         if(!hoist){return "I count understand what you put for hoist, try `yes` or `no`";}
         try{
-            ctx.guild.createRole({
+            await ctx.guild.createRole({
                 name: input.substring(0, first),
                 color: color,
                 hoist: hoist
             }, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Addrole", `Failed to create role, ${ctx.msg.content}, error: ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to create role, ${ctx.msg.content}, error: ${err}`, "Addrole");
             return "There was an error creating the role";
         }
         return "Successfully made the role!";

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import {exec} from "child_process";
 
 class Restart extends Command{
@@ -22,7 +22,7 @@ class Restart extends Command{
     }
 
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<void>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<void>{
         await ctx.channel.createMessage("Restarting").catch(() => {});
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         exec("pm2 restart 0", (error: any, stdout: any) => {});

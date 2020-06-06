@@ -1,5 +1,5 @@
 import {Collection} from "eris";
-import {HyperionInterface, CommandContext} from "../../types";
+import {IHyperion, ICommandContext} from "../../types";
 
 export class Command{
     name: string;
@@ -62,7 +62,7 @@ export class Command{
     //dummy default command 
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<unknown>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<unknown>{
         throw new Error("Unimplemented command!");
     }
 

@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import { Embed } from "eris";
 class Bean extends Command{
     constructor(){
@@ -12,7 +12,7 @@ class Bean extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>}>{
         const data = {
             content: ctx.args.join(" "),
             embed: {

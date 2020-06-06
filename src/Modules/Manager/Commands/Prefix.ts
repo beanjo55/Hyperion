@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 
 
 class Prefix extends Command{
@@ -15,7 +15,7 @@ class Prefix extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         if(!ctx.args[0]){
             return `The current prefix is \`${ctx.guildConfig.prefix}\``;
         }

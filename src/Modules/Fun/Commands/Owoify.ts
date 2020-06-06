@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 const owoify = require("owoify-js").default;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const _clean = (text: any): string => {
@@ -30,7 +30,7 @@ class Owoify extends Command{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         let text = "";
         let output = "";
         const randomInt = Math.floor(Math.random() * options.length);

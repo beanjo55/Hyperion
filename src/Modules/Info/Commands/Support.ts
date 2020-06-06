@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import { Embed } from "eris";
 
 class Support extends Command{
@@ -14,7 +14,7 @@ class Support extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
         if(ctx.args[0] && ctx.args[0].toLowerCase() === "raw"){
             return "https://discord.gg/Vd8vmBD";
         }else{

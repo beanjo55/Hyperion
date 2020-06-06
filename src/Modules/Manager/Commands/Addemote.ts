@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 import {default as fetch} from "node-fetch";
 
 class AddEmote extends Command{
@@ -18,7 +18,7 @@ class AddEmote extends Command{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         if(!ctx.args[0]){return "Please specify an emote name and link";}
         if(!ctx.args[1]){return "Please specify a link";}
         const img = await this.resolveImage(ctx.args[1]);

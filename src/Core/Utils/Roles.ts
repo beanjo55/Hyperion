@@ -21,5 +21,17 @@ function getColor(roles: Collection<Role>, guildRoles: Collection<Role>): number
     return sortRoles(colored, guildRoles)[0].color;
 }
 
+export function resolveRole(input: string, roles: Collection<Role>): Role | undefined{
+    input = input.toLowerCase();
+    let role = roles.get(input);
+    if(!role){
+        role = roles.find(r => r.name === input);
+    }
+    if(!role){
+        role = roles.find(r => r.name.toLowerCase().startsWith(input));
+    }
+    return role;
+}
+
 export {sortRoles as sr};
 export {getColor as gc};

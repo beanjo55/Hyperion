@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import { Embed } from "eris";
 
 const gifs: Array<string> = [
@@ -25,7 +25,7 @@ class Hug extends Command{
     }
 
     
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>}>{
         const randomInt = Math.floor(Math.random() * gifs.length);
         const data = {
             embed: {

@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 
 class Bio extends Command{
     constructor(){
@@ -13,7 +13,7 @@ class Bio extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         if(ctx.args.length === 0){
             const current = await Hyperion.managers.user.getBio(ctx.user.id);
             if(!current || current === ""){return "You dont have a bio set";}

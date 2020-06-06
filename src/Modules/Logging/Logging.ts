@@ -3,11 +3,12 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {Module} from "../../Core/Structures/Module";
 // eslint-disable-next-line no-unused-vars
-import {HyperionInterface, GuildConfig, LogEvent} from "../../types";
+import {IHyperion, GuildConfig, LogEvent} from "../../types";
 // eslint-disable-next-line no-unused-vars
 import { Guild, Member, User, Message, VoiceChannel, Role, GuildChannel, Emoji, TextChannel, Embed } from "eris";
 import {LoggingConfig} from "../../Core/DataManagers/MongoGuildManager";
 import {default as msc} from "pretty-ms";
+import { IGuild } from "../../MongoDB/Guild";
 class Logging extends Module{
     constructor(){
         super({
@@ -35,20 +36,21 @@ class Logging extends Module{
         return input.replace(rx, "\\`\\`\\`");
     }
 
-    async getEventConfig(Hyperion: HyperionInterface, guildID: string, eventName: string): Promise<LogEvent>{
-        const config: GuildConfig = await Hyperion.managers.guild.getConfig(guildID);
+    async getEventConfig(Hyperion: IHyperion, guildID: string, eventName: string): Promise<LogEvent>{
+        const config: IGuild | null = await Hyperion.managers.guild.getConfig(guildID);
         if(!config?.logging){return new LoggingConfig({})[eventName];}
-        if(!config.logging[eventName]){return {enabled: false, channel: "default", ignoredRoles: [], ignoredChannels: []};}
-        return config.logging[eventName];
+        if(config.logging === {}){return new LoggingConfig({})[eventName];}
+        if(!(config.logging as LoggingConfig)[eventName]){return {enabled: false, channel: "default", ignoredRoles: [], ignoredChannels: []};}
+        return (config.logging as LoggingConfig)[eventName];
     }
 
-    async getLoggingConfig(Hyperion: HyperionInterface, guildID: string): Promise<LoggingConfig>{
-        const config: GuildConfig = await Hyperion.managers.guild.getConfig(guildID);
+    async getLoggingConfig(Hyperion: IHyperion, guildID: string): Promise<LoggingConfig>{
+        const config: IGuild | null = await Hyperion.managers.guild.getConfig(guildID);
         if(!config?.logging){return new LoggingConfig({});}
-        return config.logging;
+        return (config.logging as LoggingConfig);
     }
 
-    async preCheck(Hyperion: HyperionInterface, guild: Guild, eventName: string, roles?: Array<string>, channel?: string): Promise<boolean>{
+    async preCheck(Hyperion: IHyperion, guild: Guild, eventName: string, roles?: Array<string>, channel?: string): Promise<boolean>{
         if(!await this.checkGuildEnabled(Hyperion, guild.id)){return false;}
         const econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
         if(!econfig){return false;}
@@ -65,7 +67,7 @@ class Logging extends Module{
         return true;
     }
 
-    async testChannel(Hyperion: HyperionInterface, guild: Guild, eventName: string): Promise<TextChannel|undefined>{
+    async testChannel(Hyperion: IHyperion, guild: Guild, eventName: string): Promise<TextChannel|undefined>{
         const econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
         if(!econfig?.channel){return;}
         let channel: string = econfig.channel;
@@ -81,7 +83,7 @@ class Logging extends Module{
     }
 
     //GUILD MEMBER
-    async guildMemberAdd(Hyperion: HyperionInterface, guild: Guild, member: Member): Promise<void | undefined>{
+    async guildMemberAdd(Hyperion: IHyperion, guild: Guild, member: Member): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "memberAdd", undefined, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberAdd");
         if(!channelObj){return;}
@@ -111,12 +113,12 @@ class Logging extends Module{
         try{
             await channelObj.createMessage(data);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for member join, ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to post log for member join, ${err}`, "Logging");
         }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async guildMemberRemove(Hyperion: HyperionInterface, guild: Guild, member: Member | any): Promise<void | undefined>{
+    async guildMemberRemove(Hyperion: IHyperion, guild: Guild, member: Member | any): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "memberRemove", undefined, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberRemove");
         if(!channelObj){return;}
@@ -143,18 +145,18 @@ class Logging extends Module{
         try{
             await channelObj.createMessage(data);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for member leave, ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to post log for member leave, ${err}`, "Logging");
         }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async guildMemberUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any): Promise<void | undefined>{
+    async guildMemberUpdate(Hyperion: IHyperion, guild: Guild, member: Member, oldMember: any): Promise<void | undefined>{
         if(!oldMember || (!oldMember.nick && !oldMember.roles)){return;}
         if(member.roles !== oldMember.roles){this.guildMemberRolesUpdate(Hyperion, guild, member, oldMember);}
         if(member.nick !== oldMember.nick){this.guildMemberNickUpdate(Hyperion, guild, member, oldMember);}
     }
 
-    async guildBanAdd(Hyperion: HyperionInterface, guild: Guild, user: User): Promise<void | undefined>{
+    async guildBanAdd(Hyperion: IHyperion, guild: Guild, user: User): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "banAdd", undefined, undefined)){return;}
         Hyperion.redis.set(`${guild.id}:${user.id}:banAdd`, "yes", "EX", 5);
         const channelObj = await this.testChannel(Hyperion, guild, "banAdd");
@@ -182,11 +184,11 @@ class Logging extends Module{
         try{
             await channelObj.createMessage(data);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for ban add, ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to post log for ban add, ${err}`, "Logging");
         }
     }
 
-    async guildBanRemove(Hyperion: HyperionInterface, guild: Guild, user: User): Promise<void | undefined>{
+    async guildBanRemove(Hyperion: IHyperion, guild: Guild, user: User): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "banRemove", undefined, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "banRemove");
         if(!channelObj){return;}
@@ -213,7 +215,7 @@ class Logging extends Module{
         try{
             await channelObj.createMessage(data);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for ban remove, ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to post log for ban remove, ${err}`, "Logging");
         }
     }
 
@@ -221,7 +223,7 @@ class Logging extends Module{
 
     //MESSGAES
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async messageDelete(Hyperion: HyperionInterface, msg: Message | any): Promise<void | undefined>{
+    async messageDelete(Hyperion: IHyperion, msg: Message | any): Promise<void | undefined>{
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
         if(msg.author && msg.author.bot){return;}
         const guild = msg.channel.guild;
@@ -310,12 +312,12 @@ class Logging extends Module{
         try{
             await channelObj.createMessage(data);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for message delete, ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to post log for message delete, ${err}`, "Logging");
         }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async messageUpdate(Hyperion: HyperionInterface, msg: Message | any, oldMessage: any): Promise<void | undefined>{
+    async messageUpdate(Hyperion: IHyperion, msg: Message | any, oldMessage: any): Promise<void | undefined>{
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
         if(msg.author && msg.author.bot){return;}
         const guild = msg.channel.guild;
@@ -391,12 +393,12 @@ class Logging extends Module{
         try{
             await channelObj.createMessage(data);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for message edit, ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to post log for message edit, ${err}`, "Logging");
         }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async messageDeleteBulk(Hyperion: HyperionInterface, messages: Array<Message|any>): Promise<void | undefined>{
+    async messageDeleteBulk(Hyperion: IHyperion, messages: Array<Message|any>): Promise<void | undefined>{
         const msg = messages[0];
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
         const guild = msg.channel.guild;
@@ -416,54 +418,54 @@ class Logging extends Module{
         try{
             await channelObj.createMessage(data);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for message delete, ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to post log for message delete, ${err}`, "Logging");
         }
     }
 
 
 
     //VOICE
-    async voiceJoin(Hyperion: HyperionInterface, member: Member, channel: VoiceChannel){
+    async voiceJoin(Hyperion: IHyperion, member: Member, channel: VoiceChannel){
 
     }
 
-    async voiceLeave(Hyperion: HyperionInterface, member: Member, channel: VoiceChannel){
+    async voiceLeave(Hyperion: IHyperion, member: Member, channel: VoiceChannel){
         
     }
 
-    async voiceSwitch(Hyperion: HyperionInterface, member: Member, newChannel: VoiceChannel, oldChannel: VoiceChannel){
+    async voiceSwitch(Hyperion: IHyperion, member: Member, newChannel: VoiceChannel, oldChannel: VoiceChannel){
         
     }
 
 
 
     //ROLE
-    async roleCreate(Hyperion: HyperionInterface, guild: Guild, role: Role){
+    async roleCreate(Hyperion: IHyperion, guild: Guild, role: Role){
 
     }
 
-    async roleDelete(Hyperion: HyperionInterface, guild: Guild, role: Role){
+    async roleDelete(Hyperion: IHyperion, guild: Guild, role: Role){
         
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async roleUpdate(Hyperion: HyperionInterface, guild: Guild, role: Role, oldRole: any){
+    async roleUpdate(Hyperion: IHyperion, guild: Guild, role: Role, oldRole: any){
         
     }
 
 
 
     //CHANNEL
-    async channelCreate(Hyperion: HyperionInterface, guild: Guild, channel: GuildChannel){
+    async channelCreate(Hyperion: IHyperion, guild: Guild, channel: GuildChannel){
 
     }
 
-    async channelDelete(Hyperion: HyperionInterface, guild: Guild, channel: GuildChannel){
+    async channelDelete(Hyperion: IHyperion, guild: Guild, channel: GuildChannel){
         
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async channelUpdate(Hyperion: HyperionInterface, guild: Guild, channel: GuildChannel, oldChannel: any){
+    async channelUpdate(Hyperion: IHyperion, guild: Guild, channel: GuildChannel, oldChannel: any){
         
     }
 
@@ -471,12 +473,12 @@ class Logging extends Module{
 
     //MISC
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async webhooksUpdate(Hyperion: HyperionInterface, data: any, channelID: string, guildID: string){
+    async webhooksUpdate(Hyperion: IHyperion, data: any, channelID: string, guildID: string){
 
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async guildUpdate(Hyperion: HyperionInterface, guild: Guild, oldGuild: any){
+    async guildUpdate(Hyperion: IHyperion, guild: Guild, oldGuild: any){
 
     }
 
@@ -484,15 +486,15 @@ class Logging extends Module{
 
 
     //REACTIONS
-    async messageReactionAdd(Hyperion: HyperionInterface, msg: Message, emote: Emoji, userID: string){
+    async messageReactionAdd(Hyperion: IHyperion, msg: Message, emote: Emoji, userID: string){
 
     }
 
-    async messageReactionRemove(Hyperion: HyperionInterface, msg: Message, emote: Emoji, userID: string){
+    async messageReactionRemove(Hyperion: IHyperion, msg: Message, emote: Emoji, userID: string){
         
     }
 
-    async messageReactionRemoveAll(Hyperion: HyperionInterface, msg: Message){
+    async messageReactionRemoveAll(Hyperion: IHyperion, msg: Message){
         
     }
 
@@ -500,21 +502,21 @@ class Logging extends Module{
 
     //CUSTOM
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async system(Hyperion: HyperionInterface, message: any){
+    async system(Hyperion: IHyperion, message: any){
 
     }
 
-    async ghostReact(Hyperion: HyperionInterface, member: Member, msg: Message, emote: Emoji){
-
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async guildMemberRolesUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any){
+    async ghostReact(Hyperion: IHyperion, member: Member, msg: Message, emote: Emoji){
 
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async guildMemberNickUpdate(Hyperion: HyperionInterface, guild: Guild, member: Member, oldMember: any): Promise<void | undefined>{
+    async guildMemberRolesUpdate(Hyperion: IHyperion, guild: Guild, member: Member, oldMember: any){
+
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async guildMemberNickUpdate(Hyperion: IHyperion, guild: Guild, member: Member, oldMember: any): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "memberNicknameChange", undefined, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberNicknameChange");
         if(!channelObj){return;}
@@ -584,7 +586,7 @@ class Logging extends Module{
         try{
             await channelObj.createMessage(data);
         }catch(err){
-            Hyperion.logger.warn("Hyperion", "Logging", `Failed to post log for member nickname change, ${err}`);
+            Hyperion.logger.warn("Hyperion", `Failed to post log for member nickname change, ${err}`, "Logging");
         }
     }
 }

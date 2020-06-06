@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
-import {HyperionInterface, CommandContext} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import {default as msc} from "pretty-ms";
 import { Embed } from "eris";
 
@@ -18,7 +18,7 @@ class Up extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>}>{
         const data = {
             embed: {
                 title: "Hyperion Uptime",

@@ -1,4 +1,6 @@
-import {Schema, model} from "mongoose";
+/* eslint-disable @typescript-eslint/interface-name-prefix */
+import {Schema, model, Model, Document} from "mongoose";
+import * as Types from "../types";
 
 
 const guildconf = new Schema({
@@ -100,6 +102,10 @@ const guildconf = new Schema({
     embedCommonResponses: {
         type: Boolean,
         default: false
+    },
+    caseNum: {
+        type: String,
+        default: "0"
     }
 
 
@@ -108,4 +114,32 @@ const guildconf = new Schema({
     autoIndex: true
 });
 
-export default model("guild", guildconf);
+export interface IGuild{
+    guild: string;
+    prefix: string;
+    updatedAt?: number;
+    modules: {[key: string]: {[key: string]: boolean}};
+    reactionRoles: {} | Types.RRConfig;
+    tags: {} | Types.TagConfig;
+    autorole: {} | Types.AutoroleConfig;
+    ranks: {} | Types.RankConfig;
+    starboard: {} | Types.StarboardConfig;
+    logging: {} | Types.LoggingConfig;
+    welcome: {}| Types.WelcomeConfig;
+    mod: {} | Types.ModConfig;
+    commands: {} | Types.CommandConfig;
+    ignoredChannels: Array<string>;
+    ignoredRoles: Array<string>;
+    ignoredUsers: Array<string>;
+    cantRunMessage: boolean;
+    botMissingPermsMessages: boolean;
+    embedCommonResponses: boolean;
+    caseNum: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [index: string]: any;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IGuildModel extends Model<IGuildDoc>{}
+export interface IGuildDoc extends Document, IGuild{}
+export default model<IGuildDoc>("guild", guildconf);

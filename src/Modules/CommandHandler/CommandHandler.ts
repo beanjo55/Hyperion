@@ -3,6 +3,7 @@ import * as Types from "../../types";
 import {Message, Member, Embed} from "eris";
 import {inspect} from "util";
 import {Command} from "../../Core/Structures/Command";
+import { IGuild } from "../../MongoDB/Guild";
 
 enum HandlerType{
     normal = 0,
@@ -18,7 +19,8 @@ enum HandlerLogLevel{
     debug
 }
 
-interface HandlerConfig{
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+interface IHandlerConfig{
     type: HandlerType;
     ghost: boolean;
     logLevel: HandlerLogLevel;
@@ -38,9 +40,9 @@ class CommandHandler extends Module{
     cooldowns: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     intervalID: any;
-    constructor(data: HandlerConfig){
+    constructor(data: IHandlerConfig){
         super({
-            name: "commandhandler",
+            name: "Commandandler",
             private: true,
             alwaysEnabled: true,
             hasCommands: false,
@@ -57,11 +59,11 @@ class CommandHandler extends Module{
         this.intervalID = setInterval(this.clearCooldowns.bind(this), 60000);
     }
 
-    async messageCreate(Hyperion: Types.HyperionInterface, msg: Message): Promise<void>{
+    async messageCreate(Hyperion: Types.IHyperion, msg: Message): Promise<void>{
         this.handler(msg, Hyperion);
     }
     /** 
-    init(Hyperion: Types.HyperionInterface): void{
+    init(Hyperion: Types.IHyperion): void{
         Hyperion.handler = this;
     }*/
 
@@ -85,11 +87,12 @@ class CommandHandler extends Module{
         this.ghost = mode;
     }
 
-    async getConfig(Hyperion: Types.HyperionInterface, guildID: string): Promise<Types.GuildConfig>{
+    async getConfig(Hyperion: Types.IHyperion, guildID: string): Promise<IGuild | null>{
         return await Hyperion.managers.guild.getConfig(guildID);
     }
 
     isMod(user: Member, guildConfig: Types.GuildConfig): boolean{
+        if(user.permission.has("manageGuild")){return true;}
         if(!guildConfig.mod){return false;}
         if(!guildConfig.mod.modRoles){return false;}
         if(guildConfig.mod.modRoles.length === 0){return false;}
@@ -104,12 +107,12 @@ class CommandHandler extends Module{
         return false;
     }
 
-    async isSupport(user: string, Hyperion: Types.HyperionInterface): Promise<boolean>{
+    async isSupport(user: string, Hyperion: Types.IHyperion): Promise<boolean>{
         const acks: Types.AckInterface = await Hyperion.managers.user.getAcks(user);
         return acks.support;
     }
 
-    async isAdmin(user: string, Hyperion: Types.HyperionInterface): Promise<boolean>{
+    async isAdmin(user: string, Hyperion: Types.IHyperion): Promise<boolean>{
         const acks: Types.AckInterface = await Hyperion.managers.user.getAcks(user);
         if(!acks.admin){
             if(acks.developer){return true;}
@@ -119,12 +122,12 @@ class CommandHandler extends Module{
         return acks.admin;
     }
 
-    async isDev(user: string, Hyperion: Types.HyperionInterface): Promise<boolean>{
+    async isDev(user: string, Hyperion: Types.IHyperion): Promise<boolean>{
         const acks: Types.AckInterface = await Hyperion.managers.user.getAcks(user);
         return acks.developer;
     }
 
-    async isolate(msg: Message, guildPrefix: string, Hyperion: Types.HyperionInterface): Promise<Isolated | null>{
+    async isolate(msg: Message, guildPrefix: string, Hyperion: Types.IHyperion): Promise<Isolated | null>{
         if(await this.isDev(msg.author.id, Hyperion) && msg.content.startsWith(Hyperion.devPrefix)){
             return {
                 type: "dev",
@@ -161,7 +164,7 @@ class CommandHandler extends Module{
         return null;
     }
 
-    findCommand(commandLabel: string, Hyperion: Types.HyperionInterface): Command | undefined{
+    findCommand(commandLabel: string, Hyperion: Types.IHyperion): Command | undefined{
         let found: Command | undefined = Hyperion.commands.get(commandLabel.toLowerCase());
         if(!found){
             found = Hyperion.commands.find((c: Command) => c.aliases.includes(commandLabel.toLowerCase()));
@@ -177,7 +180,7 @@ class CommandHandler extends Module{
         return sub;
     }
 
-    global(Hyperion: Types.HyperionInterface, command: Command, module: Module, user: string): boolean{
+    global(Hyperion: Types.IHyperion, command: Command, module: Module, user: string): boolean{
         if(Hyperion.global.gDisabledCommands.includes(command.name)){return false;}
         if(Hyperion.global.gDisabledMods.includes(module.name)){return false;}
         if(Hyperion.global.blacklist.includes(user)){return false;}
@@ -262,7 +265,7 @@ class CommandHandler extends Module{
         return false;
     }
 
-    authorized(guildConfig: Types.GuildConfig, ctx: Partial<Types.CommandContext>): boolean{
+    authorized(guildConfig: Types.GuildConfig, ctx: Partial<Types.ICommandContext>): boolean{
         if(!ctx?.member?.roles){return false;}
         if(!ctx?.command){return false;}
         if(!ctx?.channel){return false;}
@@ -288,7 +291,7 @@ class CommandHandler extends Module{
         return true;
     }
 
-    async specialAuthorized(user: string, command: Command, Hyperion: Types.HyperionInterface): Promise<boolean>{
+    async specialAuthorized(user: string, command: Command, Hyperion: Types.IHyperion): Promise<boolean>{
         if(command.dev){
             if(await this.isDev(user, Hyperion)){
                 return true;
@@ -331,7 +334,7 @@ class CommandHandler extends Module{
         this.cooldowns[user].last = {time: Date.now(), length: globalTime};
     }
 
-    async executeCommand(ctx: Types.CommandContext, Hyperion: Types.HyperionInterface): Promise<undefined | void>{
+    async executeCommand(ctx: Types.ICommandContext, Hyperion: Types.IHyperion): Promise<undefined | void>{
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await ctx.command.execute(ctx, Hyperion).then(async (result: any) => {
             await this.commandSuccess(ctx, result, Hyperion);
@@ -339,9 +342,9 @@ class CommandHandler extends Module{
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }).catch((err: any) => {
             if(this.logLevel >= 2 && err.toString().startsWith("Discord")){
-                Hyperion.logger.warning("Hyperion", "API Error", `Command failed with discord error: ${inspect(err)}`);
+                Hyperion.logger.warn("Hyperion", "API Error", `Command failed with discord error: ${inspect(err)}`);
             }
-            Hyperion.logger.error("Hyperion", "Command Error", `Error executing ${ctx.command.name}, Command Call: ${ctx.msg.content}\nerror: ${err}`);
+            Hyperion.logger.error("Hyperion", `Error executing ${ctx.command.name}, Command Call: ${ctx.msg.content}\nerror: ${err}`, "Command Error");
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             Hyperion.sentry.configureScope(function(scope: any){
                 scope.setExtra("Command String", ctx.msg.content);
@@ -354,7 +357,7 @@ class CommandHandler extends Module{
         
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async commandError(ctx: Types.CommandContext, result: any, Hyperion: Types.HyperionInterface): Promise<void>{
+    async commandError(ctx: Types.ICommandContext, result: any, Hyperion: Types.IHyperion): Promise<void>{
         try{
             await ctx.channel.createMessage(result);
         }catch(err){
@@ -365,7 +368,7 @@ class CommandHandler extends Module{
         this.updateCooldown(ctx.user.id, ctx.command, Hyperion.global.globalCooldown);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async commandSuccess(ctx: Types.CommandContext, result: any, Hyperion: Types.HyperionInterface): Promise<void | undefined>{
+    async commandSuccess(ctx: Types.ICommandContext, result: any, Hyperion: Types.IHyperion): Promise<void | undefined>{
         this.updateCooldown(ctx.user.id, ctx.command, Hyperion.global.globalCooldown);
         this.updateCommandStats(Hyperion, ctx.command);
         if(ctx.command.selfResponse){return;}
@@ -381,11 +384,11 @@ class CommandHandler extends Module{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async updateCommandStats(Hyperion: Types.HyperionInterface, command: Command): Promise<void>{
+    async updateCommandStats(Hyperion: Types.IHyperion, command: Command): Promise<void>{
         Hyperion.redis.incr("lcr");
     }
 
-    sendHelp(ctx: Partial<Types.CommandContext>, Hyperion: Types.HyperionInterface): string | {embed: Partial<Embed>} | undefined{
+    sendHelp(ctx: Partial<Types.ICommandContext>, Hyperion: Types.IHyperion): string | {embed: Partial<Embed>} | undefined{
         if(!ctx?.user){return;}
         if(Hyperion.global.blacklist.includes(ctx.user.id)){return;}
         if(ctx.args && ctx.args[0]){
@@ -420,7 +423,7 @@ class CommandHandler extends Module{
         return data;
     }
     
-    sendCommandHelp(ctx: Partial<Types.CommandContext>, cmd: Command, Hyperion: Types.HyperionInterface): {embed: Partial<Embed>} | undefined{
+    sendCommandHelp(ctx: Partial<Types.ICommandContext>, cmd: Command, Hyperion: Types.IHyperion): {embed: Partial<Embed>} | undefined{
         if(!cmd){return;}
         if(!ctx?.guildConfig?.prefix){return;}
         if(!ctx?.user?.id){return;}
@@ -451,7 +454,7 @@ class CommandHandler extends Module{
         this.updateCooldown(ctx.user.id, ({name: "help"} as Command), Hyperion.global.globalCooldown);
         return data;
     }
-    async handler(msg: Message, Hyperion: Types.HyperionInterface): Promise<undefined | void>{
+    async handler(msg: Message, Hyperion: Types.IHyperion): Promise<undefined | void>{
         if(!msg){return;}
         if(!msg.member){return;}
         if(!msg.channel){return;}
@@ -504,7 +507,7 @@ class CommandHandler extends Module{
         }
         if(!ctx.admin && !this.authorized(ctx.guildConfig, ctx)){return;}
         if(!ctx.admin && !this.checkCooldown(ctx.user.id, ctx.command, Hyperion.global.globalCooldown)){return;}
-        const newCtx: Types.CommandContext = {
+        const newCtx: Types.ICommandContext = {
             msg: ctx.msg,
             channel: ctx.channel,
             guild: ctx.guild,

@@ -1,9 +1,10 @@
 import {logger} from "./Logger";
 import {default as fs} from "fs";
-import {HyperionInterface, ConfigOp, GuildConfig} from "../../types";
+import {IHyperion, ConfigOp} from "../../types";
 import {ConfigKey as configkey} from "../../types";
 import {inspect} from "util";
 import {Collection} from "eris";
+import { IGuild } from "../../MongoDB/Guild";
 
 
 export class Module{
@@ -32,7 +33,7 @@ export class Module{
         this.friendlyName = data.friendlyName ?? this.name;
         this.id = this.name;
 
-        this.private = data.private ?? false;
+        this.private = data.private ?? false;   
         this.alwaysEnabled = data.alwaysEnabled ?? false;
         this.defaultStatus = data.defaultStatus ?? true;
         this.hasCfg = data.hasCfg ?? false;
@@ -72,18 +73,18 @@ export class Module{
                         }
                         this[name] = modfile;
                     }catch(err){
-                        logger.error("Hyperion", "Load Mod", `Error laoding mod file ${e}, error: ${err}`);
+                        logger.error("Hyperion", `Error laoding mod file ${e}, error: ${err}`, "Load Mod");
                     }
                 }
             });
         }catch(err){
-            logger.error("Hyperion", "Load Mod", `Error loading module files for module ${this.name}: ${err}`);
+            logger.error("Hyperion", `Error loading module files for module ${this.name}: ${err}`, "Load Mod");
         }
     }
 
     
 
-    loadCommands(Hyperion: HyperionInterface): void{
+    loadCommands(Hyperion: IHyperion): void{
         try{
             const cmdFiles = fs.readdirSync(this.cmdpath);
             cmdFiles.forEach((e: string) => {
@@ -100,16 +101,16 @@ export class Module{
                         }
                         Hyperion.commands.add(cmd);
                     }catch(err){
-                        logger.error("Hyperion", "Load Commands", `Failed to load command ${e} from module ${this.name}. error: ${inspect(err)}`);
+                        logger.error("Hyperion", `Failed to load command ${e} from module ${this.name}. error: ${inspect(err)}`, "Load Commands");
                     }
                 }
             });
         }catch(err){
-            logger.error("Hyperion", "Load Commands", `Error loading commands for module ${this.name}: ${err}`);
+            logger.error("Hyperion", `Error loading commands for module ${this.name}: ${err}`, "Load Commands");
         }
     }
 
-    reloadCommands(Hyperion: HyperionInterface): void | undefined{
+    reloadCommands(Hyperion: IHyperion): void | undefined{
         if(!this.hasCommands){
             return;
         }
@@ -127,13 +128,13 @@ export class Module{
 
     //module setup, to be implemented by module
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    init(Hyperion: HyperionInterface): void{
+    init(Hyperion: IHyperion): void{
         throw new Error("Init was expected, but not implemented");
     }
 
-    async checkGuildEnabled(Hyperion: HyperionInterface, guildID: string): Promise<boolean>{
+    async checkGuildEnabled(Hyperion: IHyperion, guildID: string): Promise<boolean>{
         if(Hyperion.global.gDisabledMods.includes(this.name)){return false;}
-        const config: GuildConfig = await Hyperion.managers.guild.getConfig(guildID);
+        const config: IGuild | null = await Hyperion.managers.guild.getConfig(guildID);
         if(!config){return this.defualtState;}
         if(!config.modules){return this.defualtState;}
         if(!config.modules[this.name]){return this.defaultState;}

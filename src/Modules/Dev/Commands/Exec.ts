@@ -1,7 +1,7 @@
 import {Command} from "../../../Core/Structures/Command";
 import {exec} from "child_process";
 import {inspect} from "util";
-import { CommandContext, HyperionInterface } from "../../../types";
+import { ICommandContext, IHyperion } from "../../../types";
 
 class Exec extends Command{
     constructor(){
@@ -22,7 +22,7 @@ class Exec extends Command{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | void>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | void>{
         
         try{
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

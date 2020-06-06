@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-unused-vars */
-import {HyperionInterface} from "../types";
+import {IHyperion} from "../types";
 import {GuildChannel} from "eris";
 class ChannelUpdateHandler{
     name: string;
@@ -9,8 +9,8 @@ class ChannelUpdateHandler{
         this.name = "channelUpdate";
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async handle(this: HyperionInterface, channel: GuildChannel, oldChannel: any): Promise<void>{
+    async handle(this: IHyperion, channel: GuildChannel, oldChannel: any): Promise<void>{
 
     }
 }
-exports.event = new ChannelUpdateHandler;
+export default new ChannelUpdateHandler;

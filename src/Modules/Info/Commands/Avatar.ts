@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 import {Member, Embed} from "eris";
 
 class Avatar extends Command{
@@ -15,7 +15,7 @@ class Avatar extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
         let target: Member | undefined;
         if(ctx.args[0]){
             target = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);

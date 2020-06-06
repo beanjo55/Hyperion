@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { GuildChannel, Embed } from "eris";
 import { LoggingConfig } from "../../../Core/DataManagers/MongoGuildManager";
@@ -31,7 +31,7 @@ class Logging extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
         if(!ctx.args[0]){
             return await this.showOverallSettings(ctx, Hyperion);
         }
@@ -135,7 +135,7 @@ class Logging extends Command{
         return "this should never be reached";
     }
 
-    async showOverallSettings(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | string>{
+    async showOverallSettings(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
         let config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
         config = new LoggingConfig(config);
         if(!config){return "An error occured";}

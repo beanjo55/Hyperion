@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 // eslint-disable-next-line no-unused-vars
 import { Role, Embed, GuildChannel } from "eris";
 
@@ -16,7 +16,7 @@ class Serverinfo extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>} | undefined>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | undefined>{
         const rolelist = ctx.guild.roles.filter((r: Role) => r.id !== ctx.guild.id).sort((a, b) => b.position - a.position).map((r: Role) => r.mention).join(" ");
         const owner = ctx.guild.members.get(ctx.guild.ownerID);
         if(!owner){return;}

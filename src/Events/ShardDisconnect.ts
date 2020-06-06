@@ -1,12 +1,12 @@
 // eslint-disable-next-line no-unused-vars
-import {HyperionInterface} from "../types";
+import {IHyperion} from "../types";
 class ShardDisconnectHandler{
     name: string;
     constructor(){
         this.name = "shardDisconnect";
     }
-    async handle(this: HyperionInterface, err: Error, shardID: number): Promise<void>{
-        this.logger.warn("Hyperion", "Sharding", `Shard ${shardID} disconnected, ${err}`);
+    async handle(this: IHyperion, err: Error, shardID: number): Promise<void>{
+        this.logger.warn("Hyperion", `Shard ${shardID} disconnected, ${err}`, "Sharding");
     }
 }
-exports.event = new ShardDisconnectHandler;
+export default new ShardDisconnectHandler;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 /* eslint-disable no-mixed-spaces-and-tabs */
@@ -10,7 +9,7 @@ import {Cluster} from "../Cluster/Cluster";
 import {Service} from "../Services/Service";
 import {BaseServiceWorker} from "../Services/BaseServiceWorker";
 import {MasterIPC} from "./MasterIPC";
-import {ServiceOptions, SharderEvents, IPCEvents, HyperionStats, IPCResult, SharderOptions, ClusterShardInfo, SessionObject} from "../../types";
+import {ServiceOptions, SharderEvents, IPCEvents, HyperionStats, IPCResult, ISharderOptions, IClusterShardInfo, ISessionObject} from "../../types";
 import {ClientOptions} from "eris";
 import fetch from "node-fetch";
 import {promisify} from "util";
@@ -49,7 +48,7 @@ export class ShardManager extends EventEmitter {
     public statsInterval: number;
     public delay: number
 
-    public constructor(options: SharderOptions) {
+    public constructor(options: ISharderOptions) {
 	    super();
 
 	    this.path = options.path!;
@@ -232,7 +231,7 @@ export class ShardManager extends EventEmitter {
     }
 
     /** Get the bot gateway response from Discord */
-    public async getBotGateway(): Promise<SessionObject> {
+    public async getBotGateway(): Promise<ISessionObject> {
 	    if (!this.token)
 	        throw new Error("No token was provided!");
 
@@ -249,8 +248,8 @@ export class ShardManager extends EventEmitter {
 	    throw new Error(res.statusText);
     }
 
-    private clusterShards(): ClusterShardInfo[] {
-	    const clusters: ClusterShardInfo[] = [];
+    private clusterShards(): IClusterShardInfo[] {
+	    const clusters: IClusterShardInfo[] = [];
 	    const shardsPerCluster = Math.floor(<number>this.shardCount / this.clusterCount);
 	    const leftovers = <number>this.shardCount % this.clusterCount;
 

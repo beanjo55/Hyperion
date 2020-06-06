@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-unused-vars
-import {Member, Role, Message, Collection} from "eris";
+import {Member, Role, Message, Collection, User} from "eris";
+import { IHyperion } from "../../types";
 
 
 
@@ -8,7 +9,7 @@ import {Member, Role, Message, Collection} from "eris";
 
 
 
-function resolveUser(msg: Message, search: string, members: Collection<Member>): Member | undefined{
+export function resolveUser(msg: Message, search: string, members: Collection<Member>): Member | undefined{
     if(!(msg.channel.type === 0 || msg.channel.type === 5)){ return;}
     if(!members){
         members = msg.channel.guild.members;
@@ -25,7 +26,7 @@ function resolveUser(msg: Message, search: string, members: Collection<Member>):
 }
 
 // eslint-disable-next-line no-unused-vars
-function hoistUserResolver(msg: Message, search: string, members: Collection<Member>): Member | undefined{
+export function hoistUserResolver(msg: Message, search: string, members: Collection<Member>): Member | undefined{
     if(!(msg.channel.type === 0 || msg.channel.type === 5)){ return;}
     if(!search){
         return undefined;
@@ -48,5 +49,34 @@ function hoistUserResolver(msg: Message, search: string, members: Collection<Mem
     return resolveUser(msg, search, members);
 }
 
-export {hoistUserResolver as hur};
-export {resolveUser as ur};
+export function strictResolver(search: string, members: Collection<Member>, ): Member | undefined{
+    let member = members.get(search);
+    const test = search.match(/<@!?(\d+)>/);
+    if(test && test[1]){
+        search = test[1];
+        member = members.get(search);
+    }
+    if(!member){
+        member = members.find((M: Member) => search === `${M.username}#${M.discriminator}`);
+    }
+    if(!member){
+        member = members.find((M: Member) => search === M.username);
+    }
+    return member;
+}
+
+export async function banResolver(search: string, members: Collection<Member>, Hyperion: IHyperion): Promise<Member | User | undefined>{
+    let user: User | Member | undefined;
+    user = strictResolver(search, members);
+    if(!user){
+        user = Hyperion.client.users.get(search);
+    }
+    if(!user){
+        try{
+            user = await Hyperion.client.getRESTUser(search);
+        // eslint-disable-next-line no-empty
+        }catch{}
+    }
+    return user;
+}
+

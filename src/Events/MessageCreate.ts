@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import {inspect} from "util";
-import {HyperionInterface, HyperionGuild} from "../types";
+import {IHyperion, HyperionGuild} from "../types";
 import {Message, Guild} from "eris";
 import {Module} from "../Core/Structures/Module";
 const eventName = "messageCreate";
@@ -10,7 +10,7 @@ class MessageCreateHandler{
         this.name = "messageCreate";
     }
 
-    async handle(this: HyperionInterface, msg: Message): Promise<void>{
+    async handle(this: IHyperion, msg: Message): Promise<void>{
         
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){
             return;
@@ -25,7 +25,7 @@ class MessageCreateHandler{
             try{
                 fetchguild.fetchAllMembers();
             }catch(err){
-                this.logger.error(`failed to fetch guild ${guild.id}, error: ${inspect(err)}`);
+                this.logger.error("Hyperion", `failed to fetch guild ${guild.id}, error: ${inspect(err)}`, "Member Fetch");
             }
             (this.client.guilds.get(guild.id) as HyperionGuild).fetched = true;
         }
@@ -38,4 +38,4 @@ class MessageCreateHandler{
         //msg.channel.createMessage("```js\n" + inspect(await this.handler(msg), {depth: 1}) + "```");
     }
 }
-exports.event = new MessageCreateHandler;
+export default new MessageCreateHandler;

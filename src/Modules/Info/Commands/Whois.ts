@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion, EmbedResponse} from "../../../types";
 // eslint-disable-next-line no-unused-vars
 import {Member, Role, Collection, Embed} from "eris";
 
@@ -18,7 +18,7 @@ class Whois extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
         let target: Member | undefined;
         if(ctx.args[0]){
             target = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
@@ -45,7 +45,7 @@ class Whois extends Command{
         if(!color){color = Hyperion.defaultColor;}
         if(color === 0){color = Hyperion.defaultColor;}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let joinPos: any = ctx.guild.members.filter((m: Member) => !m.bot).sort((a: Member, b: Member) => a.joinedAt - b.joinedAt).map((m: Member) => m.id).indexOf(target.id) + 1;
+        let joinPos = (ctx.guild.members.filter((m: Member) => !m.bot).sort((a: Member, b: Member) => a.joinedAt - b.joinedAt).map((m: Member) => m.id).indexOf(target.id) + 1).toString();
 
         if(joinPos === undefined){joinPos = "N/A";}
         let rep = await Hyperion.managers.user.getRep(target.id);
@@ -55,8 +55,7 @@ class Whois extends Command{
         if(rep === undefined){rep = 0;}
         if(given === undefined){given = 0;}
         if(money === undefined){money = 0;}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data: any = {
+        const data: EmbedResponse = {
             embed: {
                 thumbnail: {url: target.avatarURL},
                 description: "",
@@ -88,12 +87,12 @@ class Whois extends Command{
                     },
                     {
                         name: "Rep Recieved",
-                        value: rep,
+                        value: rep.toString(),
                         inline: true
                     },
                     {
                         name: "Rep Given",
-                        value: given,
+                        value: given.toString(),
                         inline: true
                     },
                     {
@@ -116,7 +115,7 @@ class Whois extends Command{
             if(bio.length > 1024){
                 bio = bio.substring(0, 1020) + "...";
             }
-            data.embed.fields.push({
+            data.embed.fields!.push({
                 name: "Bio",
                 value: bio
             });
@@ -124,7 +123,7 @@ class Whois extends Command{
 
         const roleString = roleList.join(" ");
         if(roleString.length > 0){
-            data.embed.fields.push({
+            data.embed.fields!.push({
                 name: "Roles",
                 value: roleString
             });
@@ -133,9 +132,9 @@ class Whois extends Command{
         
         const acks = await Hyperion.managers.user.getAcks(target.id);
         const ack: Array<string> = [];
-        if(acks.owner){ack.push("Owner");}
-        if(acks.developer){ack.push("Developer");}
-        if(acks.admin){ack.push("Global Admin");}
+        if(acks.owner){ack.push("Bot Owner");}
+        if(acks.developer){ack.push("Bot Developer");}
+        if(acks.admin){ack.push("Hyperion Board Member");}
         if(acks.support){ack.push("Support Team");}
         if(acks.staff){ack.push("Community Staff");}
         if(acks.friend){ack.push("Project Friend");}
@@ -161,7 +160,7 @@ class Whois extends Command{
             }
         }
         if(ack.length > 0){
-            data.embed.fields.push({name: "Acknowledgements", value: ack.join(", ")});
+            data.embed.fields!.push({name: "Acknowledgements", value: ack.join(", ")});
         }
         return data;
     }

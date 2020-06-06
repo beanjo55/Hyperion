@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {HyperionInterface} from "../types";
+import {IHyperion} from "../types";
 class WarnHandler{
     name: string;
     constructor(){
         this.name = "warn";
     }
-    async handle(this: HyperionInterface, warnMsg: string, shardID: number): Promise<void>{
-        this.logger.warn("Hyperion", "Warning", `Warning on shard ${shardID}, ${warnMsg}`);
+    async handle(this: IHyperion, warnMsg: string, shardID: number): Promise<void>{
+        this.logger.warn("Hyperion", `Warning on shard ${shardID}, ${warnMsg}`, "Warning");
     }
 }
-exports.event = new WarnHandler;
+export default new WarnHandler;

@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
-import {HyperionInterface} from "../types";
+import {IHyperion} from "../types";
 import {Guild} from "eris";
 class GuildCreateHandler{
     name: string;
     constructor(){
         this.name = "guildCreate";
     }
-    async handle(this: HyperionInterface, guild: Guild): Promise<void>{
+    async handle(this: IHyperion, guild: Guild): Promise<void>{
         if(!await this.managers.guild.exists(guild.id)){
             this.managers.guild.createConfig(guild.id);
         }
@@ -23,6 +23,6 @@ class GuildCreateHandler{
         });
     }
 }
-exports.event = new GuildCreateHandler;
+export default new GuildCreateHandler;
 
 // https://canary.discordapp.com/api/webhooks/707305665500151818/v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq

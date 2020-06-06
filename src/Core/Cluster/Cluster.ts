@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { Worker, fork } from "cluster";
 import {EventEmitter} from "events";
-import {ShardOptions, ClusterOptions, SharderEvents, IPCEvents} from "../../types";
+import {ShardOptions, IClusterOptions, SharderEvents, IPCEvents} from "../../types";
 import {ShardManager} from "../Sharding/ShardManager";
 import {SendOptions} from "veza";
 import {promisify} from "util";
@@ -21,7 +20,7 @@ export class Cluster extends EventEmitter {
 
 	private readonly exitListenerFunction: (...args: any[]) => void;
 
-	public constructor(public manager: ShardManager, options: ClusterOptions) {
+	public constructor(public manager: ShardManager, options: IClusterOptions) {
 	    super();
 
 	    this.id = options.id;

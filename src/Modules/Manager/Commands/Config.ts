@@ -1,9 +1,11 @@
 import {Command} from "../../../Core/Structures/Command";
-import {HyperionInterface, CommandContext, GuildConfig} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import {configurableModules} from "../Module/ConfigHelper";
 import { Module, ConfigKey } from "../../../Core/Structures/Module";
 import {inspect} from "util";
-import { GuildChannel, Embed } from "eris";
+import { GuildChannel, Embed, Role } from "eris";
+import { IGuild } from "../../../MongoDB/Guild";
+
 
 
 const opmap = ["get", "set", "add", "remove", "clear"];
@@ -25,7 +27,7 @@ class Config extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<string | {embed: Partial<Embed>} | undefined>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>} | undefined>{
         if(!ctx.args[0]){
             return this.listModules(ctx, Hyperion);
         }
@@ -68,7 +70,7 @@ class Config extends Command{
         return await this.doOp(ctx, Hyperion, mod, key, op, ctx.args.slice(3).join(" "));
     }
 
-    listModules(ctx: CommandContext, Hyperion: HyperionInterface): {embed: Partial<Embed>}{
+    listModules(ctx: ICommandContext, Hyperion: IHyperion): {embed: Partial<Embed>}{
         const confMods = configurableModules(Hyperion.modules).map((m: Module) => m.friendlyName);
 
         const data = {
@@ -82,7 +84,7 @@ class Config extends Command{
         return data;
     }
 
-    listKeys(Hyperion: HyperionInterface, module: Module): string | {embed: Partial<Embed>}{
+    listKeys(Hyperion: IHyperion, module: Module): string | {embed: Partial<Embed>}{
         if(!module.configKeys){return "The module is marked as configurable, but has no keys to configure.";}
         const output: Array<string> = module.configKeys.map((ck: ConfigKey) => `${ck.id}: ${ck.description}`);
         const data = {
@@ -96,7 +98,7 @@ class Config extends Command{
         return data;
     }
 
-    listOps(Hyperion: HyperionInterface, key: ConfigKey): {embed: Partial<Embed>}{
+    listOps(Hyperion: IHyperion, key: ConfigKey): {embed: Partial<Embed>}{
         const output: Array<string> = [];
         key.ops.forEach((op: number) => {
             output.push(opmap[op]);
@@ -120,7 +122,7 @@ class Config extends Command{
         return `${key.friendlyName} is a ${key.dataType}`;
     }
 
-    async doOp(ctx: CommandContext, Hyperion: HyperionInterface, module: Module, key: ConfigKey, op: number, value: string): Promise<string | undefined>{
+    async doOp(ctx: ICommandContext, Hyperion: IHyperion, module: Module, key: ConfigKey, op: number, value: string): Promise<string | undefined>{
         if(!key.ops.includes(op)){return "That operation is not valid for this key";}
         const guilddata = await Hyperion.managers.guild.getConfig(ctx.guild.id);
         if(!guilddata){return "There was an error getting the guild data";}
@@ -145,6 +147,19 @@ class Config extends Command{
                 if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
                 data[key.id] = chan;
             }
+
+            if(key.dataType === "role"){
+                let role = ctx.guild.roles.get(value)?.id;
+                if(!role && ctx.msg.roleMentions && ctx.msg.roleMentions[0]){
+                    role = ctx.msg.roleMentions[0];
+                }
+                if(!role){
+                    role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
+                }
+                if(!role){return "I cant find that role in the guild, try a role mention or the role id";}
+                data[key.id] = role;
+            }
+            
             if(key.dataType === "boolean"){
                 if(value.toLowerCase() === "true" || value.toLowerCase() === "yes" || value === "1"){data[key.id] = true;}else{
                     if(value.toLowerCase() === "false" || value.toLowerCase() === "no" || value === "0"){data[key.id] = false;}else{
@@ -156,7 +171,7 @@ class Config extends Command{
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
-                Hyperion.logger.error("Hyperion", "Config", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`);
+                Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
                 return "there was an error updating the config";
             }
             return "Success!";
@@ -180,10 +195,23 @@ class Config extends Command{
                     if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
                     data[key.id] = [chan];
                 }
+
+                if(key.dataType === "role"){
+                    let role = ctx.guild.roles.get(value)?.id;
+                    if(!role && ctx.msg.roleMentions && ctx.msg.roleMentions[0]){
+                        role = ctx.msg.roleMentions[0];
+                    }
+                    if(!role){
+                        role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
+                    }
+                    if(!role){return "I cant find that role in the guild, try a role mention or the role id";}
+                    data[key.id] = role;
+                }
+                
                 try{
                     await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
                 }catch(err){
-                    Hyperion.logger.error("Hyperion", "Config", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`);
+                    Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
                     return "there was an error updating the config";
                 }
                 return "Success!";
@@ -198,8 +226,21 @@ class Config extends Command{
                     chan = ctx.guild.channels.find((c: GuildChannel) => (c.type === 0 || c.type === 5) && c.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
                 }
                 if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
+                if(old.includes(chan)){return "That channel has already been added";}
                 old.push(chan);
             }else{
+                if(key.dataType === "role"){
+                    let role = ctx.guild.roles.get(value)?.id;
+                    if(!role && ctx.msg.roleMentions && ctx.msg.roleMentions[0]){
+                        role = ctx.msg.roleMentions[0];
+                    }
+                    if(!role){
+                        role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
+                    }
+                    if(!role){return "I cant find that role in the guild, try a role mention or the role id";}
+                    if(old.includes(role)){return "That role has already been added";}
+                    old.push(role);
+                }
                 old.push(value);
             }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -208,7 +249,7 @@ class Config extends Command{
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
-                Hyperion.logger.error("Hyperion", "Config", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`);
+                Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
                 return "there was an error updating the config";
             }
             return "Success!";
@@ -229,6 +270,17 @@ class Config extends Command{
                 if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
                 value = chan;
             }
+            if(key.dataType === "role"){
+                let role = ctx.guild.roles.get(value)?.id;
+                if(!role && ctx.msg.roleMentions && ctx.msg.roleMentions[0]){
+                    role = ctx.msg.roleMentions[0];
+                }
+                if(!role){
+                    role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
+                }
+                if(!role){return "I cant find that role in the guild, try a role mention or the role id";}
+                value = role;
+            }
             if(!old.includes(value)){return "That value isnt part of that key";}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const newarr: Array<any> = [];
@@ -243,15 +295,15 @@ class Config extends Command{
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
-                Hyperion.logger.error("Hyperion", "Config", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`);
+                Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
                 return "there was an error updating the config";
             }
             return "Success!";
         }
     }
 
-    async getVal(ctx: CommandContext, Hyperion: HyperionInterface, module: Module, key: ConfigKey): Promise<string | {embed: Partial<Embed>}>{
-        const data: GuildConfig = await Hyperion.managers.guild.getConfig(ctx.guild.id);
+    async getVal(ctx: ICommandContext, Hyperion: IHyperion, module: Module, key: ConfigKey): Promise<string | {embed: Partial<Embed>}>{
+        const data: IGuild | null = await Hyperion.managers.guild.getConfig(ctx.guild.id);
         if(!data){return "There was an error getting the guild data";}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const out = (data as any)[module.name][key.id];
@@ -274,10 +326,20 @@ class Config extends Command{
             });
             output.embed.description = tmp.join("\n");
         }
+        if(key.dataType === "role" && !key.array){
+            output.embed.description = `<@&${out}>`;
+        }
+        if(key.dataType === "role" && key.array){
+            const tmp: Array<string> = [];
+            out.forEach((x: string) => {
+                tmp.push(`<@&${x}>`);
+            });
+            output.embed.description = tmp.join("\n");
+        }
         return output;
     }
 
-    async reset(ctx: CommandContext, Hyperion: HyperionInterface, module: Module, key: ConfigKey): Promise<string>{
+    async reset(ctx: ICommandContext, Hyperion: IHyperion, module: Module, key: ConfigKey): Promise<string>{
         if(key.array){
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data: any = {};
@@ -285,7 +347,7 @@ class Config extends Command{
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
-                Hyperion.logger.error("Hyperion", "Config", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`);
+                Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
                 return "there was an error updating the config";
             }
             return "Success!";
@@ -294,9 +356,9 @@ class Config extends Command{
         const data: any = {};
         data[key.id] = key.default;
         try{
-            Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
+            await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
         }catch(err){
-            Hyperion.logger.error("Hyperion", "Config", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`);
+            Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
             return "there was an error updating the config";
         }
         return "Success!";
@@ -304,7 +366,7 @@ class Config extends Command{
 
 
 
-    validateModule(Hyperion: HyperionInterface, input: string): string | Module{
+    validateModule(Hyperion: IHyperion, input: string): string | Module{
         if(!configurableModules(Hyperion.modules).map((m: Module) => m.name).includes(input.toLowerCase())){
             return "I couldnt find a configurable module by that name";
         }

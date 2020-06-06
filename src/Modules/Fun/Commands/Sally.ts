@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {CommandContext, HyperionInterface} from "../../../types";
+import {ICommandContext, IHyperion} from "../../../types";
 import { Embed } from "eris";
 
 export const sallys = ["https://cdn.discordapp.com/attachments/225182513465786369/660282554649149490/image0.jpg",
@@ -33,7 +33,7 @@ class Sally extends Command{
         });
     }
 
-    async execute(ctx: CommandContext, Hyperion: HyperionInterface): Promise<{embed: Partial<Embed>}>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>}>{
         const randomInt = Math.floor(Math.random() * sallys.length);
         const data = {
             embed: {

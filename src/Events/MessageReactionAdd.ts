@@ -1,20 +1,21 @@
 /* eslint-disable no-unused-vars */
-import {HyperionInterface, GuildConfig} from "../types";
+import {IHyperion} from "../types";
 import {Module} from "../Core/Structures/Module";
 import {Message, Emoji} from "eris";
+import { IGuild } from "../MongoDB/Guild";
 
 class MessageReactionAddHandler{
     name: string;
     constructor(){
         this.name = "messageReactionAdd";
     }
-    async handle(this: HyperionInterface, msg: Message, emote: Emoji, userID: string): Promise<void>{
+    async handle(this: IHyperion, msg: Message, emote: Emoji, userID: string): Promise<void>{
 
 
         //basics
         if(msg.channel.type !== 0){return;}
-        const conf: GuildConfig = await this.managers.guild.getConfig(msg.channel.guild.id);
-
+        const conf: IGuild | null = await this.managers.guild.getConfig(msg.channel.guild.id);
+        if(!conf){return;}
         //starboard
         if(conf.modules?.starboard !== undefined && conf.modules?.starboard.enabled){
             const starboard: Module | undefined = this.modules.get("starboard");
@@ -27,4 +28,4 @@ class MessageReactionAddHandler{
 
     }
 }
-exports.event = new MessageReactionAddHandler;
+export default new MessageReactionAddHandler;

@@ -1,4 +1,7 @@
-import {Schema, model} from "mongoose";
+/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/interface-name-prefix */
+import {Schema, model, Model, Document} from "mongoose";
+import { AckInterface } from "../types";
 
 const userinfo = new Schema({
 
@@ -100,4 +103,25 @@ const userinfo = new Schema({
     autoIndex: true
 });
 
-export default model("user", userinfo);
+export interface IUser{
+    user: string;
+    level: number;
+    exp: number;
+    money: number;
+    rep: number;
+    repGiven: number;
+    lastRepTime: number;
+    lastDailyTime: number;
+    lastSallyGame: number;
+    socialPings: boolean;
+    color?: string;
+    friends: Array<string>;
+    partner?: string;
+    bio: string;
+    data: {};
+    acks: AckInterface;
+}
+
+export interface IUserDoc extends Document, IUser {}
+export interface IUserModel extends Model<IUserDoc> {}
+export default model<IUserDoc>("user", userinfo);
