@@ -83,7 +83,7 @@ class Logging extends Command{
         if(ctx.args[0].toLowerCase() === "showavatar"){
             if(!ctx.args[1]){return "Please specify true/false or yes/no";}
             const result = Hyperion.utils.input2boolean(ctx.args[1]);
-            if(!result){return "Im not sure what you are trying to say, try yes or no";}
+            if(result === undefined){return "Im not sure what you are trying to say, try yes or no";}
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {showAvatar: result});
             }catch(err){
