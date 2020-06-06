@@ -32,7 +32,8 @@ class Moderators extends Command{
     list(ctx: ICommandContext, Hyperion: IHyperion): {embed: Partial<Embed>}{
         const admins = ctx.guild.roles.filter(r => r.permissions.has("administrator") && !r.managed).map(r => r.mention);
         const managers = ctx.guild.roles.filter(r => r.permissions.has("manageGuild") && !r.permissions.has("administrator") && !r.managed).map(r => r.mention);
-        const mods = ctx.guild.roles.filter(r => ctx.guildConfig?.mod?.modRoles.includes(r.id) && !r.managed).map(r => r.mention);
+        const modroles = ctx.guildConfig?.mod?.modRoles ?? [];
+        const mods = ctx.guild.roles.filter(r => modroles.includes(r.id) && !r.managed).map(r => r.mention);
         const fieldarr: Array<{name: string; value: string; inline: boolean}> = [];
         const data = {
             embed: {
