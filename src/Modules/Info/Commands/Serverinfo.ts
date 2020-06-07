@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
-import {ICommandContext, IHyperion} from "../../../types";
+import {ICommandContext, IHyperion, EmbedResponse} from "../../../types";
 // eslint-disable-next-line no-unused-vars
 import { Role, Embed, GuildChannel } from "eris";
 
@@ -20,7 +20,7 @@ class Serverinfo extends Command{
         const rolelist = ctx.guild.roles.filter((r: Role) => r.id !== ctx.guild.id).sort((a, b) => b.position - a.position).map((r: Role) => r.mention).join(" ");
         const owner = ctx.guild.members.get(ctx.guild.ownerID);
         if(!owner){return;}
-        const data = {
+        const data: EmbedResponse = {
             embed: {
                 timestamp: new Date,
                 color: Hyperion.defaultColor,
@@ -75,20 +75,23 @@ class Serverinfo extends Command{
                 ]
             }
         };
+        if(ctx.guild.description){
+            data.embed.description = ctx.guild.description;
+        }
         if(ctx.guild.emojis.length > 0){
-            data.embed.fields.push({
+            data.embed.fields?.push({
                 name: "Emotes",
                 value: `${ctx.guild.emojis.length} Emotes`,
                 inline: true
             });
         }
         if(rolelist.length > 1020){
-            data.embed.fields.push({name: `Roles [${ctx.guild.roles.size-1}]`, value: `${ctx.guild.roles.size-1} Roles`, inline: false});
+            data.embed.fields?.push({name: `Roles [${ctx.guild.roles.size-1}]`, value: `${ctx.guild.roles.size-1} Roles`, inline: false});
         }else{
             if(ctx.guild.roles.size === 0){
-                data.embed.fields.push({name: "Roles", value: "This server has no roles", inline: false});
+                data.embed.fields?.push({name: "Roles", value: "This server has no roles", inline: false});
             }else{
-                data.embed.fields.push({name: `Roles [${ctx.guild.roles.size-1}]`, value: rolelist, inline: false});
+                data.embed.fields?.push({name: `Roles [${ctx.guild.roles.size-1}]`, value: rolelist, inline: false});
             }
         }
         return data;

@@ -24,6 +24,9 @@ export class Command{
     hasSub: boolean;
     selfResponse: boolean;
     subcommands: Collection<Command>;
+    friend: boolean;
+    contrib: boolean;
+    unlisted: boolean;
 
 
     constructor(data: Partial<Command>){
@@ -56,6 +59,10 @@ export class Command{
 
         this.selfResponse = data.selfResponse ?? false;
         this.subcommands = new Collection(Command);
+
+        this.friend = data.friend ?? false;
+        this.contrib = data.contrib ?? false;
+        this.unlisted = data.unlisted ?? false;
     }
 
 

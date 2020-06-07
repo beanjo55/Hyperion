@@ -127,6 +127,16 @@ class CommandHandler extends Module{
         return acks.developer;
     }
 
+    async isFriend(user: string, Hyperion: Types.IHyperion): Promise<boolean>{
+        const acks: Types.AckInterface = await Hyperion.managers.user.getAcks(user);
+        return acks.friend;
+    }
+
+    async isContrib(user: string, Hyperion: Types.IHyperion): Promise<boolean>{
+        const acks: Types.AckInterface = await Hyperion.managers.user.getAcks(user);
+        return acks.contrib;
+    }
+
     async isolate(msg: Message, guildPrefix: string, Hyperion: Types.IHyperion): Promise<Isolated | null>{
         if(await this.isDev(msg.author.id, Hyperion) && msg.content.startsWith(Hyperion.devPrefix)){
             return {
@@ -389,6 +399,7 @@ class CommandHandler extends Module{
     }
 
     sendHelp(ctx: Partial<Types.ICommandContext>, Hyperion: Types.IHyperion): string | {embed: Partial<Embed>} | undefined{
+        if(this.ghost && !ctx.admin){return;}
         if(!ctx?.user){return;}
         if(Hyperion.global.blacklist.includes(ctx.user.id)){return;}
         if(ctx.args && ctx.args[0]){
@@ -411,7 +422,7 @@ class CommandHandler extends Module{
             }
         };
         cats.forEach(cat => {
-            const cmds = Hyperion.commands.filter(c => c.module.toLowerCase() === cat.name.toLowerCase()).map(c => c.name).join(", ");
+            const cmds = Hyperion.commands.filter(c => !c.unlisted && c.module.toLowerCase() === cat.name.toLowerCase()).map(c => c.name).join(", ");
             const toPush: {name: string; value: string; inline: boolean} = {
                 name: cat.friendlyName,
                 value: cmds,
@@ -487,7 +498,9 @@ class CommandHandler extends Module{
         ctx.args = isolated.args;
         if(isolated.label.toLowerCase() === "help"){
             this.checkCooldown(ctx.user.id, ({name: "help"} as Command), Hyperion.global.globalCooldown);
-            return await ctx.channel.createMessage(this.sendHelp(ctx, Hyperion));
+            const out = this.sendHelp(ctx, Hyperion);
+            if(!out){return;}
+            return await ctx.channel.createMessage(out);
         }
         const command: Command | undefined = this.findCommand(isolated.label, Hyperion);
         if(!command){return;}
@@ -521,6 +534,9 @@ class CommandHandler extends Module{
             module: ctx.module,
             args: ctx.args
         };
+        if(ctx.command.contrib && !await this.isContrib(ctx.user.id, Hyperion) && !ctx.admin){return;}
+        if(ctx.command.friend && !await this.isFriend(ctx.user.id, Hyperion) && !ctx.admin){return;}
+        if(this.ghost && !ctx.admin){return;}
         return await this.executeCommand(newCtx, Hyperion);
     }
 

@@ -30,7 +30,7 @@ class Nick extends Command{
             return "Successfully reset my nickname!";
         }
         try{
-            await Hyperion.client.editNickname(ctx.guild.id, ctx.args.join(), `User: ${ctx.user.username}#${ctx.user.discriminator}`);
+            await Hyperion.client.editNickname(ctx.guild.id, ctx.args.join(" "), `User: ${ctx.user.username}#${ctx.user.discriminator}`);
         }catch(err){
             return "There was an error trying to change my nickname";
         }

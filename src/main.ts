@@ -320,7 +320,6 @@ export default class HyperionC extends BaseClusterWorker implements IHyperion{
     redact(input: string): string{
         let output = input;
         Object.getOwnPropertyNames(this.listTokens).forEach((t: string) => {
-            console.log(this.listTokens[t]);
             const rx = new RegExp(this.listTokens[t], "gmi");
             output = output.replace(rx, "No");
         });

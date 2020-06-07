@@ -511,6 +511,7 @@ export interface IMongoUpdateResult{
     electionId?: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     operationTime?: any;
+    
     "$clusterTime"?: Array<unknown>;
 }
 
