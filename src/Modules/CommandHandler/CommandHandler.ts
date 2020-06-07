@@ -534,8 +534,8 @@ class CommandHandler extends Module{
             module: ctx.module,
             args: ctx.args
         };
-        if(ctx.command.contrib && !await this.isContrib(ctx.user.id, Hyperion) && !ctx.admin){return;}
-        if(ctx.command.friend && !await this.isFriend(ctx.user.id, Hyperion) && !ctx.admin){return;}
+        if(!ctx.admin || (ctx.command.contrib && !await this.isContrib(ctx.user.id, Hyperion))){return;}
+        if(!ctx.admin || (ctx.command.friend && !await this.isFriend(ctx.user.id, Hyperion))){return;}
         if(this.ghost && !ctx.admin){return;}
         return await this.executeCommand(newCtx, Hyperion);
     }
