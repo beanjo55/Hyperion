@@ -6,7 +6,7 @@ function error(name: string, message: string, subprefix?: string): void{
     }
     signale.error({
         prefix: `[${name}]`,
-        message: message
+        message: `[${new Date().toLocaleTimeString()}] ${message}`
     });
 }
 
@@ -16,7 +16,7 @@ function fatal(name: string, message: string, subprefix?: string): void{
     }
     signale.fatal({
         prefix: `[${name}]`,
-        message: message
+        message: `[${new Date().toLocaleTimeString()}] ${message}`
     });
 }
 
@@ -26,7 +26,7 @@ function debug(name: string, message: string, subprefix?: string): void{
     }
     signale.debug({
         prefix: `[${name}]`,
-        message: message
+        message: `[${new Date().toLocaleTimeString()}] ${message}`
     });
 }
 
@@ -36,7 +36,7 @@ function warn(name: string, message: string, subprefix?: string): void{
     }
     signale.warn({
         prefix: `[${name}]`,
-        message: message
+        message: `[${new Date().toLocaleTimeString()}] ${message}`
     });
 }
 
@@ -46,7 +46,7 @@ function info(name: string, message: string, subprefix?: string): void{
     }
     signale.info({
         prefix: `[${name}]`,
-        message: message
+        message: `[${new Date().toLocaleTimeString()}] ${message}`
     });
 }
 
@@ -56,12 +56,9 @@ function success(name: string, message: string, subprefix?: string): void{
     }
     signale.success({
         prefix: `[${name}]`,
-        message: message
+        message: `[${new Date().toLocaleTimeString()}] ${message}`
     });
 }
-
-
-
 
 export const logger = {
     debug: debug,
