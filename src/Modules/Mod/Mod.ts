@@ -64,7 +64,7 @@ const actionObj: {[key: string]: ActionInfo} = {
 };
 const timeends = ["d", "day", "m", "minute", "h", "hour"];
 class Mod extends Module{
-    sweepInterval!: NodeJS.Timeout;
+    sweepInterval!: NodeJS.Timeout | undefined;
     actions: {[key: string]: ActionInfo};
     constructor(){
         super({
@@ -113,6 +113,7 @@ class Mod extends Module{
     }
 
     async ready(Hyperion: IHyperion): Promise<void>{
+        if(this.sweepInterval){return;}
         this.sweepInterval = setInterval(this.sweepManager.bind(Hyperion), 60000);
     }
 
