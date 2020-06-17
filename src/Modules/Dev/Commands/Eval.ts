@@ -10,7 +10,7 @@ class Eval extends Command{
         super({
             name: "eval",
             module: "dev",
-            aliases: ["e", "evaluate"],
+            aliases: ["e", "evaluate", "runcodefortheboys"],
 
             internal: true,
             alwaysEnabled: true,
