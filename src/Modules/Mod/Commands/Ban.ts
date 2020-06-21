@@ -27,6 +27,7 @@ class Ban extends Command{
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "Cache Failure, couldnt find bot user";}
+        if(!ctx.args[this.argShift]){return "Please specify a user";}
         if(!bot.permission.has("banMembers")){return " I need the ban members permission to well, ban members";}
         const toBan = await Hyperion.utils.banResolver(ctx.args[this.argShift], ctx.guild.members, Hyperion);
         if(!toBan){return "I couldnt figure out what user that is";}
@@ -75,8 +76,10 @@ class Ban extends Command{
 class BanSave extends Ban{
     constructor(){
         super();
+        this.name = "save";
         this.banDays = 0;
         this.argShift = 1;
+        this.id = this.name;
     }
 }
 const subarr = [BanSave];
