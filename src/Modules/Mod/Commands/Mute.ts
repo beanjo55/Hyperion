@@ -15,9 +15,8 @@ class Mute extends Command{
         });
     }
 
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        const module = ctx.module as Mod;
-        const roleCheck = await module.checkMuteRole(Hyperion, ctx.guild);
+    async execute(ctx: ICommandContext<Mod>, Hyperion: IHyperion): Promise<string>{
+        const roleCheck = await ctx.module.checkMuteRole(Hyperion, ctx.guild);
         if(typeof roleCheck === "string"){return roleCheck;}
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){
@@ -31,13 +30,13 @@ class Mute extends Command{
         if(!ctx.args[0]){return "Please specify a user to mute";}
         const target = Hyperion.utils.strictResolver(ctx.args[0], ctx.guild.members);
         if(!target){return "I dont know who that is, try a user ID or mention";}
-        if(await module.isMod(Hyperion, target, ctx.guild)){return "That user is a mod and is protected from mod actions";}
+        if(await ctx.module.isMod(Hyperion, target, ctx.guild)){return "That user is a mod and is protected from mod actions";}
         if(target.roles.includes(roleCheck.id)){return "That user is already muted";}
         let reason = "No reason provided";
         let time = 0;
         let stringLength = "";
         if(ctx.args[1]){
-            const parsed = module.parseTime(ctx.args[1]);
+            const parsed = ctx.module.parseTime(ctx.args[1]);
             if(parsed !== 0 && ctx.args[2]){
                 time = parsed;
                 stringLength = ctx.args[1];
@@ -70,7 +69,7 @@ class Mute extends Command{
             if(stringLength !== ""){
                 data.stringLength = stringLength;
             }
-            module.makeLog(Hyperion, data, target.user);
+            ctx.module.makeLog(Hyperion, data, target.user);
             return `Muted ${target.username}#${target.discriminator}`;
         }catch{
             return "Something went wrong";
