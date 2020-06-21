@@ -6,7 +6,7 @@ import {Command} from "../Structures/Command";
 import {Module} from "../Structures/Module";
 
 
-class CommandConfig implements Types.CommandConfig{
+export class CommandConfig{
     enabled: boolean;
     allowedRoles: Array<string>;
     disabledRoles: Array<string>;
@@ -32,14 +32,14 @@ class CommandConfig implements Types.CommandConfig{
     }
 }
 
-class ModuleConfig implements Types.ModuleConfig{
+export class ModuleConfig{
     enabled: boolean;
     constructor(data: Types.ModuleConfig, defState: boolean){
         this.enabled = data.enabled ?? defState;
     }
 }
 
-class ModConfig implements Types.ModConfig{
+export class ModConfig{
     modRoles: Array<string>;
     protectedRoles: Array<string>;
     deleteAfter: number;
@@ -50,6 +50,7 @@ class ModConfig implements Types.ModConfig{
     deleteCommand: boolean;
     lastCase: number;
     muteRole: string;
+    dmOnAction: boolean;
     constructor(data: Partial<Types.ModConfig>){
         this.modRoles = data.modRoles ?? [];
         this.protectedRoles = data.protectedRoles ?? [];
@@ -63,10 +64,11 @@ class ModConfig implements Types.ModConfig{
         this.deleteCommand = data.deleteCommand ?? false;
         this.lastCase = data.lastCase ?? 0;
         this.muteRole = data.muteRole ?? "";
+        this.dmOnAction = data.dmOnAction ?? false;
     }
 }
 
-class StarboardConfig implements Types.StarboardConfig{
+export class StarboardConfig{
     starChannel: string;
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
@@ -84,13 +86,13 @@ class StarboardConfig implements Types.StarboardConfig{
     }
 }
 
-const defaultLog: Types.LogEvent = {
+export const defaultLog: Types.LogEvent = {
     enabled: false,
     channel: "default",
     ignoredRoles: [],
     ignoredChannels: []
 };
-export class LoggingConfig implements Types.LoggingConfig{
+export class LoggingConfig{
     logChannel: string;
     ghostReactTime: number;
     ignoredChannels: Array<string>;
@@ -156,7 +158,7 @@ export class LoggingConfig implements Types.LoggingConfig{
     }
 }
 
-class WelcomeConfig implements Types.WelcomeConfig{
+export class WelcomeConfig{
     messageType: string;
     content: string | Embed;
     channel?: string;
@@ -169,7 +171,7 @@ class WelcomeConfig implements Types.WelcomeConfig{
     }
 }
 
-class TagConfig implements Types.TagConfig{
+export class TagConfig{
     allowedEditRoles: Array<string>;
     limitEdit: boolean;
     delete: boolean;
@@ -182,7 +184,7 @@ class TagConfig implements Types.TagConfig{
     }
 }
 
-class RankConfig implements Types.RankConfig{
+export class RankConfig{
     limitOne: boolean;
     limitOnePerGroup: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -198,7 +200,7 @@ class RankConfig implements Types.RankConfig{
     }
 }
 
-class RRConfig implements Types.RRConfig{
+export class RRConfig{
     limitOne: boolean;
     limitOnePerGroup: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -214,7 +216,7 @@ class RRConfig implements Types.RRConfig{
     }
 }
 
-class AutoroleConfig implements Types.AutoroleConfig{
+export class AutoroleConfig{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     autoroles: any;
     removePrevious: boolean;
@@ -224,7 +226,7 @@ class AutoroleConfig implements Types.AutoroleConfig{
     }
 }
 
-class SocialConfig implements Types.SocialConfig{
+export class SocialConfig{
     ignoredChannels: Array<string>;
     levelupChannel: string;
     constructor(data: Partial<Types.SocialConfig>){
@@ -233,8 +235,9 @@ class SocialConfig implements Types.SocialConfig{
     }
 }
 
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const nameConfigMap: any = {
+const nameConfigMap: {[key: string]: any} = {
     mod: ModConfig,
     command: CommandConfig,
     module: ModuleConfig,
@@ -277,26 +280,25 @@ class MongoGuildManager{
         if(doc.prefix === ""){return "%";}
         return doc.prefix;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async setPrefix(guildID: string, newPrefix: string): Promise<any>{
+
+    async setPrefix(guildID: string, newPrefix: string): Promise<Types.IMongoUpdateResult>{
         return await this.model.updateOne({guild: guildID}, {prefix: newPrefix});
     }
 
     async getMods(guildID: string): Promise<Array<string>>{
         const guildConfig: IGuild  | null = await this.getConfig(guildID);
-        if(!guildConfig?.mod){return [];}
-        if(guildConfig.mod === {}){return [];}
+        if(!guildConfig?.mod?.modRoles){return [];}
         const roles = (guildConfig.mod as Types.ModConfig)?.modRoles;
         if(!roles){return [];}
         return roles;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    validateModuleState(state: boolean, module: string, modules: Collection<Module>): any{
+
+    validateModuleState(state: boolean, module: string, modules: Collection<Module>): false | ModuleConfig{
         const mod: undefined | Module = modules.get(module);
-        if(mod === undefined){return {code: 1, payload: "No matching module found"};}
-        if(mod.private){return {code: 1, payload: "Module is private and not stored in config"};}
-        if(!state && mod.alwaysEnabled){return {code: 1, payload: "This module is always enabled and may not be disabled"};}
-        return {code: 0, payload: new ModuleConfig({enabled: state}, mod.defaultStatus)};
+        if(mod === undefined){return false;}
+        if(mod.private){return false;}
+        if(!state && mod.alwaysEnabled){return false;}
+        return new ModuleConfig({enabled: state}, mod.defaultStatus);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validateCommandState(data: any, command: string, commands: Collection<Command>): any{
@@ -307,16 +309,15 @@ class MongoGuildManager{
         if(cmd.internal || cmd.dev || cmd.admin || cmd.support){return {code: 1, payload: "This command is private and can not be configured per server"};}
         return {code: 0, payload: new CommandConfig(data)};
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async updateModuleStates(guildID: string, newMod: string, newState: boolean, modules: Collection<Module>): Promise<any>{
+
+    async updateModuleStates(guildID: string, newMod: string, newState: boolean, modules: Collection<Module>): Promise<Types.IMongoUpdateResult | undefined>{
         const guilddata = await this.model.findOne({guild: guildID}, "modules").lean().exec();
-        if(!guilddata?.modules){return {code: 1, payload: "An error occured"};}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const validated: any = this.validateModuleState(newState, newMod, modules);
-        if(validated.code !== 0){return validated;}
+        if(!guilddata?.modules){return;}
+        const validated = this.validateModuleState(newState, newMod, modules);
+        if(validated === false){return;}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const temp: any ={};
-        temp[newMod] = validated.payload;
+        temp[newMod] = validated;
         const merged = this.merge(guilddata.modules, temp);
         return await this.model.updateOne({guild: guildID}, {modules: merged}).exec();
     }
@@ -351,10 +352,17 @@ class MongoGuildManager{
         update[mod] = validated;
         return await this.model.updateOne({guild: guildID}, update).exec();
     }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async update(guildID: string, update: any): Promise<any>{
+    async update(guildID: string, update: any): Promise<Types.IMongoUpdateResult>{
         return await this.model.updateOne({guild: guildID}, update).exec();
     }
+
+    async getCommandState(guild: string, command: string): Promise<CommandConfig>{
+        const config = await this.getConfig(guild);
+        return new CommandConfig(config?.commands[command] ?? {});
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     merge(oldData: any, newData: any): any{
         const newProps: Array<string> = Object.getOwnPropertyNames(newData);
