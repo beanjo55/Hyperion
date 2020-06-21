@@ -23,7 +23,11 @@ class Say extends Command{
         const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[0]);
         if(!channel){return ctx.channel.createMessage("Im not sure what channel that is, try an ID or mention the channel").catch(() => {});}
         if(!ctx.args[1]){return ctx.channel.createMessage("You need to provide a message for me to say").catch(() => {});}
-        channel.createMessage(ctx.args.slice(1).join(" ")).catch(() => {});
+        await channel.createMessage(ctx.args.slice(1).join(" ")).then(() => {
+            Hyperion.redis.set(`Deleted:${ctx.msg.id}`, 1, "EX", 5);
+        }).catch(() => {
+            Hyperion.redis.del(`Deleted:${ctx.msg.id}`);
+        });
         ctx.msg.delete().catch(() => {});
     }
 }
