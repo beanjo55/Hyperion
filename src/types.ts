@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 /* eslint-disable no-unused-vars */
-import {Client, Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, ClientOptions} from "eris";
+import {Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, ClientOptions} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
-import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
+import {manager as MGM, WelcomeConfig as wc, AutoroleConfig as arc, SocialConfig as sc, RRConfig as rrc, RankConfig as rc, TagConfig as tc, LoggingConfig as lc, StarboardConfig as sbc, ModuleConfig as mc, ModConfig as modc, CommandConfig as cc} from "./Core/DataManagers/MongoGuildManager";
 import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
 import {manager as MMLM} from "./Core/DataManagers/MongoModLogManager";
-import mongoose from "mongoose";
-import IORedis from "ioredis";
-import { ClusterWorkerIPC } from "./Core/Cluster/ClusterWorkerIPC";
+import {IGuild} from "./MongoDB/Guild";
+import HyperionC from "./main";
 
 
 
@@ -59,82 +58,8 @@ export interface IUtils{
     resolveRole(input: string, roles: Collection<Role>): Role | undefined;
 }
 
-export interface IHyperion {
-    client: Client;
-    readonly build: string;
-    modules: Collection<Module>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sentry: any;
-    commands: Collection<Command>;
-    logger: ILogger;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    bevents: any;
-    readonly devPrefix: string;
-    readonly modlist: Array<string>;
-    readonly version: string;
-    readonly adminPrefix: string;
-    readonly defaultColor: number;
-    readonly mongoOptions: mongoose.ConnectionOptions;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly models: any;
-    db: mongoose.Connection;
-    global: GlobalConfig;
-    logLevel: number;
-    managers: IManagers;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    stars: any;
-    utils: IUtils;
-    readonly circleCIToken: string;
-    redis: IORedis.Redis;
-    redact(input: string): string;
-    postAll(): void;
-    postDBL(): void;
-    postGlenn(): void;
-    postDBoats(): void;
-    loadEvents(): void;
-    loadEvent(eventfile: string): void;
-    loadMod(modname: string): void;
-    loadMods(): void;
-    init(): void;
-    id: number;
-    ipc: ClusterWorkerIPC;
-}
 
-export interface CommandConfig{
-    allowedRoles: Array<string>;
-    disabledRoles: Array<string>;
-    allowedChannels: Array<string>;
-    disabledChannels: Array<string>;
-    enabled: boolean;
-    subcommands?: Array<CommandConfig>;
-    name?: string;
-}
-
-export interface ModuleConfig{
-    enabled: boolean;
-}
-
-export interface ModConfig{
-    modRoles: Array<string>;
-    protectedRoles: Array<string>;
-    deleteAfter: number;
-    modLogChannel: string;
-    requireReason: boolean;
-    requireMuteTime: boolean;
-    deleteOnBan: boolean;
-    deleteCommand: boolean;
-    lastCase: number;
-    muteRole: string;
-}
-
-export interface StarboardConfig{
-    starChannel: string;
-    ignoredChannels: Array<string>;
-    ignoredRoles: Array<string>;
-    selfStar: boolean;
-    customStar: string;
-    starCount: number;
-}
+export type IHyperion = HyperionC;
 
 export interface LogEvent {
     enabled: boolean;
@@ -142,49 +67,6 @@ export interface LogEvent {
     ignoredRoles: Array<string>;
     ignoredChannels: Array<string>;
 }
-
-export interface LoggingConfig{
-    logChannel: string;
-    ghostReactTime: number;
-    ignoredChannels: Array<string>;
-    ignoredRoles: Array<string>;
-    specifyChannels: boolean;
-    newAccountAge: number;
-    showAvatar: boolean;
-
-    banAdd: LogEvent;
-    banRemove: LogEvent;
-    memberAdd: LogEvent;
-    memberRemove: LogEvent;
-    messageDelete: LogEvent;
-    messageEdit: LogEvent;
-    bulkDelete: LogEvent;
-    roleAdd: LogEvent;
-    roleUpdate: LogEvent;
-    roleDelete: LogEvent;
-    channelAdd: LogEvent;
-    channelUpdate: LogEvent;
-    channelDelete: LogEvent;
-    memberRoleAdd: LogEvent;
-    memberRoleRemove: LogEvent;
-    memberNicknameChange: LogEvent;
-    voiceJoin: LogEvent;
-    voiceSwitch: LogEvent;
-    voiceLeave: LogEvent;
-    guildUpdate: LogEvent;
-    webhookUpdate: LogEvent;
-    ghostReact: LogEvent;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [index: string]: any;
-}
-
-export interface WelcomeConfig{
-    messageType: string;
-    content: string | Embed;
-    channel?: string;
-    dm: boolean;
-}
-
 export interface Tag {
     name: string;
     author: string;
@@ -193,42 +75,6 @@ export interface Tag {
     editdate?: number;
     uses: number;
     content: string; 
-}
-
-export interface TagConfig{
-    allowedEditRoles: Array<string>;
-    limitEdit: boolean;
-    delete: boolean;
-    tags: Array<Tag>;
-}
-
-export interface RankConfig{
-    limitOne: boolean;
-    limitOnePerGroup: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ranks: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rankGroups: any;
-}
-
-export interface RRConfig{
-    limitOne: boolean;
-    limitOnePerGroup: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rr: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rrGroups: any;
-}
-
-export interface AutoroleConfig{
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    autoroles: any;
-    removePrevious: boolean;
-}
-
-export interface SocialConfig{
-    ignoredChannels: Array<string>;
-    levelupChannel: string;
 }
 
 export interface Status{
@@ -243,7 +89,17 @@ export interface HandlerConfig{
     logLevel: number;
     priority: number;
 }
-
+export type RRConfig = rrc;
+export type AutoroleConfig = arc;
+export type RankConfig = rc;
+export type TagConfig = tc;
+export type StarboardConfig = sbc;
+export type SocialConfig = sc;
+export type LoggingConfig = lc;
+export type WelcomeConfig = wc;
+export type ModConfig = modc;
+export type ModuleConfig = mc;
+export type CommandConfig = cc;
 export interface GuildConfig {
     guild: string;
     prefix: string;
@@ -279,15 +135,15 @@ export interface AckInterface{
     [index: string]: any;
 }
 
-export interface ICommandContext{
+export interface ICommandContext<T = Module>{
     msg: Message;
     channel: TextChannel;
     guild: Guild;
-    guildConfig: GuildConfig;
+    guildConfig: IGuild;
     member: Member;
     user: User;
     command: Command;
-    module: Module;
+    module: T;
     content: string;
     args: Array<string>;
     dev: boolean;
@@ -511,7 +367,6 @@ export interface IMongoUpdateResult{
     electionId?: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     operationTime?: any;
-    
     "$clusterTime"?: Array<unknown>;
 }
 
@@ -534,5 +389,8 @@ export interface IModerationContext{
 }
 
 export type EmbedResponse = {embed: Partial<Embed>};
+export type MixedResponse = string | EmbedResponse;
+export type CommandResponse = Promise<MixedResponse>;
 export type Field = {name: string; value: string; inline: boolean};
 export type FieldArray = Array<Field>;
+

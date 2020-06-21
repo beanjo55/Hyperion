@@ -11,7 +11,7 @@ import {default as Redis} from "ioredis";
 import {default as axios} from "axios";
 import {default as mongoose} from "mongoose";
 import {inspect} from "util";
-import {CoreOptions, IHyperion, IManagers, GlobalConfig, IUtils, ILogger} from "./types";
+import {CoreOptions, IManagers, GlobalConfig, IUtils, ILogger} from "./types";
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
 import {default as guilduser} from "./MongoDB/Guilduser";
@@ -25,27 +25,30 @@ import {hoistUserResolver} from "./Core/Utils/Resolvers";
 import {resolveUser as userResolver} from "./Core/Utils/Resolvers";
 import {banResolver} from "./Core/Utils/Resolvers";
 import {strictResolver} from "./Core/Utils/Resolvers";
-import {sr as sortRoles} from "./Core/Utils/Roles";
-import {gc as getColor} from "./Core/Utils/Roles";
+import {sortRoles} from "./Core/Utils/Roles";
+import {getColor} from "./Core/Utils/Roles";
 import {resolveRole} from "./Core/Utils/Roles";
 import {resolveTextChannel} from "./Core/Utils/Channels";
 import {resolveVoiceChannel} from "./Core/Utils/Channels";
 import {resolveCategory} from "./Core/Utils/Channels";
 import {BaseClusterWorker} from "./Core/Cluster/BaseClusterWorker";
 import {ShardManager} from "./Core/Sharding/ShardManager";
+import * as sentry from "@sentry/node";
+import {default as embedModel} from "./MongoDB/Embeds";
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const config = require("../config.json");
 
 
-const models = {
+const models: {[key: string]: mongoose.Model<any>} = {
     user: user,
     guild: guild,
     guilduser: guilduser,
     modlog: modlog,
     global: global,
-    starred: starModel
+    starred: starModel,
+    embed: embedModel
 };
 
 const listTokens = {
@@ -79,16 +82,16 @@ const utils: IUtils = {
 };
 
 
-export default class HyperionC extends BaseClusterWorker implements IHyperion{
+export default class HyperionC extends BaseClusterWorker{
     readonly build: string;
     modules: Collection<Module>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sentry: any;
+    sentry: sentry.User;
     commands: Collection<Command>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     logger: ILogger;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    bevents: any;
+    bevents: {[key: string]: () => void};
     readonly devPrefix: string;
     readonly modlist: Array<string>;
     readonly version: string;
@@ -188,26 +191,53 @@ export default class HyperionC extends BaseClusterWorker implements IHyperion{
         });
     }
 
-    loadMod(modname: string): void{
+    loadMod(modname: string): Module | undefined{
         try{
             const mod = require(`./Modules/${modname}/${modname}.js`).default;
-            this.modules.add(new mod);
+            return this.modules.add(new mod);
         }catch(err){
             this.logger.error("Hyperion", `Failed to load module ${modname}, error: ${err}`, "Module Loading");
         }
     }
 
     reloadMod(modname: string): void{
+        const filename = modname.charAt(0).toUpperCase() + modname.slice(1);
         if(!this.modules.has(modname)){throw new Error("Can not reload a module that doesnt exist!");}
-        delete require.cache[require.resolve(`./Modules/${modname}/${modname}.js`)];
-        this.loadMod(modname);
+        delete require.cache[require.resolve(`${__dirname}/Modules/${filename}/${filename}.js`)];
+        this.modules.delete(modname);
+        const reloaded = this.loadMod(filename);
+        if(reloaded){
+            if(reloaded.needsInit){
+                reloaded.init(this);
+            }
+            if(reloaded.hasCommands){
+                reloaded.reloadCommands(this);
+            }
+        }
     }
 
     reloadEvent(eventname: string): void{
         if(!this.bevents[eventname]){throw new Error("Can not reload an event that doesnt exist!");}
-        delete require.cache[require.resolve(`./events/${eventname.charAt(0).toUpperCase() + eventname.slice(1)}.js`)];
+        delete require.cache[require.resolve(`${__dirname}/Events/${eventname.charAt(0).toUpperCase() + eventname.slice(1)}.js`)];
         this.client.removeAllListeners(eventname);
         this.loadEvent(eventname.charAt(0).toUpperCase() + eventname.slice(1));
+    }
+
+    reloadCommand(commandName: string): void{
+        if(!this.commands.get(commandName)){throw new Error("Cannot reload a command that doesnt exist!");}
+        const moduleName = this.commands.get(commandName)?.module;
+        if(!moduleName){throw new Error("Could not find module name to reload command from!");}
+        const module = this.modules.get(moduleName);
+        if(!module){throw new Error("could not find module to reload from!");}
+        module.reloadCommand(this, commandName);
+    }
+
+    loadCommand(commandName: string, moduleName: string): void{
+        const module = this.modules.get(moduleName);
+        if(!module){throw new Error("Specify a valid module to load from");}
+        if(this.commands.has(commandName)){throw new Error("Can not load a duplicate command");}
+        module.loadCommand(this, commandName.charAt(0).toUpperCase() + commandName.slice(1) +".js");
+
     }
 
     loadMods(): void{

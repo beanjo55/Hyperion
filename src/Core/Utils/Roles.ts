@@ -4,7 +4,7 @@ import {Role, Collection} from "eris";
 
 
 
-function sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>): Array<Role>{
+export function sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>): Array<Role>{
     const userRolesObject: Array<Role> = [];
     userRoles.forEach((uRole: string) => {
         const temp = guildRoles.get(uRole);
@@ -13,7 +13,7 @@ function sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>): Arra
     return userRolesObject.sort((a, b) => b.position - a.position);
 }
 
-function getColor(roles: Collection<Role>, guildRoles: Collection<Role>): number{
+export function getColor(roles: Collection<Role>, guildRoles: Collection<Role>): number{
     const colored = roles.filter((r: Role) => r.color !== 0).map((r: Role) => r.id);
     const sorted = sortRoles(colored, guildRoles);
     if(!sorted){return 0;}
@@ -32,6 +32,3 @@ export function resolveRole(input: string, roles: Collection<Role>): Role | unde
     }
     return role;
 }
-
-export {sortRoles as sr};
-export {getColor as gc};

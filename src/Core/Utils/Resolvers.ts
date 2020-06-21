@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import {Member, Role, Message, Collection, User} from "eris";
-import { IHyperion } from "../../types";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import  HyperionC  from "../../main";
 
 
 
@@ -65,7 +66,7 @@ export function strictResolver(search: string, members: Collection<Member>, ): M
     return member;
 }
 
-export async function banResolver(search: string, members: Collection<Member>, Hyperion: IHyperion): Promise<Member | User | undefined>{
+export async function banResolver(search: string, members: Collection<Member>, Hyperion: HyperionC): Promise<Member | User | undefined>{
     let user: User | Member | undefined;
     user = strictResolver(search, members);
     if(!user){
