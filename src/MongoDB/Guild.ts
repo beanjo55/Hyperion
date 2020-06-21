@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 import {Schema, model, Model, Document} from "mongoose";
 import * as Types from "../types";
-
+import * as confs from "../Core/DataManagers/MongoGuildManager";
 
 const guildconf = new Schema({
 
@@ -29,48 +29,53 @@ const guildconf = new Schema({
 
     reactionRoles: {
         type: Object,
-        default: {}
+        default: new confs.RRConfig({})
     },
 
     tags: {
         type: Object,
-        default: {}
+        default: new confs.TagConfig({})
     },
 
     autorole: {
         type: Object,
-        default: {}
+        default: new confs.AutoroleConfig({})
     },
 
     ranks: {
         type: Object,
-        default: {}
+        default: new confs.RankConfig({})
     },
 
     starboard: {
         type: Object,
-        default: {}
+        default: new confs.StarboardConfig({})
     },
 
     logging: {
         type: Object,
-        default: {}
+        default: new confs.LoggingConfig({})
     },
 
     welcome: {
         type: Object,
-        default: {}
+        default: new confs.WelcomeConfig({})
     },
 
     mod: {
         type: Object,
-        default: {}
+        default: new confs.ModConfig({})
     },
 
     //commands
     commands: {
         type: Object,
         default: {}
+    },
+
+    social: {
+        type: Object,
+        default: new confs.SocialConfig({})
     },
 
     ignoredChannels: {
@@ -102,10 +107,6 @@ const guildconf = new Schema({
     embedCommonResponses: {
         type: Boolean,
         default: false
-    },
-    caseNum: {
-        type: String,
-        default: "0"
     }
 
 
@@ -118,23 +119,23 @@ export interface IGuild{
     guild: string;
     prefix: string;
     updatedAt?: number;
-    modules: {[key: string]: {[key: string]: boolean}};
-    reactionRoles: {} | Types.RRConfig;
-    tags: {} | Types.TagConfig;
-    autorole: {} | Types.AutoroleConfig;
-    ranks: {} | Types.RankConfig;
-    starboard: {} | Types.StarboardConfig;
-    logging: {} | Types.LoggingConfig;
-    welcome: {}| Types.WelcomeConfig;
-    mod: {} | Types.ModConfig;
-    commands: {} | Types.CommandConfig;
+    modules: {[key: string]: Types.ModuleConfig};
+    reactionRoles: Types.RRConfig;
+    tags: Types.TagConfig;
+    autorole: Types.AutoroleConfig;
+    ranks: Types.RankConfig;
+    starboard: Types.StarboardConfig;
+    logging: Types.LoggingConfig;
+    welcome: Types.WelcomeConfig;
+    mod: Types.ModConfig;
+    commands: {[key: string]: Types.CommandConfig};
     ignoredChannels: Array<string>;
     ignoredRoles: Array<string>;
     ignoredUsers: Array<string>;
     cantRunMessage: boolean;
     botMissingPermsMessages: boolean;
     embedCommonResponses: boolean;
-    caseNum: string;
+    social: Types.SocialConfig;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any;
 }
