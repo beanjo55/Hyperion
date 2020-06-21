@@ -10,7 +10,7 @@ class Social extends Module{
             hasCommands: true,
             needsInit: false,
             needsLoad: false,
-            hasCfg: true,
+            hasCfg: false,
             dirname: __dirname
         });
     }
