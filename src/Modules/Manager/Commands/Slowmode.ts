@@ -23,7 +23,7 @@ class Slowmode extends Command{
         if(isNaN(time)){return "I dont understand that time, try just a number";}
         if(time > 21600){return "That time is too long, try a shorter one";}
         try{
-            await ctx.channel.edit({
+            await channel.edit({
                 rateLimitPerUser: time
             }, "Hyperion Slowmode");
             return "Successfully set slowmode!";
