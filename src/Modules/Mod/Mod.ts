@@ -65,7 +65,7 @@ const actionObj: {[key: string]: ActionInfo} = {
 };
 const timeends = ["d", "day", "m", "minute", "h", "hour"];
 class Mod extends Module{
-    sweepInterval: NodeJS.Timeout | undefined;
+    sweepInterval!: NodeJS.Timeout | undefined;
     actions: {[key: string]: ActionInfo};
     constructor(){
         super({
