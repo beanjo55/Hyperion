@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import {Module, ConfigKey} from "../../Core/Structures/Module";
-import { IHyperion, IModerationContext, ModConfig } from "../../types";
+import { IModerationContext, ModConfig } from "../../types";
+import HyperionC from "../../main";
 import { Guild, Member, Collection, User, Message, Role, Embed } from "eris";
 import {IModeration, default as ModerationModel} from "../../MongoDB/Moderation";
 import { IModLog, IModLogDoc } from "../../MongoDB/Modlog";
@@ -22,7 +23,7 @@ const actionObj: {[key: string]: ActionInfo} = {
         hasModeration: false
     },
     softban: {
-        friendlyName: "Soft Ban",
+        friendlyName: "Softban",
         color: colors.red,
         hasModeration: false
     },
@@ -64,7 +65,7 @@ const actionObj: {[key: string]: ActionInfo} = {
 };
 const timeends = ["d", "day", "m", "minute", "h", "hour"];
 class Mod extends Module{
-    sweepInterval!: NodeJS.Timeout;
+    sweepInterval: NodeJS.Timeout | undefined;
     actions: {[key: string]: ActionInfo};
     constructor(){
         super({
@@ -85,7 +86,7 @@ class Mod extends Module{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async guildMemberAdd(Hyperion: IHyperion, guild: Guild, member: Member): Promise<void>{
+    async guildMemberAdd(Hyperion: HyperionC, guild: Guild, member: Member): Promise<void>{
         if(!await this.checkGuildEnabled(Hyperion, guild.id)){return;}
         const active = await ModerationModel.find({guild: guild.id, user: member.id}).lean<IModeration>().exec();
         let muterole: Role | string | undefined;
@@ -112,11 +113,12 @@ class Mod extends Module{
         }
     }
 
-    async ready(Hyperion: IHyperion): Promise<void>{
+    async ready(Hyperion: HyperionC): Promise<void>{
+        if(this.sweepInterval){return;}
         this.sweepInterval = setInterval(this.sweepManager.bind(Hyperion), 60000);
     }
 
-    async isMod(Hyperion: IHyperion, member: Member, guild: Guild): Promise<boolean>{
+    async isMod(Hyperion: HyperionC, member: Member, guild: Guild): Promise<boolean>{
         if(member.permission.has("manageGuild")){return true;}
         const roles = await Hyperion.managers.guild.getMods(guild.id);
         if(member.roles.some((r: string) => roles.indexOf(r) >= 0)){return true;}
@@ -178,7 +180,32 @@ class Mod extends Module{
         return 0;
     }
 
-    async canModerate(Hyperion: IHyperion, member: Member, botMember: Member, guild: Guild): Promise<boolean>{
+    async banDM(user: User, guildName: string, reason: string, additional?: {appeal?: string; custom?: string}): Promise<void>{
+        user.getDMChannel().then(x => {
+            x.createMessage(`You were banned in \`${guildName}\` for: ${reason}`).catch();
+            if(additional){
+                let message = "";
+                if(additional.appeal){
+                    message += `You can appeal at: ${additional.appeal}`;
+                }
+                if(additional.custom){
+                    if(message !== ""){
+                        message += `\nA custom message from ${guildName}: ${additional.custom}`;
+                    }else{
+                        message = `A custom message from ${guildName}: ${additional.custom}`;
+                    }
+                }
+                x.createMessage(message).catch();
+            }
+        });
+    }
+
+    async muteDM(user: User, guildName: string, reason: string, time?: string): Promise<void>{
+        const message = time ? `You were muted in \`${guildName}\` for ${reason}. The mute is ${time}` : `You were muted in \`${guildName}\` for: ${reason}`;
+        user.getDMChannel().then(x => x.createMessage(message).catch(() => {}));
+    }
+
+    async canModerate(Hyperion: HyperionC, member: Member, botMember: Member, guild: Guild): Promise<boolean>{
         const targetRoles = Hyperion.utils.sortRoles(member.roles, guild.roles);
         const botRoles = Hyperion.utils.sortRoles(botMember.roles, guild.roles);
         if(member.id === guild.ownerID){return false;}
@@ -196,7 +223,7 @@ class Mod extends Module{
         return input;
     }
 
-    async makeLog(Hyperion: IHyperion, ctx: IModerationContext, user: User): Promise<void>{
+    async makeLog(Hyperion: HyperionC, ctx: IModerationContext, user: User): Promise<void>{
 
         ctx.case = await this.getNextCase(Hyperion, ctx.guild.id);
         await this.incCaseNum(Hyperion, ctx.guild.id);
@@ -263,30 +290,29 @@ class Mod extends Module{
 
     addCaseTag(input: string, caseNum: number): string {return `${input}, Case ${caseNum}`;}
 
-    async incCaseNum(Hyperion: IHyperion, guild: string): Promise<void>{
+    async incCaseNum(Hyperion: HyperionC, guild: string): Promise<void>{
         const oldConf = await Hyperion.managers.guild.getConfig(guild);
         if(!oldConf){throw new Error("Failed to get old mod data, can not continue saving case");}
-        if(!oldConf.mod){oldConf.mod = {lastCase: 0};}
+        if(!oldConf.mod){(oldConf.mod as Partial<ModConfig>) = {lastCase: 0};}
         const newCase = (oldConf.mod as ModConfig).lastCase +1;
         await Hyperion.managers.guild.updateModuleConfig(guild, "mod", {lastCase: newCase});
     }
 
-    async getNextCase(Hyperion: IHyperion, guild: string): Promise<number>{
+    async getNextCase(Hyperion: HyperionC, guild: string): Promise<number>{
         const data = await Hyperion.managers.guild.getConfig(guild);
         if(!data?.mod){return 1;}
         if((data.mod as ModConfig).lastCase === 0){return 1;}
         return (data.mod as ModConfig).lastCase+1;
     }
 
-    async getLogChannel(Hyperion: IHyperion, guild: string): Promise<string | undefined>{
+    async getLogChannel(Hyperion: HyperionC, guild: string): Promise<string | undefined>{
         const config = await Hyperion.managers.guild.getConfig(guild);
         if(!(config?.mod as ModConfig)?.modLogChannel){return;}
         return (config!.mod as ModConfig).modLogChannel;
     }
 
-    async checkMuteRole(Hyperion: IHyperion, guild: Guild): Promise<Role | string>{
+    async checkMuteRole(Hyperion: HyperionC, guild: Guild): Promise<Role | string>{
         const data = await Hyperion.managers.guild.getConfig(guild.id);
-        if(data?.mod === {}){return "No mute role set!";}
         const id = (data?.mod as ModConfig)?.muteRole;
         if(!id){return "No mute role set!";}
         const role = guild.roles.get(id);
@@ -294,7 +320,7 @@ class Mod extends Module{
         return role;
     }
 
-    async canManageRole(Hyperion: IHyperion, guild: Guild, role: Role, bot: Member): Promise<boolean>{
+    async canManageRole(Hyperion: HyperionC, guild: Guild, role: Role, bot: Member): Promise<boolean>{
         const botRoles = Hyperion.utils.sortRoles(bot.roles, guild.roles);
         if(botRoles.length === 0){return false;}
         if(botRoles[0].position <= role.position){return false;}
@@ -343,7 +369,7 @@ class Mod extends Module{
         await ModerationModel.create(data);
     }
 
-    logToContext(log: IModLog | IModLogDoc, Hyperion: IHyperion): IModerationContext{
+    logToContext(log: IModLog | IModLogDoc, Hyperion: HyperionC): IModerationContext{
         const data: IModerationContext = {
             user: log.user,
             case: log.caseNumber,
@@ -374,7 +400,7 @@ class Mod extends Module{
         ModerationModel.deleteMany({guild: guild, user: user, action: "mute"}).exec();
     }
 
-    async sweepManager(this: IHyperion): Promise<void>{
+    async sweepManager(this: HyperionC): Promise<void>{
         const mod = this.modules.get("mod");
         if(!mod){
             this.logger.fatal("Hyperion", "Moderation module was not found!", "Moderation Sweep");
@@ -383,7 +409,7 @@ class Mod extends Module{
         mod.sweep(this);
     }
 
-    async sweep(Hyperion: IHyperion): Promise<void>{
+    async sweep(Hyperion: HyperionC): Promise<void>{
         const moderations = await ModerationModel.find({end: {$lte: Date.now()}, untimed: false}).lean<IModeration>().exec();
         for(const moderation of moderations){
             const log = await Hyperion.managers.modlog.getCaseByMID(moderation.mid);
@@ -454,12 +480,12 @@ class Mod extends Module{
         
     }
 
-    async processModeration(Hyperion: IHyperion, ctx: IModerationContext): Promise<boolean>{
+    async processModeration(Hyperion: HyperionC, ctx: IModerationContext): Promise<boolean>{
         if(ctx.moderationType === "mute"){return this,this.autoUnmute(Hyperion, ctx);}
         return false;
     }
 
-    async autoUnmute(Hyperion: IHyperion, ctx: IModerationContext): Promise<boolean>{
+    async autoUnmute(Hyperion: HyperionC, ctx: IModerationContext): Promise<boolean>{
         const user = ctx.guild.members.get(ctx.user) ?? await ctx.guild.getRESTMember(ctx.user).catch(() => {});
         if(!user){
             //asuming user isnt in the server, just silently remove the moderation
