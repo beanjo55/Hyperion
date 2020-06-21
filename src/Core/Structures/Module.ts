@@ -90,23 +90,31 @@ export class Module{
             cmdFiles.forEach((e: string) => {
                 if(!e.startsWith(".")){
                     try{
-                        const precmd = require(`${this.cmdpath}/${e}`).default;
-                        const cmd = new precmd;
-                        if(cmd.hasSub){
-                            const subcommands = require(`${this.cmdpath}/${e}`).subcmd;
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            subcommands.forEach((scmd: any) => {
-                                cmd.subcommands.add(new scmd);
-                            });
-                        }
-                        Hyperion.commands.add(cmd);
-                    }catch(err){
-                        logger.error("Hyperion", `Failed to load command ${e} from module ${this.name}. error: ${inspect(err)}`, "Load Commands");
-                    }
+                        this.loadCommand(Hyperion, e);
+                    // eslint-disable-next-line no-empty
+                    }catch{}
                 }
             });
         }catch(err){
             logger.error("Hyperion", `Error loading commands for module ${this.name}: ${err}`, "Load Commands");
+        }
+    }
+
+    loadCommand(Hyperion: IHyperion, commandFile: string): void{
+        try{
+            const precmd = require(`${this.cmdpath}/${commandFile}`).default;
+            const cmd = new precmd;
+            if(cmd.hasSub){
+                const subcommands = require(`${this.cmdpath}/${commandFile}`).subcmd;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                subcommands.forEach((scmd: any) => {
+                    cmd.subcommands.add(new scmd);
+                });
+            }
+            Hyperion.commands.add(cmd);
+        }catch(err){
+            logger.error("Hyperion", `Failed to load command ${commandFile} from module ${this.name}. error: ${inspect(err)}`, "Load Commands");
+            throw err;
         }
     }
 
@@ -122,7 +130,27 @@ export class Module{
         });
 
         this.loadCommands(Hyperion);
+    }
 
+    reloadCommand(Hyperion: IHyperion, commandName: string): void{
+        const filename = commandName.charAt(0).toUpperCase() + commandName.slice(1) + ".js";
+        console.log(filename);
+        try{
+            const cmdFiles = fs.readdirSync(this.cmdpath);
+            for(const file of cmdFiles){
+                console.log(file);
+                if(file !== filename){continue;}
+                console.log("reloading command from" + file);
+                delete require.cache[require.resolve(`${this.cmdpath}/${file}`)];
+                console.log("cache cleared");
+                Hyperion.commands.delete(commandName);
+                console.log("command removed");
+                this.loadCommand(Hyperion, filename);
+            }
+        }catch(err){
+            Hyperion.logger.error("Hyperion", `Failed to reload command ${commandName}, error: ${err}`, "Command Reload");
+            throw err;
+        }
     }
 
 
