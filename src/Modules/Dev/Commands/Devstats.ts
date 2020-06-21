@@ -38,7 +38,7 @@ class Devstats extends Command{
 
         data.embed.fields?.push({
             name: "Master",
-            value: `\`\`\`xl\nMemory: ${(stats.manager.memory.rss/1024/1024).toFixed(2)} mb\`\`\``,
+            value: `\`\`\`xl\nMemory: ${(stats.manager.memory.rss/1000/1000).toFixed(2)} mb\`\`\``,
             inline: false
         });
         if(clusters.length !== 0){
@@ -46,7 +46,7 @@ class Devstats extends Command{
                 const cluster = stats.clusters[Number(c)];
                 data.embed.fields?.push({
                     name: `Cluster ${c}`,
-                    value: `\`\`\`xl\nMemory: ${(cluster.memory.rss/1024/1024).toFixed(2)} mb\nGuilds: ${cluster.discord?.guilds}\nUsers: ${cluster.discord?.users}\nShard Count: ${cluster.discord?.latencies.length}\`\`\``,
+                    value: `\`\`\`xl\nMemory: ${(cluster.memory.rss/1000/1000).toFixed(2)} mb\nGuilds: ${cluster.discord?.guilds}\nUsers: ${cluster.discord?.users}\nShard Count: ${cluster.discord?.latencies.length}\`\`\``,
                     inline: false
                 });
             });
