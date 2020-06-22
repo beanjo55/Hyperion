@@ -12,7 +12,7 @@ class Kick extends Command{
             module: "mod",
             needsRolepos: true,
             cooldownTime: 5000,
-            helpDetail: "Kicks a user",
+            helpDetail: "Kicks a user.",
             helpUsage: "{prefix}kick [user] [reason]",
             helpUsageExample: "{prefix}kick boss trolling"
         });
@@ -20,22 +20,22 @@ class Kick extends Command{
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
-        if(!bot){return "Cache Failure, couldnt find bot user";}
-        if(!bot.permission.has("kickMembers")){return " I need the `Kick Members` permission to well, kick members";}
+        if(!bot){return "Cache Failure, couldn't find bot user";}
+        if(!bot.permission.has("kickMembers")){return "I cannot kick anyone without the `kick members` permission.";}
         const toKick = await Hyperion.utils.strictResolver(ctx.args[0], ctx.guild.members);
-        if(!toKick){return "I couldnt figure out what user that is";}
-        if(toKick.id === ctx.user.id){return "You cant kick yourself";}
-        if(toKick.id === Hyperion.client.user.id){return "I cant kick myself";}
-        if(await ctx.module.isMod(Hyperion, toKick, ctx.guild)){return "That user is a mod and is protected from mod actions";}
-        if(bot.roles.length === 0){return "I need a role higehr than the user's highest role to kick them, I cant do that with no roles";}
+        if(!toKick){return "Provide a user to kick!";}
+        if(toKick.id === ctx.user.id){return "You can't kick yourself!";}
+        if(toKick.id === Hyperion.client.user.id){return "I can't kick myself!";}
+        if(await ctx.module.isMod(Hyperion, toKick, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
+        if(bot.roles.length === 0){return "I need a role higehr than the user's highest role to kick them, I can't do that with no roles!";}
         const userRoles = Hyperion.utils.sortRoles(toKick.roles, ctx.guild.roles);
         const botRoles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
-        if(userRoles[0] && userRoles[0].position >= botRoles[0].position){return "I cant kick someone with the same highest role or a higher role than me";}
+        if(userRoles[0] && userRoles[0].position >= botRoles[0].position){return "I can't kick someone with the same highest role or a higher role than me!";}
         return await this.doKick(ctx, Hyperion,  toKick.user, ctx.args.slice(1).join(" "));
     }
 
     async doKick(ctx: ICommandContext, Hyperion: IHyperion, user: User, reason: string): Promise<string>{
-        if(!reason){reason = "No reason given";}
+        if(!reason){reason = "No reason given.";}
         let auditReason = reason;
         if(auditReason.length > 509){
             auditReason = auditReason.substring(0, 508) + "...";
@@ -56,7 +56,7 @@ class Kick extends Command{
             time: Date.now(),
             moderationEnd: false
         }, user);
-        return `Kicked ${user.username}#${user.discriminator}`;
+        return `Kicked ${user.username}#${user.discriminator}!`;
     }
 }
 export default Kick;

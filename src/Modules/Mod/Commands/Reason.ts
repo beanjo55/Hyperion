@@ -9,21 +9,21 @@ class Reason extends Command{
             name: "reason",
             module: "mod",
             userperms: ["mod"],
-            helpDetail: "Updates the reason for a case",
+            helpDetail: "Updates the reason for a case.",
             helpUsage: "{prefix}reason [case number] [new reason]",
-            helpUsageExample: "{prefix}reason 1 reverted to ban, see case 2"
+            helpUsageExample: "{prefix}reason 1 reverted to ban, see case 2."
         });
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const module = (ctx.module as Mod);
-        if(!ctx.args[0]){return "Please specify a case number";}
+        if(!ctx.args[0]){return "Please specify a case number!";}
         const caseNum = Number(ctx.args[0]);
-        if(isNaN(caseNum) || caseNum < 1){return "Please enter a valid case number";}
+        if(isNaN(caseNum) || caseNum < 1){return "Please enter a valid case number!";}
         const caseData = await Hyperion.managers.modlog.getCaseByCasenumber(ctx.guild.id, caseNum);
-        if(!caseData){return "That case was not found";}
-        if(caseData.moderator !== ctx.user.id && !ctx.member.permission.has("manageGuild")){return "Only server managers and administrators can edit cases they didnt make";}
-        if(!ctx.args[1]){return "Please enter a new reason";}
+        if(!caseData){return "That case was not found!";}
+        if(caseData.moderator !== ctx.user.id && !ctx.member.permission.has("manageGuild")){return "Only server managers and administrators can edit cases they didnt make.";}
+        if(!ctx.args[1]){return "Please enter a new reason!";}
         await Hyperion.managers.modlog.updateReason(caseData.mid, ctx.args.slice(1).join(" "));
         caseData.reason = ctx.args.slice(1).join(" ");
         if(caseData.logPost){

@@ -11,7 +11,7 @@ class Modlogs extends Command{
             module: "mod",
             userperms: ["mod"],
             cooldownTime: 5000,
-            helpDetail: "Shows moderation histroy for a user",
+            helpDetail: "Shows moderation history for a user.",
             helpUsage: "{prefix}modlogs [user]\n{prefix}modlogs [user] -type [action type]",
             helpUsageExample: "{prefix}modlogs wuper\n{prefix}modlogs boss -type mute"
         });
@@ -19,7 +19,7 @@ class Modlogs extends Command{
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | EmbedResponse>{
         ctx.module = ctx.module as Mod;
-        if(!ctx.args[0]){return "Please specify a user";}
+        if(!ctx.args[0]){return "Please specify a user!";}
         const target = Hyperion.utils.strictResolver(ctx.args[0], ctx.guild.members);
         let targetstring = "";
         if(!target){
@@ -30,7 +30,7 @@ class Modlogs extends Command{
 
         if(!ctx.args[1]){
             const logs = await Hyperion.managers.modlog.getUserModLogs(ctx.guild.id, targetstring, 25);
-            if(!logs || logs.length === 0){return "No logs found";}
+            if(!logs || logs.length === 0){return "No logs found!";}
             const fieldarr: FieldArray = [];
             const data: EmbedResponse = {
                 embed: {
@@ -53,11 +53,11 @@ class Modlogs extends Command{
 
         }
         if(ctx.args[1] && ctx.args[1] === "-type"){
-            if(!ctx.args[2]){return "You need to specify a type of mod action when using the `-type` option";}
+            if(!ctx.args[2]){return "You need to specify a type of mod action when using the `-type` option.";}
             const action = ctx.module.actions[ctx.args[2].toLowerCase()];
-            if(!action){return "I dont know what action that is";}
+            if(!action){return "Invalid user provided, try their user ID or mention.";}
             const logs = await Hyperion.managers.modlog.getUserModLogs(ctx.guild.id, targetstring, 25, ctx.args[2].toLowerCase());
-            if(!logs || logs.length === 0){return "No logs found";}
+            if(!logs || logs.length === 0){return "No logs found!";}
             const fieldarr: FieldArray = [];
             const data: EmbedResponse = {
                 embed: {

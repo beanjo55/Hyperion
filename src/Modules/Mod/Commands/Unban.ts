@@ -8,7 +8,7 @@ class Unban extends Command{
             module: "mod",
             userperms: ["mod"],
             cooldownTime: 5000,
-            helpDetail: "Unbans a user with an optional reason",
+            helpDetail: "Unbans a user with an optional reason.",
             helpUsage: "{prefix}unban [userID] [optional reason]",
             helpUsageExample: "{prefix}unban 253233185800847361 appealed"
         });
@@ -19,8 +19,8 @@ class Unban extends Command{
         if(!bot){return "Cache falure, could not find bot user";}
         if(!bot.permission.has("banMembers")){return "I need the `Ban Members` permission to unban members";}
         if(!ctx.args[0]){return "Please give the user ID of the user you want to unban";}
-        if(isNaN(Number(ctx.args[0]))){return "I dont understand that user ID, it should be all numbers";}
-        let reason = "No reason provided";
+        if(isNaN(Number(ctx.args[0]))){return "Invalid user provided, make sure it's their user ID!";}
+        let reason = "No reason provided.";
         let auditReason = reason;
         if(ctx.args[1]){
             reason = ctx.args.slice(1).join(" ");
@@ -32,7 +32,7 @@ class Unban extends Command{
         try{
             await ctx.guild.unbanMember(ctx.args[0], auditReason);
             const user = Hyperion.client.users.get(ctx.args[0]) ?? await Hyperion.client.getRESTUser(ctx.args[0]);
-            if(!user){return "This should be an unreachable error";}
+            if(!user){return "This should be an unreachable error!";}
             ctx.module.makeLog(Hyperion, {
                 user: user.id,
                 moderator: ctx.member.id,
@@ -44,7 +44,7 @@ class Unban extends Command{
             }, user);
             return `Successfuly unbanned ${user.username}#${user.discriminator}`;
         }catch{
-            return "Something went wrong";
+            return "Something went wrong!";
         }
     }
 }
