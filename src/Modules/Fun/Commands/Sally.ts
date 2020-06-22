@@ -27,7 +27,7 @@ class Sally extends Command{
             name: "sally",
             module: "fun",
 
-            helpDetail: "Sends Sally, a cute chocolate lab",
+            helpDetail: "Sends Sally, a cute chocolate lab!",
             helpUsage: "{prefix}sally",
             noExample: true
         });

@@ -56,7 +56,7 @@ class Owoify extends Command{
             output = "The output was too long!";
         }
         if(output.length === 0){
-            output = "There was no output";
+            output = "There was no output!";
         }
         return output;
     }
