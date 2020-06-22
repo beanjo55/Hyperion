@@ -368,7 +368,7 @@ class Config extends Command{
 
     validateModule(Hyperion: IHyperion, input: string): string | Module{
         if(!configurableModules(Hyperion.modules).map((m: Module) => m.name).includes(input.toLowerCase())){
-            return "The module you provided cannot be configurated!";
+            return "A configurable module was not found by that name!";
         }
         const module: Module | undefined = Hyperion.modules.get(input.toLowerCase());
         if(!module){return "I couldnt find a module by that name!";}

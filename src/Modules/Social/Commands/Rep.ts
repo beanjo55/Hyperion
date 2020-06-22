@@ -28,7 +28,7 @@ class Rep extends Command{
         if((Date.now() - time <= day) && !ctx.admin){
             return `You can give more rep in ${msc(day - (Date.now()-time))}`;
         }
-        if(!target){return "Invalid user, try their user ID or mention!";}
+        if(!target){return "A valid user was not found!";}
         if(target.id === ctx.user.id){return "You can't rep yourself!";}
         Hyperion.managers.user.gotRep(target.id);
         Hyperion.managers.user.gaveRep(ctx.user.id);

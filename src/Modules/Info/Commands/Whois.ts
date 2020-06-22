@@ -26,7 +26,7 @@ class Whois extends Command{
             target = ctx.member;
         }
 
-        if(!target){return "Invalid member.";}
+        if(!target){return "That user was not found!";}
         
         const roleList: Array<string> = [];
         let color = Hyperion.defaultColor;

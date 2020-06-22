@@ -33,7 +33,7 @@ class Daily extends Command{
         if((Date.now() - time <= day) && !ctx.admin){
             return `You can collect or give daily money in ${msc(day - (Date.now()-time))}`;
         }
-        if(!target && ctx.args[0]){return "Invalid user provided, try their user ID or mention.";}
+        if(!target && ctx.args[0]){return "A valid user was not found!";}
         if(!target && !ctx.args[0]){
             Hyperion.managers.user.changeMoney(ctx.user.id, payout);
             Hyperion.managers.user.setDailyTime(ctx.user.id);

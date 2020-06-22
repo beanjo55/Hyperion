@@ -29,7 +29,7 @@ class Role extends Command{
         const roleObj = Hyperion.utils.resolveRole(roleInput, ctx.guild.roles);
         if(!roleObj){return "I dont know what that role is, try a role ID.";}
         const user = Hyperion.utils.strictResolver(ctx.args[0], ctx.guild.members);
-        if(!user){return "Invalid role provided! Try the role ID or name.";}
+        if(!user){return "Invalid user provided! Try the user ID or name.";}
         const botRoles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
         if(botRoles[0].position <= roleObj.position){return "I can't manage roles that are my highest role, or above my highest role.";}
         if(operation === "add"){

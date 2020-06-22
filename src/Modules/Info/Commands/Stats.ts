@@ -57,7 +57,7 @@ class Stats extends Command{
                     },
                     {
                         name: "Guilds",
-                        value: `${totalGuilds !== 0 ? totalGuilds: "I haven't been up long enough to show some stats."}`,
+                        value: `${totalGuilds !== 0 ? totalGuilds: "I haven't been up long enough to show total guilds."}`,
                         inline: true
                     },
                     {
@@ -72,7 +72,7 @@ class Stats extends Command{
                     },
                     {
                         name: "Users",
-                        value: `${totalUsers !== 0 ? totalUsers: "I havent been up long enough to show total users."}`,
+                        value: `${totalUsers !== 0 ? totalUsers: "I haven't been up long enough to show total users."}`,
                         inline: true
                     },
                     {
@@ -87,7 +87,7 @@ class Stats extends Command{
                     },
                     {
                         name: "RAM Usage",
-                        value: `${totalMem !== 0 ? totalMem.toFixed(2): "I havent been up long enough to show total memory."}mb`,
+                        value: `${totalMem !== 0 ? totalMem.toFixed(2): "I haven't been up long enough to show total memory."}mb`,
                         inline: true
                     }
 

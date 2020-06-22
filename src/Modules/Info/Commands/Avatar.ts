@@ -23,7 +23,7 @@ class Avatar extends Command{
             target = ctx.member;
         }
 
-        if(!target){return "That user does not exist.";}
+        if(!target){return "That user was not found!";}
 
         const data = {
             embed: {
