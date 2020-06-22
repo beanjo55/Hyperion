@@ -15,7 +15,7 @@ class Ban extends Command{
             needsRolepos: true,
             cooldownTime: 5000,
             hasSub: true,
-            helpDetail: "Bans a user",
+            helpDetail: "Bans a user.",
             helpUsage: "{prefix}ban [user] [reason]",
             helpSubcommands: "{prefix}ban save - Bans a user, but does not delete their recent messages",
             helpUsageExample: "{prefix}ban boss trolling\n{prefix}ban save wuper trolling"
@@ -26,29 +26,29 @@ class Ban extends Command{
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
-        if(!bot){return "Cache Failure, couldnt find bot user";}
-        if(!ctx.args[this.argShift]){return "Please specify a user";}
-        if(!bot.permission.has("banMembers")){return " I need the ban members permission to well, ban members";}
+        if(!bot){return "Cache Failure, couldn't find bot user";}
+        if(!ctx.args[this.argShift]){return "Please specify a user!";}
+        if(!bot.permission.has("banMembers")){return "I cannot ban anyone without the `ban members` permission.";}
         const toBan = await Hyperion.utils.banResolver(ctx.args[this.argShift], ctx.guild.members, Hyperion);
-        if(!toBan){return "I couldnt figure out what user that is";}
-        if(toBan.id === ctx.user.id){return "You cant ban yourself";}
-        if(toBan.id === Hyperion.client.user.id){return "I cant ban myself";}
+        if(!toBan){return "Provide a user to ban!";}
+        if(toBan.id === ctx.user.id){return "You can't ban yourself!";}
+        if(toBan.id === Hyperion.client.user.id){return "I can't ban myself!";}
         if(toBan instanceof User){
             return await this.doBan(ctx, Hyperion, toBan, ctx.args.slice(this.argShift+1).join(" "));
         }
         if(toBan instanceof Member){
-            if(await ctx.module.isMod(Hyperion, toBan, ctx.guild)){return "That user is a mod and is protected from mod actions";}
-            if(bot.roles.length === 0){return "I need a role higehr than the user's highest role to ban them, I cant do that with no roles";}
+            if(await ctx.module.isMod(Hyperion, toBan, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
+            if(bot.roles.length === 0){return "I need a role higehr than the user's highest role to ban them, I can't do that with no roles!";}
             const userRoles = Hyperion.utils.sortRoles(toBan.roles, ctx.guild.roles);
             const botRoles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
-            if(userRoles[0] && userRoles[0].position >= botRoles[0].position){return "I cant ban someone with the same highest role or a higher role than me";}
+            if(userRoles[0] && userRoles[0].position >= botRoles[0].position){return "I can't ban someone with the same highest role or a higher role than me";}
             return await this.doBan(ctx, Hyperion,  toBan.user, ctx.args.slice(this.argShift+1).join(" "));
         }
         return "You shouldnt be able to see this message, but if you do, Congrats! You found a bug!";
     }
 
     async doBan(ctx: ICommandContext, Hyperion: IHyperion, user: User, reason: string): Promise<string>{
-        if(!reason){reason = "No reason given";}
+        if(!reason){reason = "No reason given.";}
         let auditReason = reason;
         if(auditReason.length > 509){
             auditReason = auditReason.substring(0, 508) + "...";
@@ -69,7 +69,7 @@ class Ban extends Command{
             time: Date.now(),
             moderationEnd: false
         }, user);
-        return `Banned ${user.username}#${user.discriminator}`;
+        return `Banned ${user.username}#${user.discriminator}!`;
     }
 }
 

@@ -10,21 +10,21 @@ class Command extends command{
             alwaysEnabled: true,
             userperms: ["manager"],
 
-            helpDetail: "Enabled or disables a command",
+            helpDetail: "Enables or disables a command.",
             helpUsage: "{prefix}command [command name]",
             helpUsageExample: "{prefix}command owoify"
         });
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        if(!ctx.args[0]){return "please specify a command to toggle";}
+        if(!ctx.args[0]){return "Please specify a command to toggle.";}
         const name = ctx.args[0].toLowerCase();
         let cmd = Hyperion.commands.get(name);
         if(!cmd){
             cmd = Hyperion.commands.find((c: command) => c.aliases.includes(name));
         }
-        if(!cmd){return "I couldnt find a command by that name";}
-        if(cmd.alwaysEnabled){return "This command is always enabled for diagnostic and internal reasons, it may not be disabled";}
+        if(!cmd){return "Invalid command name provided!";}
+        if(cmd.alwaysEnabled){return "This command may not be disabled due to internal reasons.";}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if(ctx.guildConfig && ctx.guildConfig.commands && (ctx.guildConfig.commands as any)[cmd.name]){
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

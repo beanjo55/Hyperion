@@ -8,7 +8,7 @@ class Decancertext extends Command{
         super({
             name: "decancertext",
             module: "fun",
-            helpDetail: "decancers text input",
+            helpDetail: "Decancers text input.",
             helpUsage: "{prefix}decancertext [text]",
             helpUsageExample: "{prefix}decancertext 𝓣𝓱𝓪𝓽𝓖𝓾𝔂™"
         });
@@ -16,7 +16,7 @@ class Decancertext extends Command{
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        if(!ctx.args[0]){return "You didnt provide any input";}
+        if(!ctx.args[0]){return "You didn't provide any text to decancer.";}
         return this.decancer(ctx.args.join(" "));
     }
 

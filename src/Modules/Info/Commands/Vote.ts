@@ -8,7 +8,7 @@ class Vote extends Command{
             name: "vote",
             module: "info",
 
-            helpDetail: "Various places you can show your support on",
+            helpDetail: "Various places you can show your support on.",
             helpUsage: "{prefix}vote",
             noExample: true
         });

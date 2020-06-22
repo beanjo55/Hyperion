@@ -10,7 +10,7 @@ class Addrole extends Command{
             userperms: ["manager"],
             cooldownTime: 6000,
 
-            helpDetail: "Makes a new role",
+            helpDetail: "Makes a new role.",
             helpUsage: "{prefix}addrole rolename, [optional color], [optional hoist]",
             helpUsageExample: "{prefix}addrole developers\n{prefix}addrole developers, #6597f9\n{prefix}addrole developers, #6597f9, yes"
         });
@@ -18,8 +18,8 @@ class Addrole extends Command{
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
-        if(!bot){return "A cache error occured";}
-        if(!bot.permission.has("manageRoles")){return "I need the `Manage Roles` permission to create roles";}
+        if(!bot){return "A cache error occured!";}
+        if(!bot.permission.has("manageRoles")){return "I need the `Manage Roles` permission to create roles.";}
         const input = ctx.args.join(" ");
         if(!input.includes(",")){
             try{
@@ -28,7 +28,7 @@ class Addrole extends Command{
                 }, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
             }catch(err){
                 Hyperion.logger.warn("Hyperion", `Failed to create role, ${ctx.msg.content}, error: ${err}`, "Addrole");
-                return "There was an error creating the role";
+                return "There was an error creating the role.";
             }
             return "Successfully made the role!";
         }
@@ -44,10 +44,10 @@ class Addrole extends Command{
                 color = parseInt(sub.substring(1), 16);
             }
             if(!isNaN(Number(sub))){
-                if(Number(sub) > 16777215 || Number(sub) < 0){return "I couldnt understand that color";}
+                if(Number(sub) > 16777215 || Number(sub) < 0){return "Invalid color provided.";}
                 color = Number(sub);
             }
-            if(color === undefined){return "I couldnt understand that color";}
+            if(color === undefined){return "Invalid color provided.";}
             try{
                 await ctx.guild.createRole({
                     name: input.substring(0, first),
@@ -55,7 +55,7 @@ class Addrole extends Command{
                 }, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
             }catch(err){
                 Hyperion.logger.warn("Hyperion", `Failed to create role, ${ctx.msg.content}, error: ${err}`, "Addrole");
-                return "There was an error creating the role";
+                return "There was an error creating the role!";
             }
             return "Successfully made the role!";
         }
@@ -69,20 +69,20 @@ class Addrole extends Command{
             color = parseInt(sub.substring(1), 16);
         }
         if(!isNaN(Number(sub))){
-            if(Number(sub) > 16777215 || Number(sub) < 0){return "I couldnt understand that color";}
+            if(Number(sub) > 16777215 || Number(sub) < 0){return "Invalid color provided.";}
             color = Number(sub);
         }else{
             if(!color){
                 color = parseInt(sub, 16);
             }
         }
-        if(color === undefined){return "I couldnt understand that color";}
+        if(color === undefined){return "Invalid color provided.";}
 
         const subHoist = input.substring(second+1).trim().toLowerCase();
         let hoist;
         if(subHoist === "yes" || subHoist === "true"){hoist = true;}
         if(subHoist === "false" || subHoist === "no"){hoist = false;}
-        if(!hoist){return "I count understand what you put for hoist, try `yes` or `no`";}
+        if(!hoist){return "Invalid argument provided, try `yes` or `no`.";}
         try{
             await ctx.guild.createRole({
                 name: input.substring(0, first),
@@ -91,7 +91,7 @@ class Addrole extends Command{
             }, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
         }catch(err){
             Hyperion.logger.warn("Hyperion", `Failed to create role, ${ctx.msg.content}, error: ${err}`, "Addrole");
-            return "There was an error creating the role";
+            return "There was an error creating the role!";
         }
         return "Successfully made the role!";
     }

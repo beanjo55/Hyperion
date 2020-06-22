@@ -13,7 +13,7 @@ class Daily extends Command{
             name: "daily",
             module: "social",
             aliases: ["dly", "dalies"],
-            helpDetail: "Collect your daily money or give it to someone else, or if you can collect daily money",
+            helpDetail: "Collect your daily money or give it to someone else, or if you can collect daily money.",
             helpUsage: "{prefix}daily\n{prefix}daily [user]\n{prefix}daily check",
             helpUsageExample: "{prefix}daily\n{prefix}daily @bean"
         });
@@ -33,13 +33,13 @@ class Daily extends Command{
         if((Date.now() - time <= day) && !ctx.admin){
             return `You can collect or give daily money in ${msc(day - (Date.now()-time))}`;
         }
-        if(!target && ctx.args[0]){return "Who?";}
+        if(!target && ctx.args[0]){return "A valid user was not found!";}
         if(!target && !ctx.args[0]){
             Hyperion.managers.user.changeMoney(ctx.user.id, payout);
             Hyperion.managers.user.setDailyTime(ctx.user.id);
             return `You collected your daily money of $${payout}!`;
         }
-        if(!target){return "Who?";}
+        if(!target){return "Invalid user provided, try their user ID or mention.";}
         Hyperion.managers.user.changeMoney(target.id, payout);
         Hyperion.managers.user.setDailyTime(ctx.user.id);
         return `${ctx.user.mention} gave ${target.mention} their daily money of $${payout}!`;
