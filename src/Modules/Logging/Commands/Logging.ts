@@ -36,11 +36,11 @@ class Logging extends Command{
             return await this.showOverallSettings(ctx, Hyperion);
         }
         
-        if(!settingNamesL.includes(ctx.args[0].toLowerCase())){return "I dont know what that setting is";}
+        if(!settingNamesL.includes(ctx.args[0].toLowerCase())){return "Invalid setting provided.";}
         if(ctx.args[0].toLowerCase() === "logchannel"){
             if(!ctx.args[1]){return "Please specify a channel";}
             const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
-            if(!channel){return "Im not sure what that channel is";}
+            if(!channel){return "Invalid channel provided.";}
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {logChannel: channel.id});
             }catch(err){
@@ -51,9 +51,9 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "ignoredchannels"){
-            if(!ctx.args[1]){return "Please specify a channel";}
+            if(!ctx.args[1]){return "Please specify a channel.";}
             const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
-            if(!channel){return "Im not sure what that channel is";}
+            if(!channel){return "Invalid channel provided.";}
 
             const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
             const size = config.ignoredChannels.length;
@@ -74,16 +74,16 @@ class Logging extends Command{
                 return "Something went wrong";
             }
             if(config.ignoredChannels.length > size){
-                return "Added channel to ignored channels";
+                return "Added channel to ignored channels.";
             }else{
-                return "Removed channel from ignored channels";
+                return "Removed channel from ignored channels.";
             }
         }
 
         if(ctx.args[0].toLowerCase() === "showavatar"){
-            if(!ctx.args[1]){return "Please specify true/false or yes/no";}
+            if(!ctx.args[1]){return "Please specify true/false or yes/no.";}
             const result = Hyperion.utils.input2boolean(ctx.args[1]);
-            if(result === undefined){return "Im not sure what you are trying to say, try yes or no";}
+            if(result === undefined){return "Invalid argument, try yes or no.";}
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {showAvatar: result});
             }catch(err){
@@ -94,12 +94,12 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "enable"){
-            if(!ctx.args[1]){return "Please specify an event";}
+            if(!ctx.args[1]){return "Please specify an event.";}
             const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
             if(!eventNames.map((e: string) => e.toLowerCase()).includes(ctx.args[1].toLowerCase())){return "I dont know what event that is";}
             const name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
             if(config[name]?.enabled === true){
-                return "that event is already enabled";
+                return "That event is already enabled.";
             }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data: any = {};
@@ -114,12 +114,12 @@ class Logging extends Command{
         }
 
         if(ctx.args[0].toLowerCase() === "disable"){
-            if(!ctx.args[1]){return "Please specify an event";}
+            if(!ctx.args[1]){return "Please specify an event.";}
             const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
             if(!eventNames.map((e: string) => e.toLowerCase()).includes(ctx.args[1].toLowerCase())){return "I dont know what event that is";}
             const name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
             if(config[name]?.enabled === false){
-                return "that event is already disabled";
+                return "That event is already disabled.";
             }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data: any = {};
@@ -128,11 +128,11 @@ class Logging extends Command{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", data);
             }catch(err){
                 Hyperion.logger.warn("Hyperion", "Logging Config", `Failed to disable ${name} on ${ctx.guild.id}, error: ${err}`);
-                return "Something went wrong";
+                return "Something went wrong.";
             }
-            return "The event was disabled";
+            return "The event was disabled.";
         }
-        return "this should never be reached";
+        return "this should never be reached.";
     }
 
     async showOverallSettings(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
@@ -140,9 +140,9 @@ class Logging extends Command{
         config = new LoggingConfig(config);
         if(!config){return "An error occured";}
         const chanObj = ctx.guild.channels.get(config.logChannel);
-        let channelName = "Not Set";
+        let channelName = "No channel set.";
         if(chanObj){channelName = chanObj.mention;}
-        let ignoredChannels= "None Set";
+        let ignoredChannels= "No ignored channels set.";
         if(config.ignoredChannels){
             ignoredChannels = config.ignoredChannels.map((C: string) => ctx.guild.channels.get(C)?.mention).join(", ");
         }
