@@ -21,7 +21,7 @@ class Config extends Command{
             alwaysEnabled: true,
             userperms: ["manager"],
 
-            helpDetail: "Configures bot settings for the server",
+            helpDetail: "Configures bot settings for the server.",
             helpUsage: "{prefix}config - shows configurable modules\n{prefix}config [module] - shows settings for the module\n{prefix}config [module] [setting] - shows operations possible for that setting\n{prefix}config [module] [setting] [operation] [value] - changes a setting",
             helpUsageExample: "{prefix}config\n{prefix}config starboard\n{prefix}config starboard starchannel\n{prefix}config starboard starchannel set #starboard"
         });
@@ -115,7 +115,7 @@ class Config extends Command{
     }
 
     listType(key: ConfigKey): string{
-        if(!key){return "How did you get here? key is undefined";}
+        if(!key){return "How did you get here? Key is undefined";}
         if(key.array){
             return `${key.friendlyName} is an array of ${key.dataType}s`;
         }
@@ -123,9 +123,9 @@ class Config extends Command{
     }
 
     async doOp(ctx: ICommandContext, Hyperion: IHyperion, module: Module, key: ConfigKey, op: number, value: string): Promise<string | undefined>{
-        if(!key.ops.includes(op)){return "That operation is not valid for this key";}
+        if(!key.ops.includes(op)){return "That operation is not valid for this key!";}
         const guilddata = await Hyperion.managers.guild.getConfig(ctx.guild.id);
-        if(!guilddata){return "There was an error getting the guild data";}
+        if(!guilddata){return "There was an error getting the guild data!";}
 
         if(op === 1){
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -133,7 +133,7 @@ class Config extends Command{
             data[key.id] = value;
             if(key.dataType === "number"){
                 const num = Number(value);
-                if(isNaN(num)){return "That isnt a valid number";}
+                if(isNaN(num)){return "Invalid number provided!";}
                 data[key.id] = num;
             }
             if(key.dataType === "channel"){
@@ -144,7 +144,7 @@ class Config extends Command{
                 if(!chan){
                     chan = ctx.guild.channels.find((c: GuildChannel) => (c.type === 0 || c.type === 5) && c.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
                 }
-                if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
+                if(!chan){return "I could not find that channel in this guild, try using the channel ID or mention.";}
                 data[key.id] = chan;
             }
 
@@ -156,14 +156,14 @@ class Config extends Command{
                 if(!role){
                     role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
                 }
-                if(!role){return "I cant find that role in the guild, try a role mention or the role id";}
+                if(!role){return "I could not find that role in this guild, try using the role ID or mention.";}
                 data[key.id] = role;
             }
             
             if(key.dataType === "boolean"){
                 if(value.toLowerCase() === "true" || value.toLowerCase() === "yes" || value === "1"){data[key.id] = true;}else{
                     if(value.toLowerCase() === "false" || value.toLowerCase() === "no" || value === "0"){data[key.id] = false;}else{
-                        return "Invalid boolean value given";
+                        return "Invalid value given, try `true` or `false`.";
                     }
                 }
                 
@@ -172,7 +172,7 @@ class Config extends Command{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
                 Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
-                return "there was an error updating the config";
+                return "There was an error updating the config!";
             }
             return "Success!";
         }
@@ -192,7 +192,7 @@ class Config extends Command{
                     if(!chan){
                         chan = ctx.guild.channels.find((c: GuildChannel) => (c.type === 0 || c.type === 5) && c.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
                     }
-                    if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
+                    if(!chan){return "I could not find that channel in this guild, try using the channel ID or mention.";}
                     data[key.id] = [chan];
                 }
 
@@ -204,7 +204,7 @@ class Config extends Command{
                     if(!role){
                         role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
                     }
-                    if(!role){return "I cant find that role in the guild, try a role mention or the role id";}
+                    if(!role){return "I could not find that channel in this guild, try using the channel ID or mention.";}
                     data[key.id] = role;
                 }
                 
@@ -225,8 +225,8 @@ class Config extends Command{
                 if(!chan){
                     chan = ctx.guild.channels.find((c: GuildChannel) => (c.type === 0 || c.type === 5) && c.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
                 }
-                if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
-                if(old.includes(chan)){return "That channel has already been added";}
+                if(!chan){return "I could not find that channel in this guild, try using the channel ID or mention.";}
+                if(old.includes(chan)){return "That channel has already been added!";}
                 old.push(chan);
             }else{
                 if(key.dataType === "role"){
@@ -237,8 +237,8 @@ class Config extends Command{
                     if(!role){
                         role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
                     }
-                    if(!role){return "I cant find that role in the guild, try a role mention or the role id";}
-                    if(old.includes(role)){return "That role has already been added";}
+                    if(!role){return "I could not find that role in this guild, try using the role ID or mention.";}
+                    if(old.includes(role)){return "That role has already been added!";}
                     old.push(role);
                 }
                 old.push(value);
@@ -250,7 +250,7 @@ class Config extends Command{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
                 Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
-                return "there was an error updating the config";
+                return "There was an error updating the config!";
             }
             return "Success!";
         }
@@ -258,7 +258,7 @@ class Config extends Command{
         if(op === 3){
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const old = (guilddata as any)[module.name][key.id];
-            if(!old || !old[0]){return "No values were set, so there is nothing to remove";}
+            if(!old || !old[0]){return "No values were set, so there is nothing to remove.";}
             if(key.dataType === "channel"){
                 let chan = ctx.guild.channels.get(value)?.id;
                 if(!chan && ctx.msg.channelMentions && ctx.msg.channelMentions[0]){
@@ -267,7 +267,7 @@ class Config extends Command{
                 if(!chan){
                     chan = ctx.guild.channels.find((c: GuildChannel) => (c.type === 0 || c.type === 5) && c.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
                 }
-                if(!chan){return "I cant find that channel in the guild, try a channel mention or the channel id";}
+                if(!chan){return "I could not find that channel in this guild, try using the channel ID or mention.";}
                 value = chan;
             }
             if(key.dataType === "role"){
@@ -278,10 +278,10 @@ class Config extends Command{
                 if(!role){
                     role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(value.toLowerCase()))?.id;
                 }
-                if(!role){return "I cant find that role in the guild, try a role mention or the role id";}
+                if(!role){return "I could not find that role in this guild, try using the role ID or mention.";}
                 value = role;
             }
-            if(!old.includes(value)){return "That value isnt part of that key";}
+            if(!old.includes(value)){return "That value isnt part of that key!";}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const newarr: Array<any> = [];
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -296,7 +296,7 @@ class Config extends Command{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
                 Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
-                return "there was an error updating the config";
+                return "There was an error updating the config!";
             }
             return "Success!";
         }
@@ -304,10 +304,10 @@ class Config extends Command{
 
     async getVal(ctx: ICommandContext, Hyperion: IHyperion, module: Module, key: ConfigKey): Promise<string | {embed: Partial<Embed>}>{
         const data: IGuild | null = await Hyperion.managers.guild.getConfig(ctx.guild.id);
-        if(!data){return "There was an error getting the guild data";}
+        if(!data){return "There was an error getting the guild data!";}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const out = (data as any)[module.name][key.id];
-        if(!out){return "This value hasnt been set";}
+        if(!out){return "This value hasnt been set!";}
         const output = {
             embed: {
                 color: Hyperion.defaultColor,
@@ -348,7 +348,7 @@ class Config extends Command{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
             }catch(err){
                 Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
-                return "there was an error updating the config";
+                return "There was an error updating the config!";
             }
             return "Success!";
         }
@@ -359,7 +359,7 @@ class Config extends Command{
             await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, module.name, data);
         }catch(err){
             Hyperion.logger.error("Hyperion", `Error updating config for ${ctx.guild.id}, command ${ctx.msg.content}, error: ${inspect(err)}`, "Config");
-            return "there was an error updating the config";
+            return "There was an error updating the config!";
         }
         return "Success!";
     }
@@ -368,10 +368,10 @@ class Config extends Command{
 
     validateModule(Hyperion: IHyperion, input: string): string | Module{
         if(!configurableModules(Hyperion.modules).map((m: Module) => m.name).includes(input.toLowerCase())){
-            return "I couldnt find a configurable module by that name";
+            return "The module you provided cannot be configurated!";
         }
         const module: Module | undefined = Hyperion.modules.get(input.toLowerCase());
-        if(!module){return "I couldnt find a module by that name";}
+        if(!module){return "I couldnt find a module by that name!";}
         return module;
     }
 
@@ -390,7 +390,7 @@ class Config extends Command{
         if(gets.includes(input)){return 0;}
         if(dels.includes(input)){return 3;}
         if(clears.includes(input)){return 4;}
-        return "I dont understand that operation";
+        return "Invalid operation!";
     }
 
 }

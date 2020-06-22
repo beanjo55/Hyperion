@@ -11,7 +11,7 @@ class AddEmote extends Command{
             aliases: ["addemoji", "steal"],
             cooldownTime: 10000,
 
-            helpDetail: "Adds an emote to the server from a link",
+            helpDetail: "Adds an emote to the server from a link.",
             helpUsage: "{prefix}addemote [name] [Link]",
             helpUsageExample: "{prefix}addemote Sally https://cdn.discordapp.com/emojis/664222020581720065.png?v=1"
         });
@@ -19,15 +19,15 @@ class AddEmote extends Command{
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        if(!ctx.args[0]){return "Please specify an emote name and link";}
-        if(!ctx.args[1]){return "Please specify a link";}
+        if(!ctx.args[0]){return "Please specify an emote name and link.";}
+        if(!ctx.args[1]){return "Please specify a link.";}
         const img = await this.resolveImage(ctx.args[1]);
-        if(!img){return "I couldnt understand that image link";}
+        if(!img){return "Invalid link provided.";}
         try{
             await ctx.guild.createEmoji({name: ctx.args[0], image: img});
         }catch(err){
             console.log(err);
-            return "Something went wrong";
+            return "Something went wrong.";
         }
         return "Successfully added emote!";
 

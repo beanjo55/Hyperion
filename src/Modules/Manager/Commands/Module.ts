@@ -52,7 +52,7 @@ class Module extends Command{
             return data;
         }
         const name = ctx.args[0].toLowerCase();
-        if(!list.includes(name)){return "I cant find a toggleable module by that name";}
+        if(!list.includes(name)){return "I can't find a toggleable module by that name!";}
         if(ctx.guildConfig && ctx.guildConfig.modules){
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if((ctx.guildConfig.modules as any)[name] !== undefined){
@@ -62,18 +62,18 @@ class Module extends Command{
                     await Hyperion.managers.guild.updateModuleStates(ctx.guild.id, name, !oldstate, Hyperion.modules);
                 }catch(err){
                     Hyperion.logger.error("Hyperion", `error toggling ${name}, error: ${err}`, "Module toggle");
-                    return "Something went wrong";
+                    return "Something went wrong!";
                 }
                 return "Success!";
             }
         }
         const mod = Hyperion.modules.get(name);
-        if(!mod){return "I couldnt find that module";}
+        if(!mod){return "Invalid module provided!";}
         try{
             await Hyperion.managers.guild.updateModuleStates(ctx.guild.id, name, !mod.default, Hyperion.modules);
         }catch(err){
             Hyperion.logger.error("Hyperion", `error toggling ${name}, error: ${err}`, "Module toggle");
-            return "Something went wrong";
+            return "Something went wrong!";
         }
         return "Success!";
 
