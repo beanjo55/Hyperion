@@ -7,7 +7,7 @@ class Bio extends Command{
             name: "bio",
             module: "social",
 
-            helpDetail: "Sets your bio that is displayed in whois",
+            helpDetail: "Sets your bio that is displayed in whois.",
             helpUsage: "{prefix}bio [text]",
             helpUsageExample: "{prefix}bio Hi I'm bean"
         });
@@ -16,12 +16,12 @@ class Bio extends Command{
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         if(ctx.args.length === 0){
             const current = await Hyperion.managers.user.getBio(ctx.user.id);
-            if(!current || current === ""){return "You dont have a bio set";}
+            if(!current || current === ""){return "You dont have a bio set!";}
             return `Your current bio is: ${current}`;
         }
         const bio = ctx.args.join(" ");
         if(bio.length > 1020){
-            return "That bio is too long, try a shorter one";
+            return "That bio is too long, be sure it's under 1020 characters!";
         }
         Hyperion.managers.user.setBio(ctx.user.id, bio);
         return "Your bio has been set!";
