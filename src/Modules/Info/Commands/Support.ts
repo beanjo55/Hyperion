@@ -8,7 +8,7 @@ class Support extends Command{
             name: "support",
             module: "info",
 
-            helpDetail: "Shows the support server invite, with the option to paste the raw invite in chat instead of embedding the link",
+            helpDetail: "Shows the support server invite, with the option to paste the raw invite in chat instead of embedding the link.",
             helpUsage: "{prefix}support\n{prefix}support raw",
             noExample: true
         });

@@ -12,7 +12,7 @@ class Up extends Command{
             aliases: ["uptime"],
             alwaysEnabled: true,
 
-            helpDetail: "Shows uptime and some technical statistics",
+            helpDetail: "Shows uptime and some technical statistics.",
             helpUsage: "{prefix}up",
             noExample: true
         });

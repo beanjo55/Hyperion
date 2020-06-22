@@ -8,7 +8,7 @@ class Roleinfo extends Command{
             name: "roleinfo",
             module: "info",
 
-            helpDetail: "Shows info about a role",
+            helpDetail: "Shows information on the role provided.",
             helpUsage: "{prefix}roleinfo [role]",
             noExample: true
         });
@@ -16,7 +16,7 @@ class Roleinfo extends Command{
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
         if(!ctx.args[0]){
-            return "You need to tell me a role";
+            return "Provide a role!";
         }
 
         let role = ctx.guild.roles.get(ctx.args[0]);
@@ -27,7 +27,7 @@ class Roleinfo extends Command{
             role = ctx.guild.roles.find((r: Role) => r.name.toLowerCase().startsWith(ctx.args.join(" ").toLowerCase()));
         }
         if(!role || role.id === ctx.guild.id){
-            return "I couldnt find that role";
+            return "Invalid role provided!";
         }
         const frole: Role = role;
 

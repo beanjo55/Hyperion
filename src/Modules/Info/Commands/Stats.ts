@@ -12,7 +12,7 @@ class Stats extends Command{
             module: "info",
             alwaysEnabled: true,
 
-            helpDetail: "Shows some bot stats",
+            helpDetail: "Shows information/stats on Hyperion.",
             helpUsage: "{prefix}stats",
             noExample: true
         });
@@ -24,7 +24,7 @@ class Stats extends Command{
         let totalUsers = 0;
         const fstats: IPCResult = (await Hyperion.ipc.getStats() as IPCResult);
         if(!fstats?.success){
-            return "There was an error fetching stats";
+            return "There was an error fetching stats.";
         }
 
         const stats: HyperionStats = (fstats.d as HyperionStats);
@@ -57,7 +57,7 @@ class Stats extends Command{
                     },
                     {
                         name: "Guilds",
-                        value: `${totalGuilds !== 0 ? totalGuilds: "I havent been up long enough to show some stats"}`,
+                        value: `${totalGuilds !== 0 ? totalGuilds: "I haven't been up long enough to show some stats."}`,
                         inline: true
                     },
                     {
@@ -72,7 +72,7 @@ class Stats extends Command{
                     },
                     {
                         name: "Users",
-                        value: `${totalUsers !== 0 ? totalUsers: "I havent been up long enough to show some stats"}`,
+                        value: `${totalUsers !== 0 ? totalUsers: "I havent been up long enough to show total users."}`,
                         inline: true
                     },
                     {
@@ -87,7 +87,7 @@ class Stats extends Command{
                     },
                     {
                         name: "RAM Usage",
-                        value: `${totalMem !== 0 ? totalMem.toFixed(2): "I havent been up long enough to show some stats"}mb`,
+                        value: `${totalMem !== 0 ? totalMem.toFixed(2): "I havent been up long enough to show total memory."}mb`,
                         inline: true
                     }
 

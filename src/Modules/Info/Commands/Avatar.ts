@@ -9,7 +9,7 @@ class Avatar extends Command{
             module: "info",
             aliases: ["av"],
 
-            helpDetail: "Shows a user's avatar",
+            helpDetail: "Shows a user's avatar.",
             helpUsage: "{prefix}avatar\n{prefix}avatar @user",
             helpUsageExample: "{prefix}avatar @bean"
         });
@@ -23,7 +23,7 @@ class Avatar extends Command{
             target = ctx.member;
         }
 
-        if(!target){return "Who?";}
+        if(!target){return "That user does not exist.";}
 
         const data = {
             embed: {
