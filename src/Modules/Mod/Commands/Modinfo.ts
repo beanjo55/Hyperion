@@ -18,9 +18,9 @@ class Modinfo extends Command{
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | EmbedResponse>{
         ctx.module = ctx.module as Mod;
-        if(!ctx.args[0]){return "Please specify a user";}
+        if(!ctx.args[0]){return "Please specify a user!";}
         const user = await Hyperion.utils.banResolver(ctx.args[0], ctx.guild.members, Hyperion);
-        if(!user){return "I dont know who that is, try a user ID";}
+        if(!user){return "Invalid user provided, try their user ID or mention.";}
         const modstats = await Hyperion.managers.modlog.moderationCount(ctx.guild.id, user.id);
         const fields: FieldArray = [];
         if(user instanceof Member){

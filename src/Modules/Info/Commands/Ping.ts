@@ -12,7 +12,7 @@ class Ping extends Command{
             alwaysEnabled: true,
             selfResponse: true,
 
-            helpDetail: "Shows current latency",
+            helpDetail: "Shows current latency.",
             helpUsage: "{prefix}ping",
             noExample: true
         });

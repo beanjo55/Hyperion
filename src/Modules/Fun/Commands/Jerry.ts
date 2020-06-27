@@ -6,7 +6,7 @@ class Jerry extends Command{
         super({
             name: "jerry",
             module: "fun",
-            helpDetail: "send jerry",
+            helpDetail: "Send Jerry.",
             helpUsage: "{prefix}jerry",
             noExample: true,
             friend: true,

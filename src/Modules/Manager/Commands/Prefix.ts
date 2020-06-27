@@ -9,7 +9,7 @@ class Prefix extends Command{
             module: "manager",
             userperms: ["manager"],
 
-            helpDetail: "Changes the prefix for the server",
+            helpDetail: "Changes the prefix for the server.",
             helpUsage: "{prefix}prefix [new prefix]",
             helpUsageExample: "{prefix}prefix %%"
         });
@@ -19,11 +19,11 @@ class Prefix extends Command{
         if(!ctx.args[0]){
             return `The current prefix is \`${ctx.guildConfig.prefix}\``;
         }
-        if(ctx.args[0].length > 8){return "That prefix is too long";}
+        if(ctx.args[0].length > 8){return "That prefix is too long, it must be lower than 8 characters!";}
         try{
             await Hyperion.managers.guild.setPrefix(ctx.guild.id, ctx.args[0]);
         }catch{
-            return "Something went wrong";
+            return "Something went wrong!";
         }
         return `Prefix changed to \`${ctx.args[0]}\``;
     }

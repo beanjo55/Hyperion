@@ -9,7 +9,7 @@ class Moderators extends Command{
             aliases: ["mods"],
             module: "manager",
             userperms: ["manager"],
-            helpDetail: "Show and manage server moderators",
+            helpDetail: "Show and manage server moderators.",
             helpUsage: "{prefix}moderators\n{prefix}moderators add [role]\n{prefix}moderators remove [role]",
             helpUsageExample: "{prefix}moderators add Mods\n{prefix}moderators remove Helpers"
         });
@@ -64,9 +64,9 @@ class Moderators extends Command{
     }
 
     async add(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        if(!ctx.args[1]){return "Please enter a role to add";}
+        if(!ctx.args[1]){return "Please enter a role to add!";}
         const role = Hyperion.utils.resolveRole(ctx.args[1], ctx.guild.roles);
-        if(!role){return "I couldnt find that role";}
+        if(!role){return "Invalid role provided!";}
         let roles = ctx.guildConfig?.mod?.modRoles;
         if(!roles){
             roles = [role.id];
@@ -78,11 +78,11 @@ class Moderators extends Command{
     }
 
     async remove(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        if(!ctx.args[1]){return "Please enter a role to remove";}
+        if(!ctx.args[1]){return "Please enter a role to remove!";}
         const role = Hyperion.utils.resolveRole(ctx.args[1], ctx.guild.roles);
-        if(!role){return "I couldnt find that role";}
+        if(!role){return "Invalid role provided!";}
         const roles = ctx.guildConfig?.mod?.modRoles;
-        if(!roles || !roles.includes(role.id)){return "That role isnt added as mod";}
+        if(!roles || !roles.includes(role.id)){return "That role isnt added as mod!";}
         const index = roles.indexOf(role.id);
         if(index > -1){
             roles.splice(index, 1);

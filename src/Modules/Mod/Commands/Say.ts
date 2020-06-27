@@ -10,7 +10,7 @@ class Say extends Command{
             module: "mod",
             userperms: ["mod"],
             cooldownTime: 5000,
-            helpDetail: "Makes the bot repeat your message in a channel you specify",
+            helpDetail: "Makes the bot repeat your message in a channel you specify.",
             helpUsage: "{prefix}say [channel] [message]",
             helpUsageExample: "{prefix}say #general I'm a talking bot!",
             selfResponse: true
@@ -19,10 +19,10 @@ class Say extends Command{
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<any>{
-        if(!ctx.args[0]){return ctx.channel.createMessage("Please specify a channel").catch(() => {});}
+        if(!ctx.args[0]){return ctx.channel.createMessage("Please specify a channel!").catch(() => {});}
         const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[0]);
-        if(!channel){return ctx.channel.createMessage("Im not sure what channel that is, try an ID or mention the channel").catch(() => {});}
-        if(!ctx.args[1]){return ctx.channel.createMessage("You need to provide a message for me to say").catch(() => {});}
+        if(!channel){return ctx.channel.createMessage("I could not find that channel in this guild, try using the channel ID or mention.").catch(() => {});}
+        if(!ctx.args[1]){return ctx.channel.createMessage("You need to provide a message for me to say.").catch(() => {});}
         await channel.createMessage(ctx.args.slice(1).join(" ")).then(() => {
             Hyperion.redis.set(`Deleted:${ctx.msg.id}`, 1, "EX", 5);
         }).catch(() => {

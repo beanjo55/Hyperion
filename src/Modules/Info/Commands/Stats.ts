@@ -12,7 +12,7 @@ class Stats extends Command{
             module: "info",
             alwaysEnabled: true,
 
-            helpDetail: "Shows some bot stats",
+            helpDetail: "Shows information/stats on Hyperion.",
             helpUsage: "{prefix}stats",
             noExample: true
         });
@@ -40,7 +40,7 @@ class Stats extends Command{
                     },
                     {
                         name: "Guilds",
-                        value: `${totalGuilds !== 0 ? totalGuilds: "I havent been up long enough to show some stats"}`,
+                        value: `${totalGuilds !== 0 ? totalGuilds: "I haven't been up long enough to show total guilds."}`,
                         inline: true
                     },
                     {
@@ -55,7 +55,7 @@ class Stats extends Command{
                     },
                     {
                         name: "Users",
-                        value: `${totalUsers !== 0 ? totalUsers: "I havent been up long enough to show some stats"}`,
+                        value: `${totalUsers !== 0 ? totalUsers: "I haven't been up long enough to show total users."}`,
                         inline: true
                     },
                     {

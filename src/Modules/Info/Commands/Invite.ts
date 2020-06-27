@@ -8,7 +8,7 @@ class Invite extends Command{
             name: "invite",
             module: "info",
 
-            helpDetail: "Shows an invite for the bot",
+            helpDetail: "Shows an invite for the bot.",
             helpUsage: "{prefix}invite",
             noExample: true
         });

@@ -18,7 +18,7 @@ class Hug extends Command{
         super({
             name: "hug",
             module: "fun",
-            helpDetail: "Give someone a big hug",
+            helpDetail: "Give someone a big hug.",
             helpUsage: "{prefix}hug [text]",
             helpUsageExample: "{prefix}hug @arch hi cutie"
         });

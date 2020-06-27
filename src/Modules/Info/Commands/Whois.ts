@@ -12,7 +12,7 @@ class Whois extends Command{
             module: "info",
             aliases: ["w"],
 
-            helpDetail: "Shows information about a user",
+            helpDetail: "Shows information about a user.",
             helpUsage: "{prefix}whois\n{prefix}whois @user",
             helpUsageExample: "{prefix}whois @bean"
         });
@@ -26,7 +26,7 @@ class Whois extends Command{
             target = ctx.member;
         }
 
-        if(!target){return "Who?";}
+        if(!target){return "That user was not found!";}
         
         const roleList: Array<string> = [];
         let color = Hyperion.defaultColor;
