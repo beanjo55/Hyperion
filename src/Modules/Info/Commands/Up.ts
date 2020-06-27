@@ -25,7 +25,7 @@ class Up extends Command{
                 color: Hyperion.defaultColor,
                 timestamp: new Date(),
                 footer: {
-                    text: `Hyperion | ${Hyperion.build} | ${Hyperion.version} | PID ${process.pid} | Cluster ${Hyperion.id} | Shard ${ctx.guild.shard.id}`
+                    text: `Hyperion | ${Hyperion.build} | ${Hyperion.version} | PID ${process.pid} | Cluster ${Hyperion.clusterID} | Shard ${ctx.guild.shard.id}`
                 },
                 description: `**Process Uptime:** ${msc(process.uptime()*1000)}\n**Connection Uptime:** ${msc(Hyperion.client.uptime)}`
             }

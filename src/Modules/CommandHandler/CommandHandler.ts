@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import {Module} from "../../Core/Structures/Module";
 import * as Types from "../../types";
-import {Message, Member, Embed, Channel, GuildChannel} from "eris";
+import {Message, Member, Embed, GuildChannel} from "eris";
 import {inspect} from "util";
 import {Command} from "../../Core/Structures/Command";
 import { IGuild } from "../../MongoDB/Guild";
-import HyperionC from "../../main";
 import {Scope} from "@sentry/node";
 
 enum HandlerType{

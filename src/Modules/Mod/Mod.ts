@@ -427,11 +427,6 @@ class Mod extends Module{
             
             if(!guild){
                 Hyperion.logger.warn("Hyperion", `Could not find guild to end moderation ${moderation.mid}`, "Moderation Sweep");
-                try{
-                    await Hyperion.ipc.fetchGuild(log.guild);
-                }catch{
-                    Hyperion.logger.info("Hyperion", "No clusters have this guild, assuming Hyperion was yeeted and increasing fail count", "Moderation Sweep");
-                }
                 if((moderation.failCount ?? 0) < 3){
                     ModerationModel.updateOne({mid: moderation.mid}, {$inc: {failCount: 1}}).exec();
                 }else{

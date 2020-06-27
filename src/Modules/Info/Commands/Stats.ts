@@ -2,7 +2,7 @@ import {Command} from "../../../Core/Structures/Command";
 import {default as os} from "os";
 import {default as msc} from "pretty-ms";
 // eslint-disable-next-line no-unused-vars
-import {IHyperion, ICommandContext, IPCResult, HyperionStats} from "../../../types";
+import {IHyperion, ICommandContext} from "../../../types";
 import { Embed } from "eris";
 
 class Stats extends Command{
@@ -19,26 +19,9 @@ class Stats extends Command{
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
-        let totalGuilds = 0;
-        let totalMem = 0;
-        let totalUsers = 0;
-        const fstats: IPCResult = (await Hyperion.ipc.getStats() as IPCResult);
-        if(!fstats?.success){
-            return "There was an error fetching stats";
-        }
-
-        const stats: HyperionStats = (fstats.d as HyperionStats);
-        const clusters = Object.getOwnPropertyNames(stats.clusters);
-        if(clusters.length !== 0){
-            totalMem += stats.manager.memory.rss/1024/1024;
-            clusters.forEach((c: string) => {
-            
-                totalMem += stats.clusters[Number(c)].memory.rss/1024/1024;
-                totalGuilds += stats.clusters[Number(c)]?.discord?.guilds ?? 0;
-                totalUsers += stats.clusters[Number(c)]?.discord?.users ?? 0;
-            });
-        }
-
+        const totalGuilds = 0;
+        const totalMem = 0;
+        const totalUsers = 0;
         const data = {
             embed:{
                 title: "Hyperion Stats",
@@ -87,7 +70,7 @@ class Stats extends Command{
                     },
                     {
                         name: "RAM Usage",
-                        value: `${totalMem !== 0 ? totalMem.toFixed(2): "I havent been up long enough to show some stats"}mb`,
+                        value: `${totalMem !== 0 ? 0 : "I havent been up long enough to show some stats"}mb`,
                         inline: true
                     }
 

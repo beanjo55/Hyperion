@@ -50,7 +50,14 @@ export class ModConfig{
     deleteCommand: boolean;
     lastCase: number;
     muteRole: string;
-    dmOnAction: boolean;
+    dmOnBan: boolean;
+    dmOnKick: boolean;
+    dmOnMute: boolean;
+    dmOnUnmute: boolean;
+    banLogChannel: string;
+    warnLogChannel: string;
+    muteLogChannel: string;
+    kickLogChannel: string;
     constructor(data: Partial<Types.ModConfig>){
         this.modRoles = data.modRoles ?? [];
         this.protectedRoles = data.protectedRoles ?? [];
@@ -64,7 +71,16 @@ export class ModConfig{
         this.deleteCommand = data.deleteCommand ?? false;
         this.lastCase = data.lastCase ?? 0;
         this.muteRole = data.muteRole ?? "";
-        this.dmOnAction = data.dmOnAction ?? false;
+        
+        this.dmOnBan = data.dmOnBan ?? false;
+        this.dmOnKick = data.dmOnKick ?? false;
+        this.dmOnMute = data.dmOnMute ?? false;
+        this.dmOnUnmute = data.dmOnUnmute ?? false;
+
+        this.banLogChannel = data.banLogChannel ?? this.modLogChannel ?? "";
+        this.kickLogChannel = data.kickLogChannel ?? this.modLogChannel ?? "";
+        this.muteLogChannel = data.muteLogChannel ?? this.modLogChannel ?? "";
+        this.warnLogChannel = data.warnLogChannel ?? this.modLogChannel ?? "";
     }
 }
 
@@ -301,13 +317,13 @@ class MongoGuildManager{
         return new ModuleConfig({enabled: state}, mod.defaultStatus);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    validateCommandState(data: any, command: string, commands: Collection<Command>): any{
+    validateCommandState(data: any, command: string, commands: Collection<Command>): string | CommandConfig{
         const cmd: Command | undefined = commands.get(command);
-        if(!cmd){return {code: 1, payload: "Invalid command"};}
+        if(!cmd){return "Invalid command";}
         const cmdConfig = new CommandConfig(data);
-        if(!cmdConfig.enabled && cmd.alwaysEnabled){return {code: 1, payload: "This command can not be disabled"};}
-        if(cmd.internal || cmd.dev || cmd.admin || cmd.support){return {code: 1, payload: "This command is private and can not be configured per server"};}
-        return {code: 0, payload: new CommandConfig(data)};
+        if(!cmdConfig.enabled && cmd.alwaysEnabled){return "This command can not be disabled";}
+        if(cmd.internal || cmd.dev || cmd.admin || cmd.support){return "This command is private and can not be configured per server";}
+        return new CommandConfig(data);
     }
 
     async updateModuleStates(guildID: string, newMod: string, newState: boolean, modules: Collection<Module>): Promise<Types.IMongoUpdateResult | undefined>{
@@ -316,35 +332,32 @@ class MongoGuildManager{
         const validated = this.validateModuleState(newState, newMod, modules);
         if(validated === false){return;}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const temp: any ={};
+        const temp: any = {};
         temp[newMod] = validated;
         const merged = this.merge(guilddata.modules, temp);
         return await this.model.updateOne({guild: guildID}, {modules: merged}).exec();
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async updateCommands(guildID: string, newCmd: string, data: any, commands: Collection<Command>): Promise<any>{
+    async updateCommands(guildID: string, newCmd: string, data: any, commands: Collection<Command>): Promise<string | Types.IMongoUpdateResult>{
         const guilddata = await this.model.findOne({guild: guildID}, "commands").lean().exec();
-        if(!guilddata?.commands){return {code: 1, payload: "An error occured"};}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const validated: any = this.validateCommandState(data, newCmd, commands);
-        if(validated.code !== 0){return validated;}
+        if(!guilddata?.commands){return "An error occured";}
+        const validated = this.validateCommandState(data, newCmd, commands);
+        if(typeof(validated) === "string"){return validated;}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const temp: any = {};
-        temp[newCmd] = validated.payload;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const merged: any = this.merge(guilddata.commands, temp);
+        temp[newCmd] = validated;
+        const merged = this.merge(guilddata.commands, temp);
         return await this.model.updateOne({guild: guildID}, {commands: merged}).exec();
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async updateModuleConfig(guildID: string, mod: string, data: any): Promise<any>{
+    async updateModuleConfig(guildID: string, mod: string, data: any): Promise<string | Types.IMongoUpdateResult>{
         if(!Object.getOwnPropertyNames(nameConfigMap).includes(mod)){
-            return {code: 1, payload: "No matching module found"};
+            return "No matching module found";
         }
         let guilddata = await this.model.findOne({guild: guildID}, mod).lean().exec();
         if(!guilddata){guilddata = await this.createConfig(guildID);}
-        if(!guilddata?.[mod]){return {code: 1, payload: "An error occured"};}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const merged: any = this.merge(guilddata?.[mod], data);
+        if(!guilddata?.[mod]){return "An error occured";}
+        const merged = this.merge(guilddata?.[mod], data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const validated: any = new nameConfigMap[mod](merged);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

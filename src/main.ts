@@ -31,8 +31,7 @@ import {resolveRole} from "./Core/Utils/Roles";
 import {resolveTextChannel} from "./Core/Utils/Channels";
 import {resolveVoiceChannel} from "./Core/Utils/Channels";
 import {resolveCategory} from "./Core/Utils/Channels";
-import {BaseClusterWorker} from "./Core/Cluster/BaseClusterWorker";
-import {ShardManager} from "./Core/Sharding/ShardManager";
+import {BaseClusterWorker, Setup} from "./Core/Cluster/BaseClusterWorker";
 import * as sentry from "@sentry/node";
 import {default as embedModel} from "./MongoDB/Embeds";
 
@@ -85,12 +84,9 @@ const utils: IUtils = {
 export default class HyperionC extends BaseClusterWorker{
     readonly build: string;
     modules: Collection<Module>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sentry: sentry.User;
     commands: Collection<Command>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     logger: ILogger;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bevents: {[key: string]: () => void};
     readonly devPrefix: string;
     readonly modlist: Array<string>;
@@ -99,7 +95,7 @@ export default class HyperionC extends BaseClusterWorker{
     readonly defaultColor: number;
     readonly mongoOptions: mongoose.ConnectionOptions;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly models: any;
+    readonly models: {[key: string]: mongoose.Model<any>};
     db: mongoose.Connection;
     global!: GlobalConfig;
     logLevel: number
@@ -110,10 +106,8 @@ export default class HyperionC extends BaseClusterWorker{
     readonly circleCIToken: string;
     redis: Redis.Redis;
     private listTokens: {[key: string]: string};
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(manager: ShardManager, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions,){
-        super(manager);
+    constructor(setup: Setup, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions,){
+        super(setup);
         this.build = coreOptions.build;
         this.modules = new Collection(Module);
         this.commands = new Collection(Command);
@@ -144,6 +138,7 @@ export default class HyperionC extends BaseClusterWorker{
     }
 
     async launch(): Promise<void>{
+        //console.log(inspect(this));
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (process as NodeJS.EventEmitter).on("uncaughtException", (err: Error, origin: string) =>{
             this.logger.fatal("Hyperion", "An uncaught execption was encountered", "Uncaught Exception");
@@ -159,15 +154,15 @@ export default class HyperionC extends BaseClusterWorker{
         });
         this.loadMods();
         this.loadEvents();
-        await this.models.global.findOne({}).lean().exec().then((g: GlobalConfig | null) => {
-            if(g === null){throw new Error("Unable to get global config");}
-            this.global = g;
-        });
+        const global = await this.models.global.findOne({}).lean<GlobalConfig>().exec() as GlobalConfig | null;
+        if(global === null){throw new Error("Unable to get global config");}
+        this.global = global;
+        
         this.client.connect();
     }
 
     async reloadGlobal(): Promise<void>{
-        const newGlobal = await this.models.global.findOne({}).lean().exec();
+        const newGlobal = await this.models.global.findOne({}).lean<GlobalConfig>().exec() as GlobalConfig | null;
         if(!newGlobal){
             throw new Error("Could not find new global, aborting!");
         }

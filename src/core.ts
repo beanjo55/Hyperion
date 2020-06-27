@@ -1,23 +1,11 @@
 import {isMaster} from "cluster";
-import {ShardManager} from "./Core/Sharding/ShardManager";
 import {CoreOptions} from "./types";
-import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
-import {default as guilduser} from "./MongoDB/Guilduser";
-import {default as modlog} from "./MongoDB/Modlog";
 import {default as global} from "./MongoDB/Global";
-import {default as starModel} from "./MongoDB/Starred";
 import {default as fs} from "fs";
+import {Admiral as Fleet, Options} from "./Core/Sharding/Admiral";
+import {inspect} from "util";
 
-
-const models = {
-    user: user,
-    guild: guild,
-    guilduser: guilduser,
-    modlog: modlog,
-    global: global,
-    starred: starModel
-};
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const config = require("../config.json");
@@ -26,34 +14,30 @@ const config = require("../config.json");
 
 async function start(): Promise<void>{
     if((config.coreOptions as CoreOptions).init !== undefined && (config.coreOptions as CoreOptions).init === true){
-        await models.global.create({});
-        await models.user.create({user: "253233185800847361", acks: {developer: true}});
+        await global.create({});
+        await user.create({user: "253233185800847361", acks: {developer: true}});
         console.log("Generated new global config. Dont forget to change \"init\" to false. Exiting");
         process.exit(0);
     }
-
-    const manager = new ShardManager({
+    const options: Options = {
         path: __dirname + "/main.js",
         token: config.token,
-        clientOptions: config.erisOptions,
-        shardCount: config.IClusteringOptions.shards,
-        clusterCount: config.IClusteringOptions.clusters,
-        delay: config.IClusteringOptions.delay
-    });
-    await manager.spawn();
+        clusters: 1,
+        clientOptions: config.clientOptions
+    };
+    const Admiral = new Fleet(options);
     if (isMaster) {
-        // Master process code here
-        manager.on("error", error => {
-            if(!error.toString().includes("1006")){
-                console.log(error);
-            }}); // Not handling these errors will kill everything when any error is emitted
-        manager.on("debug", message => {
-            if(message !== "Updating stats"){
-                console.log(message);
-            }
-        });
-        manager.on("clusterReady", cluster => console.log(`Cluster ${cluster.id} ready`));
+        // Code to only run for your master process
+        Admiral.on("log", m => console.log(m));
+        Admiral.on("debug", m => console.debug(m));
+        Admiral.on("warn", m => console.warn(m));
+        Admiral.on("error", m => console.error(inspect(m)));
+    
+        // Logs stats when they arrive
+        Admiral.on("stats", m => console.log(m));
     }
+
+
 }
 if(isMaster){
     fs.readFile(`${__dirname}/v2.txt`, "utf8", function (error, data) {

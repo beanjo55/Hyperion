@@ -1,123 +1,151 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { Worker, fork } from "cluster";
-import {EventEmitter} from "events";
-import { ShardManager } from "../Sharding/ShardManager";
-import { ServiceOptions, IPCEvents, SharderEvents } from "../../types";
-import { SendOptions } from "veza";
-import {promisify} from "util";
+import {worker} from "cluster";
+import {BaseServiceWorker} from "./BaseServiceWorker";
+import {inspect} from "util";
 
-const sleep = promisify(setTimeout);
+export class Service {
+	path!: string;
+	serviceName!: string;
+	app?: BaseServiceWorker;
+	timeout!: number;
+	whatToLog!: string[];
 
+	constructor() {
 
+	    console.log = (str: unknown) => {if (process.send) process.send({op: "log", msg: str});};
+	    console.debug = (str: unknown) => {if (process.send) process.send({op: "debug", msg: str});};
+	    console.error = (str: unknown) => {if (process.send) process.send({op: "error", msg: str});};
+	    console.warn = (str: unknown) => {if (process.send) process.send({op: "warn", msg: str});};
 
-export class Service extends EventEmitter {
-	/** Indicates if the worker is ready */
-	public ready = false;
-	public name: string;
-	public worker?: Worker;
-	public timeout: number;
-
-	private readonly exitListenerFunction: (...args: any[]) => void;
-
-	public constructor(public manager: ShardManager, public path: string, options: ServiceOptions) {
-	    super();
-
-	    this.name = options.name;
-	    this.timeout = options.timeout || 30e3;
-
-	    this.exitListenerFunction = this.exitListener.bind(this);
-	}
-
-	public send(data: any, options: SendOptions = { }): Promise<any>{
-	    return this.manager.ipc!.sendTo("service:" + this.name, data, options);
-	}
-
-	/**
-	 * Shut down the worker, waiting for it to gracefully exit
-	 * @param {Number} [timeout=-1] Time in ms to wait for the worker to shut down before forcefully exiting.
-	 */
-	public kill(timeout = -1): Promise<unknown> {
-	    return new Promise(resolve => {
-	        this.ready = false;
-
-	        if (this.worker) {
-	            this.debug(`Killing service ${this.name}`);
-
-	            this.worker.removeListener("exit", this.exitListenerFunction);
-
-	            let timeoutRef: NodeJS.Timeout;
-	            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-	            const exitListener = () => { // If the process exits itself
-	                timeoutRef && clearTimeout(timeoutRef); // Clear timeout
-	                return resolve(); // Done
-	            };
-	            this.worker.once("exit", exitListener);
-
-				// Send command to shut down
-				this.manager.ipc!.sendTo("Service:" + this.name, { op: IPCEvents.SHUTDOWN });
-
-				if (timeout > 0)
-				    timeoutRef = setTimeout(() => {
-				        if (!this.worker || this.worker!.isDead())
-				            return; // If the worker is already dead, but the timeout is not cleared, ignore
-
-						// Remove exit listener and force kill
-						this.worker!.removeListener("exit", exitListener);
-						this.worker.kill();
-
-						return resolve();
-				    }, timeout);
-	        } else
-	            return resolve();
-	    });
-	}
-
-	public async respawn(): Promise<void> {
-	    await this.kill();
-	    await sleep(500);
-	    await this.spawn();
-	}
-
-	/** Spawn the worker process */
-	public async spawn(): Promise<void> {
-	    if (this.worker && !this.worker.isDead)
-	        throw new Error("This service already has a spawned worker");
-
-	    this.worker = fork({
-	        SERVICE_NAME: this.name,
-	        SERVICE_PATH: this.path
+	    // Spawns
+	    process.on("uncaughtException", (err: Error) => {
+	        if (process.send) process.send({op: "error", msg: inspect(err)});
 	    });
 
-	    this.worker.once("exit", this.exitListenerFunction);
+	    process.on("unhandledRejection", (reason, promise) => {
+	        if (process.send) process.send({op: "error", msg: "Unhandled Rejection at: " + inspect(promise) + " reason: " + reason});
+	    });
 
-	    this.debug(`Worker spawned with id ${this.worker.id}`);
-	    this.manager.emit(SharderEvents.SERVICE_SPAWN, this);
+	    if (process.send) process.send({op: "launched"});
 
-	    await this.waitForReady();
-	}
+	    process.on("message", async message => {
+	        if (message.op) {
+	            switch (message.op) {
+	            case "connect": {
+	                this.path = message.path;
+	                this.serviceName = message.serviceName;
+	                this.timeout = message.timeout;
+	                this.whatToLog = message.whatToLog;
+	                this.loadCode();
+	                break;
+	            }
+	            case "return": {
+	                if (this.app) this.app.ipc.emit(message.id, message.value);
+	                break;
+	            }
+	            case "command": {
+	                const noHandle = () => {
+	                    const res = {err: `Service ${this.serviceName} cannot handle commands!`};
+	                    if (process.send) process.send({op: "return", value: {
+	                        id: message.command.UUID,
+	                        value: res
+	                    }, UUID: message.UUID});
+	                    console.error("I can't handle commands!");
+	                };
+	                if (this.app) {
+	                    if (this.app.handleCommand) {
+	                        const res = await this.app.handleCommand(message.command.msg);
+	                        if (message.command.receptive) {
+	                            if (process.send) process.send({op: "return", value: {
+	                                id: message.command.UUID,
+	                                value: res
+	                            }, UUID: message.UUID});
+	                        }
+	                    } else {
+	                        noHandle();
+	                    }
+	                } else {
+	                    noHandle();
+	                }
 
-	private waitForReady(): Promise<void> {
-	    return new Promise((resolve, reject) => {
-	        this.once("ready", () => {
-	            this.ready = true;
-	            return resolve();
-	        });
+	                break;
+	            }
+	            case "shutdown": {
+	                if (this.app) {
+	                    if (this.app.shutdown) {
+	                        let safe = false;
+	                        // Ask app to shutdown
+	                        this.app.shutdown(() => {
+	                            safe = true;
+	                            if (process.send) process.send({op: "shutdown"});
+	                        });
+	                        if (message.killTimeout > 0) {
+	                            setTimeout(() => {
+	                                if (!safe) {
+	                                    console.error(`Service ${this.serviceName} took too long to shutdown. Performing shutdown anyway.`);
+											
+	                                    if (process.send) process.send({op: "shutdown"});
+	                                }
+	                            }, message.killTimeout);
+	                        }
+	                    } else {
+	                        if (process.send) process.send({op: "shutdown"});
+	                    }
+	                } else {
+	                    if (process.send) process.send({op: "shutdown"});
+	                }
 
-	        setTimeout(() => reject(new Error(`Service ${this.name} took too long to get ready`)), this.timeout);
+	                break;
+	            }
+	            case "collectStats": {
+	                if (process.send) process.send({op: "collectStats", stats: {
+	                    ram: process.memoryUsage().rss / 1e6
+	                }});
+
+	                break;
+	            }
+	            }
+	        }
 	    });
 	}
+ 
+	private async loadCode() {
+	    if (this.whatToLog.includes("service_start")) console.log(`Starting service ${this.serviceName}`);
 
-	private exitListener(code: number, signal: string): void {
-	    this.ready = false;
-	    this.worker = undefined;
+	    let App = (await import(this.path));
+	    if (App.ServiceWorker) {
+	        App = App.ServiceWorker;
+	    } else {
+	        App = App.default ? App.default : App;
+	    }
+	    this.app = new App({serviceName: this.serviceName, workerID: worker.id});
 
-	    this.debug(`Worker exited with code ${code} and signal ${signal}`);
+	    let ready = false;
+	    if (this.app) this.app.readyPromise.then(() => {
+	        if (this.whatToLog.includes("service_ready")) console.log(`Service ${this.serviceName} is ready!`);
+	        if (process.send) process.send({op: "connected"});
+	        ready = true;
+	    }).catch((err: unknown) => {
+	        console.error(`Service ${this.serviceName} had an error starting: ${inspect(err)}`);
+	        process.kill(0);
+	    });
 
-	    this.respawn();
-	}
+	    // Timeout
+	    if (this.timeout !== 0) {
+	        setTimeout(() => {
+	            if (!ready) {
+	                console.error(`Service ${this.serviceName} took too long to start.`);
+	                process.kill(0);
+	            }
+	        }, this.timeout);
+	    }
 
-	private debug(message: string): void {
-	    this.manager.emit(SharderEvents.DEBUG, "[Service] " + message);
+	    /* this.app.admiral.on("broadcast", (m) => {
+			if (!m.event) console.error(`Service ${this.serviceName} | My emit cannot be completed since the message doesn't have a "message"!`);
+			if (!m.msg) m.msg = null;
+			//@ts-ignore
+			process.send({op: "broadcast", event: {op: m.event, msg: m.msg}});
+		}) */
 	}
 }
