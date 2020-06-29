@@ -180,23 +180,9 @@ class Mod extends Module{
         return 0;
     }
 
-    async banDM(user: User, guildName: string, reason: string, additional?: {appeal?: string; custom?: string}): Promise<void>{
+    async banDM(user: User, guildName: string, reason: string): Promise<void>{
         user.getDMChannel().then(x => {
-            x.createMessage(`You were banned in \`${guildName}\` for: ${reason}`).catch();
-            if(additional){
-                let message = "";
-                if(additional.appeal){
-                    message += `You can appeal at: ${additional.appeal}`;
-                }
-                if(additional.custom){
-                    if(message !== ""){
-                        message += `\nA custom message from ${guildName}: ${additional.custom}`;
-                    }else{
-                        message = `A custom message from ${guildName}: ${additional.custom}`;
-                    }
-                }
-                x.createMessage(message).catch();
-            }
+            x.createMessage(`You were banned in \`${guildName}\` for: ${reason}`).catch(() => {});
         });
     }
 

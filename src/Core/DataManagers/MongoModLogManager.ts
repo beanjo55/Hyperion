@@ -47,6 +47,17 @@ class MongoModLogManager{
         return this.model.updateOne({mid: mid}, {expired: true});
     }
 
+    async delwarn(guild: string, caseNum: number, userID: string, manager = false): Promise<IMongoUpdateResult>{
+        const Case = await this.getCaseByCasenumber(guild, caseNum);
+        if(!Case){throw new Error("I couldnt find that case");}
+        if(!manager && Case.moderator !== userID){throw new Error("Only managers can delete warns they didnt make");}
+        return await this.model.updateOne({mid: this.genMID(guild, caseNum)}, {revoked: true}).exec();
+    }
+
+    async clearwarn(guild: string, user: string): Promise<IMongoUpdateResult>{
+        return await this.model.updateMany({guild: guild, user: user, moderationType: "warn"}, {revoked: true}).exec();
+    }
+
     genMID(guild: string, caseNum: number): string{
         return `${guild}:${caseNum}`;
     }
