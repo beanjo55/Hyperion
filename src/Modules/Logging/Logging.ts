@@ -38,7 +38,7 @@ class Logging extends Module{
 
     async getEventConfig(Hyperion: IHyperion, guildID: string, eventName: string): Promise<LogEvent>{
         const config: IGuild | null = await Hyperion.managers.guild.getConfig(guildID);
-        if(!config?.logging?.channel){return new LoggingConfig({})[eventName];}
+        if(!config?.logging){return new LoggingConfig({})[eventName];}
         if(!(config.logging as LoggingConfig)[eventName]){return {enabled: false, channel: "default", ignoredRoles: [], ignoredChannels: []};}
         return (config.logging as LoggingConfig)[eventName];
     }
@@ -53,7 +53,7 @@ class Logging extends Module{
         if(!await this.checkGuildEnabled(Hyperion, guild.id)){return false;}
         const econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
         if(!econfig){return false;}
-        if(econfig.enabled !== true && econfig.enabled !== false){return false;}
+        if(econfig.enabled === false){return false;}
         const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
         if(roles){
             if(config?.ignoredRoles?.some((r: string) => roles.indexOf(r) >= 0)){return false;}
@@ -223,16 +223,12 @@ class Logging extends Module{
     //MESSGAES
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async messageDelete(Hyperion: IHyperion, msg: Message | any): Promise<void | undefined>{
-        console.log("starting delete");
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
-        console.log("passed channel type");
         if(msg.author && msg.author.bot){return;}
         const guild = msg.channel.guild;
         if(!await this.preCheck(Hyperion, guild, "messageDelete", msg.channel.id, msg?.member?.roles)){return;}
-        console.log("passed precheck");
         const channelObj = await this.testChannel(Hyperion, guild, "messageDelete");
         if(!channelObj){return;}
-        console.log("finished checks");
         const field: Array<{name: string; value: string; inline: boolean}> = [];
         const data = {
             embed: {

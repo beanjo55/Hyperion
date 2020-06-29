@@ -34,7 +34,7 @@ async function start(): Promise<void>{
         Admiral.on("error", m => console.error(inspect(m)));
     
         // Logs stats when they arrive
-        Admiral.on("stats", m => console.log(m));
+        //Admiral.on("stats", m => console.log(m));
     }
 
 
