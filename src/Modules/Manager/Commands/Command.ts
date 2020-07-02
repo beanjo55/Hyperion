@@ -12,8 +12,8 @@ class Command extends CommandConstructor{
             userperms: ["manager"],
 
             helpDetail: "Enabled disables, or sets additional settings for a command",
-            helpUsage: "{prefix}command [command name]",
-            helpUsageExample: "{prefix}command owoify"
+            helpUsage: "{prefix}command [command name]\n{prefix}command [command name] [enable or disable]\n{prefix}command [command name] allowedroles [role]\n{prefix}command [command name] disabledroles [role]\n{prefix}command [command name] allowedchannels [channel]\n{prefix}command [command name] disabledchannels [channel]",
+            helpUsageExample: "{prefix}command owoify enable\n{prefix}command owoify allowedroles developer\n{prefix}command owoify allowedchannels #commands"
         });
     }
 
