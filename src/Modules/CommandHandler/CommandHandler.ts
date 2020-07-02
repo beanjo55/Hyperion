@@ -284,7 +284,7 @@ class CommandHandler extends Module{
             if(results[0] !== null && results[0]){return true;}
             if(results[2] !== null && results[2]){return true;}
             if(results[1] !== null && results[1]){return false;}
-            if(results[4] !== null && results[4]){return false;}
+            if(results[3] !== null && results[3]){return false;}
         }
 
         if(!this.isManager(ctx.member) && this.isMod(ctx.member, guildConfig)){

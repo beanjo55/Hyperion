@@ -19,9 +19,13 @@ class Stats extends Command{
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
-        const totalGuilds = 0;
-        const totalMem = 0;
-        const totalUsers = 0;
+        let totalGuilds = 0;
+        let totalMem = 0;
+        let totalUsers = 0;
+        const statData = await Hyperion.ipc.getStats();
+        totalGuilds = statData.guilds;
+        totalMem = statData.totalRam;
+        totalUsers = statData.users;
         const data = {
             embed:{
                 title: "Hyperion Stats",
@@ -70,7 +74,7 @@ class Stats extends Command{
                     },
                     {
                         name: "RAM Usage",
-                        value: `${totalMem !== 0 ? 0 : "I havent been up long enough to show some stats"}mb`,
+                        value: `${totalMem !== 0 ? totalMem.toFixed(2) : "I havent been up long enough to show some stats"}mb`,
                         inline: true
                     }
 

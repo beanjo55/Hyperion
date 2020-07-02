@@ -10,6 +10,7 @@ import * as Eris from "eris";
 import {Cluster} from "../Cluster/Cluster";
 import {Service} from "../Services/Service";
 import * as path from "path";
+import {logger} from "../Structures/Logger";
 
 interface ServiceCreator {
 	name: string;
@@ -627,7 +628,7 @@ export class Admiral extends EventEmitter {
 	                        );
 	                        if (cluster) {
 	                            this.prelimStats.guilds += message.stats.guilds;
-	                            this.prelimStats.users += message.stats.guilds;
+	                            this.prelimStats.users += message.stats.users;
 	                            this.prelimStats.voice += message.stats.voice;
 	                            this.prelimStats.clustersRam += message.stats.ram;
 	                            this.prelimStats.largeGuilds += message.stats.largeGuilds;
@@ -879,9 +880,9 @@ export class Admiral extends EventEmitter {
 	        process.nextTick(() => {
 	            if (this.whatToLog.includes("admiral_start")) {
 	                if (this.resharding) {
-	                    this.log("Fleet | Resharding");
+	                    this.log("Resharding");
 	                } else {
-	                    this.log("Fleet | Started Admiral");
+	                    this.log("Started Harbinger");
 	                }
 	            }
 	            this.calculateShards().then((shards) => {

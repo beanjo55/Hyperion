@@ -4,6 +4,7 @@ import * as Types from "../../types";
 import {Embed, Collection} from "eris";
 import {Command} from "../Structures/Command";
 import {Module} from "../Structures/Module";
+import {inspect} from "util";
 
 
 export class CommandConfig{
@@ -21,7 +22,7 @@ export class CommandConfig{
         this.disabledRoles = data.disabledRoles ?? [];
 
         this.allowedChannels = data.allowedChannels ?? [];
-        this.disabledChannels = data.allowedChannels ?? [];
+        this.disabledChannels = data.disabledChannels ?? [];
 
         if(data.subcommands !== undefined){
             this.subcommands = data.subcommands;
@@ -341,12 +342,15 @@ class MongoGuildManager{
     async updateCommands(guildID: string, newCmd: string, data: any, commands: Collection<Command>): Promise<string | Types.IMongoUpdateResult>{
         const guilddata = await this.model.findOne({guild: guildID}, "commands").lean().exec();
         if(!guilddata?.commands){return "An error occured";}
-        const validated = this.validateCommandState(data, newCmd, commands);
+        const validated = this.validateCommandState(this.merge(guilddata.commands[newCmd], data), newCmd, commands);
         if(typeof(validated) === "string"){return validated;}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const temp: any = {};
+        console.log(inspect(validated))
         temp[newCmd] = validated;
+        console.log(inspect(temp));
         const merged = this.merge(guilddata.commands, temp);
+        console.log(inspect(merged));
         return await this.model.updateOne({guild: guildID}, {commands: merged}).exec();
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
