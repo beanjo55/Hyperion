@@ -4,7 +4,7 @@ import * as Types from "../../types";
 import {Embed, Collection} from "eris";
 import {Command} from "../Structures/Command";
 import {Module} from "../Structures/Module";
-import {inspect} from "util";
+
 
 
 export class CommandConfig{
@@ -342,15 +342,12 @@ class MongoGuildManager{
     async updateCommands(guildID: string, newCmd: string, data: any, commands: Collection<Command>): Promise<string | Types.IMongoUpdateResult>{
         const guilddata = await this.model.findOne({guild: guildID}, "commands").lean().exec();
         if(!guilddata?.commands){return "An error occured";}
-        const validated = this.validateCommandState(this.merge(guilddata.commands[newCmd], data), newCmd, commands);
+        const validated = this.validateCommandState(this.merge(guilddata.commands[newCmd] ?? {}, data), newCmd, commands);
         if(typeof(validated) === "string"){return validated;}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const temp: any = {};
-        console.log(inspect(validated))
         temp[newCmd] = validated;
-        console.log(inspect(temp));
         const merged = this.merge(guilddata.commands, temp);
-        console.log(inspect(merged));
         return await this.model.updateOne({guild: guildID}, {commands: merged}).exec();
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -378,6 +375,14 @@ class MongoGuildManager{
     async getCommandState(guild: string, command: string): Promise<CommandConfig>{
         const config = await this.getConfig(guild);
         return new CommandConfig(config?.commands[command] ?? {});
+    }
+
+    async getModuleConfig<T>(guild: string, module: string): Promise<T>{
+        const data = await this.getConfig(guild);
+        if(!data){throw new Error("Could not get guild config");}
+        const config = nameConfigMap[module];
+        if(!config){throw new Error("No config for that module");}
+        return new config(data[module] ?? {});
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,6 +1,6 @@
 import {Command as CommandConstructor} from "../../../Core/Structures/Command";
 import { ICommandContext, IHyperion, CommandResponse } from "../../../types";
-import {inspect} from "util";
+
 
 
 class Command extends CommandConstructor{
@@ -12,8 +12,8 @@ class Command extends CommandConstructor{
             userperms: ["manager"],
 
             helpDetail: "Enabled disables, or sets additional settings for a command",
-            helpUsage: "{prefix}command [command name]\n{prefix}command [command name] [enable or disable]\n{prefix}command [command name] allowedroles [role]\n{prefix}command [command name] disabledroles [role]\n{prefix}command [command name] allowedchannels [channel]\n{prefix}command [command name] disabledchannels [channel]",
-            helpUsageExample: "{prefix}command owoify enable\n{prefix}command owoify allowedroles developer\n{prefix}command owoify allowedchannels #commands"
+            helpUsage: "{prefix}command [command name]\n{prefix}command [command name] [enable or disable]\n{prefix}command [command name] allowedroles [role]\n{prefix}command [command name] disabledroles [role]\n{prefix}command [command name] allowedchannels [channel]\n{prefix}command [command name] disabledchannels [channel]\n{prefix}command [command name] reset",
+            helpUsageExample: "{prefix}command owoify enable\n{prefix}command owoify allowedroles developer\n{prefix}command owoify allowedchannels #commands\n{prefix}command owoify reset"
         });
     }
 
