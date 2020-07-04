@@ -15,6 +15,10 @@ class Slowmode extends Command{
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
+        if(!ctx.args[0]){
+            if(ctx.channel.rateLimitPerUser === 0){return "There is no slowmode in this channel";}
+            return `The slowmode in this channel is ${ctx.channel.rateLimitPerUser} seconds`;
+        }
         if(ctx.args[0] && !ctx.args[1]){
             if(!ctx.args[0]){return "Please enter a time!";}
             const time = Number(ctx.args[0]);
