@@ -18,7 +18,26 @@ export const sallys = ["https://cdn.discordapp.com/attachments/22518251346578636
     "https://cdn.discordapp.com/attachments/410646817756151808/664847101187981322/image0.jpg",
     "https://cdn.discordapp.com/attachments/668889812333494273/694379108590682182/image3.jpg",
     "https://cdn.discordapp.com/attachments/668889812333494273/694379106430746714/image0.jpg",
-    "https://cdn.discordapp.com/attachments/668889812333494273/691323183688843314/image0.jpg"
+    "https://cdn.discordapp.com/attachments/668889812333494273/691323183688843314/image0.jpg",
+    "https://images-ext-1.discordapp.net/external/LrC2B2JUOQ6OXH9n4355xMvIwk-GTeTCHZv4ayBDN4Q/https/media.discordapp.net/attachments/698588216001036400/726518399823380490/cute.jpg",
+    "https://images-ext-1.discordapp.net/external/gIHEv-uxbrhYcWeJfANYogtXey2dqt_f76Ms6vkysc0/https/media.discordapp.net/attachments/698588216001036400/726518457629147176/cute.jpg",
+    "https://images-ext-2.discordapp.net/external/l5389FrKj-5hKCJ0Oy2ZD7sWtGkSTxW8oFK-1dIE0u4/https/media.discordapp.net/attachments/698588216001036400/726518356659798046/cute.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/727656964703780894/image0.jpg",
+    "https://cdn.discordapp.com/attachments/513025490760630272/727542599426244668/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/727182389511585832/image0.jpg",
+    "https://cdn.discordapp.com/attachments/513025490760630272/726453042353799178/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/725733922457255936/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/724652180648493096/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/722462569649930300/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/721762743840931921/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/720701476787454033/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/719567818282107040/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/717362801840095322/image0.jpg",
+    "https://cdn.discordapp.com/attachments/513025490760630272/717051025378377878/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/713850214175342592/image0.jpg",
+    "https://cdn.discordapp.com/attachments/691695967615057990/707967184646701127/image0.jpg",
+    "https://cdn.discordapp.com/attachments/691695967615057990/707968602405470279/image0.jpg",
+    "https://cdn.discordapp.com/attachments/225182513465786369/704392957759062056/image0.jpg"
 ];
 
 class Sally extends Command{
