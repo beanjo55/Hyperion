@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 /* eslint-disable no-unused-vars */
-import {Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, ClientOptions} from "eris";
+import {Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, ClientOptions, GuildChannel} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
-import {manager as MGM, WelcomeConfig as wc, AutoroleConfig as arc, SocialConfig as sc, RRConfig as rrc, RankConfig as rc, TagConfig as tc, LoggingConfig as lc, StarboardConfig as sbc, ModuleConfig as mc, ModConfig as modc, CommandConfig as cc} from "./Core/DataManagers/MongoGuildManager";
+import {manager as MGM, LogEvent as le, WelcomeConfig as wc, AutoroleConfig as arc, SocialConfig as sc, RRConfig as rrc, RankConfig as rc, TagConfig as tc, LoggingConfig as lc, StarboardConfig as sbc, ModuleConfig as mc, ModConfig as modc, CommandConfig as cc} from "./Core/DataManagers/MongoGuildManager";
 import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
 import {manager as MMLM} from "./Core/DataManagers/MongoModLogManager";
 import {IGuild} from "./MongoDB/Guild";
@@ -35,6 +35,15 @@ export interface IManagers{
     modlog: MMLM; 
 }
 
+export interface IColors{
+    red: number;
+    blue: number;
+    yellow: number;
+    green: number;
+    orange: number;
+    default: number;
+}
+
 export interface ILogger{
     debug(name: string, message: string, subprefix?: string): void;
     error(name: string, message: string, subprefix?: string): void;
@@ -56,17 +65,13 @@ export interface IUtils{
     strictResolver(search: string, members: Collection<Member>): Member | undefined;
     banResolver(search: string, members: Collection<Member>, Hyperion: IHyperion): Promise<Member | User | undefined>;
     resolveRole(input: string, roles: Collection<Role>): Role | undefined;
+    resolveGuildChannel(guild: Guild, msg: Message, search: string): GuildChannel | undefined;
 }
 
 
 export type IHyperion = HyperionC;
 
-export interface LogEvent {
-    enabled: boolean;
-    channel: string;
-    ignoredRoles: Array<string>;
-    ignoredChannels: Array<string>;
-}
+export type LogEvent = le;
 export interface Tag {
     name: string;
     author: string;

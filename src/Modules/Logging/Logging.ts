@@ -3,12 +3,14 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {Module} from "../../Core/Structures/Module";
 // eslint-disable-next-line no-unused-vars
-import {IHyperion, GuildConfig, LogEvent} from "../../types";
+import {IHyperion, GuildConfig} from "../../types";
 // eslint-disable-next-line no-unused-vars
 import { Guild, Member, User, Message, VoiceChannel, Role, GuildChannel, Emoji, TextChannel, Embed } from "eris";
-import {LoggingConfig} from "../../Core/DataManagers/MongoGuildManager";
+import {LoggingConfig, LogEvent} from "../../Core/DataManagers/MongoGuildManager";
 import {default as msc} from "pretty-ms";
 import { IGuild } from "../../MongoDB/Guild";
+import HyperionC from "../../main";
+import {inspect} from "util";
 class Logging extends Module{
     constructor(){
         super({
@@ -36,17 +38,22 @@ class Logging extends Module{
         return input.replace(rx, "\\`\\`\\`");
     }
 
-    async getEventConfig(Hyperion: IHyperion, guildID: string, eventName: string): Promise<LogEvent>{
-        const config: IGuild | null = await Hyperion.managers.guild.getConfig(guildID);
-        if(!config?.logging){return new LoggingConfig({})[eventName];}
-        if(!(config.logging as LoggingConfig)[eventName]){return {enabled: false, channel: "default", ignoredRoles: [], ignoredChannels: []};}
-        return (config.logging as LoggingConfig)[eventName];
+    async updateLogEvent(Hyperion: IHyperion, guild: string, event: string, updateData: Partial<LogEvent>): Promise<void>{
+        const old = await this.getEventConfig(Hyperion, guild, event);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const update: any = {};
+        update[event] = new LogEvent(Hyperion.managers.guild.merge(old, updateData));
+        await Hyperion.managers.guild.updateModuleConfig(guild, this.name, update);
     }
 
-    async getLoggingConfig(Hyperion: IHyperion, guildID: string): Promise<LoggingConfig>{
-        const config: IGuild | null = await Hyperion.managers.guild.getConfig(guildID);
-        if(!config?.logging){return new LoggingConfig({});}
-        return (config.logging as LoggingConfig);
+    async getEventConfig(Hyperion: IHyperion, guild: string, eventName: string): Promise<LogEvent>{
+        const data = await this.getLoggingConfig(Hyperion, guild);
+        if(!data[eventName]){return new LogEvent({});}
+        return new LogEvent(data[eventName]);
+    }
+
+    async getLoggingConfig(Hyperion: IHyperion, guild: string): Promise<LoggingConfig>{
+        return await Hyperion.managers.guild.getModuleConfig<LoggingConfig>(guild, this.name);
     }
 
     async preCheck(Hyperion: IHyperion, guild: Guild, eventName: string, roles?: Array<string>, channel?: string): Promise<boolean>{
@@ -92,7 +99,7 @@ class Logging extends Module{
         const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Member Join",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.green,
                 footer: {
                     text: `ID: ${member.id}`
                 },
@@ -127,7 +134,7 @@ class Logging extends Module{
         const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Member Leave",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.red,
                 footer: {
                     text: `ID: ${member.id}`
                 },
@@ -166,7 +173,7 @@ class Logging extends Module{
         const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Member Banned",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.red,
                 footer: {
                     text: `ID: ${user.id}`
                 },
@@ -197,7 +204,7 @@ class Logging extends Module{
         const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Member Unbanned",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.blue,
                 footer: {
                     text: `ID: ${user.id}`
                 },
@@ -226,7 +233,7 @@ class Logging extends Module{
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
         if(msg.author && msg.author.bot){return;}
         const guild = msg.channel.guild;
-        if(!await this.preCheck(Hyperion, guild, "messageDelete", msg.channel.id, msg?.member?.roles)){return;}
+        if(!await this.preCheck(Hyperion, guild, "messageDelete", msg?.member?.roles, msg.channel.id)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "messageDelete");
         if(!channelObj){return;}
         const field: Array<{name: string; value: string; inline: boolean}> = [];
@@ -237,7 +244,7 @@ class Logging extends Module{
                 footer: {
                     text: `Message ID: ${msg.id}`
                 },
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.red,
                 description: `Message sent in ${msg.channel.mention} was deleted`,
                 fields: field
             }
@@ -328,7 +335,7 @@ class Logging extends Module{
         if(oldMessage?.embeds){
             if(!oldMessage.embeds[0] && msg.embeds[0]){return;}
         }
-        if(!await this.preCheck(Hyperion, guild, "messageEdit", msg.channel.id, msg?.member?.roles)){return;}
+        if(!await this.preCheck(Hyperion, guild, "messageEdit", msg?.member?.roles, msg.channel.id)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "messageEdit");
         if(!channelObj){return;}
         const field: Array<{name: string; value: string; inline: boolean}> = [];
@@ -339,7 +346,7 @@ class Logging extends Module{
                 footer: {
                     text: `Message ID: ${msg.id}`
                 },
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.orange,
                 description: `Message sent in ${msg.channel.mention} was edited`,
                 fields: field
             }
@@ -405,13 +412,13 @@ class Logging extends Module{
         const msg = messages[0];
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
         const guild = msg.channel.guild;
-        if(!await this.preCheck(Hyperion, guild, "bulkDelete", msg.channel.id, msg?.member?.roles)){return;}
+        if(!await this.preCheck(Hyperion, guild, "bulkDelete", msg?.member?.roles, msg.channel.id)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "bulkDelete");
         if(!channelObj){return;}
 
         const data = {
             embed: {
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.red,
                 timestamp: new Date,
                 title: "Bulk Delete Log",
                 description: `Bulk Delete in ${msg.channel.mention}, ${messages.length} messages deleted`
@@ -515,8 +522,112 @@ class Logging extends Module{
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async guildMemberRolesUpdate(Hyperion: IHyperion, guild: Guild, member: Member, oldMember: any){
-
+        console.log(inspect(oldMember));
+        const addedRoles: Array<string> = [];
+        const removedRoles: Array<string> = [];
+        member.roles.forEach(r => {
+            if(!oldMember.roles.includes(r)){addedRoles.push(r);}
+        });
+        oldMember.roles.forEach((r: string) => {
+            if(!member.roles.includes(r)){removedRoles.push(r);}
+        });
+        if(addedRoles.length !== 0 && removedRoles.length !== 0){return this.memberRoleUpdate(Hyperion, guild, member, addedRoles, removedRoles);}
+        if(addedRoles.length !== 0 && removedRoles.length === 0){return this.memberRoleAdd(Hyperion, guild, member, addedRoles);}
+        if(addedRoles.length === 0 && removedRoles.length !== 0){return this.memberRoleRemove(Hyperion, guild, member, removedRoles);}
     }
+    
+    async memberRoleAdd(Hyperion: IHyperion, guild: Guild, member: Member, roles: Array<string>): Promise<void>{
+        if(!await this.preCheck(Hyperion, guild, "memberRoleAdd", roles, undefined)){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "memberRoleAdd");
+        if(!channelObj){return;}
+        const sorted = Hyperion.utils.sortRoles(roles, guild.roles).map(r => r.id);
+
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        const data: {embed: Partial<Embed>} = {
+            embed: {
+                title: "Member Role Add",
+                color: Hyperion.colors.blue,
+                footer: {
+                    text: `ID: ${member.id}`
+                },
+                timestamp: new Date,
+                description: `**Roles Added**\n${sorted.map(r => `<@&${r}>`).join("\n")}`
+            }
+        };
+
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: member.avatarURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for member role add, ${err}`, "Logging");
+        }
+    }
+
+    async memberRoleRemove(Hyperion: IHyperion, guild: Guild, member: Member, roles: Array<string>): Promise<void>{
+        if(!await this.preCheck(Hyperion, guild, "memberRoleRemove", roles, undefined)){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "memberRoleRemove");
+        if(!channelObj){return;}
+        const sorted = Hyperion.utils.sortRoles(roles, guild.roles).map(r => r.id);
+
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        const data: {embed: Partial<Embed>} = {
+            embed: {
+                title: "Member Role Remove",
+                color: Hyperion.colors.blue,
+                footer: {
+                    text: `ID: ${member.id}`
+                },
+                timestamp: new Date,
+                description: `**Roles Removed**\n${sorted.map(r => `<@&${r}>`).join("\n")}`
+            }
+        };
+
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: member.avatarURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for member role remove, ${err}`, "Logging");
+        }
+    }
+
+    async memberRoleUpdate(Hyperion: IHyperion, guild: Guild, member: Member, rolesAdded: Array<string>, rolesRemoved: Array<string>): Promise<void>{
+        if(!await this.preCheck(Hyperion, guild, "memberRoleUpdate", rolesAdded, undefined)){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "memberRoleUpdate");
+        if(!channelObj){return;}
+        const sortedAdd = Hyperion.utils.sortRoles(rolesAdded, guild.roles).map(r => r.id);
+        const sortedRemove = Hyperion.utils.sortRoles(rolesRemoved, guild.roles).map(r => r.id);
+
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        const data: {embed: Partial<Embed>} = {
+            embed: {
+                title: "Member Role Update",
+                color: Hyperion.colors.blue,
+                footer: {
+                    text: `ID: ${member.id}`
+                },
+                timestamp: new Date,
+                description: `**Roles Added**\n${sortedAdd.map(r => `<@&${r}>`).join("\n")}\n**Roles Removed**\n${sortedRemove.map(r => `<@&${r}>`).join("\n")}`
+            }
+        };
+
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: member.avatarURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for member role remove, ${err}`, "Logging");
+        }
+    }
+
+    
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async guildMemberNickUpdate(Hyperion: IHyperion, guild: Guild, member: Member, oldMember: any): Promise<void | undefined>{
@@ -593,4 +704,5 @@ class Logging extends Module{
         }
     }
 }
+
 export default Logging;

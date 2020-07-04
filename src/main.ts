@@ -11,7 +11,7 @@ import {default as Redis} from "ioredis";
 import {default as axios} from "axios";
 import {default as mongoose} from "mongoose";
 import {inspect} from "util";
-import {CoreOptions, IManagers, GlobalConfig, IUtils, ILogger} from "./types";
+import {CoreOptions, IManagers, GlobalConfig, IUtils, ILogger, IColors} from "./types";
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
 import {default as guilduser} from "./MongoDB/Guilduser";
@@ -34,6 +34,7 @@ import {resolveCategory} from "./Core/Utils/Channels";
 import {BaseClusterWorker, Setup} from "./Core/Cluster/BaseClusterWorker";
 import * as sentry from "@sentry/node";
 import {default as embedModel} from "./MongoDB/Embeds";
+import {resolveGuildChannel} from "./Core/Utils/Channels";
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -77,7 +78,17 @@ const utils: IUtils = {
     input2boolean: input2boolean,
     banResolver: banResolver,
     strictResolver: strictResolver,
-    resolveRole: resolveRole
+    resolveRole: resolveRole,
+    resolveGuildChannel: resolveGuildChannel
+};
+
+const colors: IColors = {
+    red: 15541248, 
+    yellow: 16771072, 
+    green: 65386, 
+    orange: 15234850, 
+    blue: 30719,
+    default: config.coreOptions.defaultColor
 };
 
 
@@ -105,6 +116,7 @@ export default class HyperionC extends BaseClusterWorker{
     utils: IUtils;
     readonly circleCIToken: string;
     redis: Redis.Redis;
+    colors: IColors;
     private listTokens: {[key: string]: string};
     constructor(setup: Setup, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions,){
         super(setup);
@@ -133,7 +145,7 @@ export default class HyperionC extends BaseClusterWorker{
         this.utils = utils;
         this.redis = new Redis({keyPrefix: `${this.build}:`});
         this.listTokens = listTokens;
-
+        this.colors = colors;
 
     }
 

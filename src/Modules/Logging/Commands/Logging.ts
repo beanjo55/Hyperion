@@ -4,6 +4,7 @@ import {ICommandContext, IHyperion} from "../../../types";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { GuildChannel, Embed } from "eris";
 import { LoggingConfig } from "../../../Core/DataManagers/MongoGuildManager";
+import {default as LoggingModule} from "../Logging";
 
 const eventNames: Array<string> = [
     "banAdd",
@@ -13,9 +14,12 @@ const eventNames: Array<string> = [
     "messageDelete",
     "messageEdit",
     "bulkDelete",
-    "memberNicknameChange"
+    "memberNicknameChange",
+    "memberRoleAdd",
+    "memberRoleRemove",
+    "memberRoleUpdate"
 ];
-const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar", "enable", "disable"];
+const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar"];
 
 
 class Logging extends Command{
@@ -31,12 +35,13 @@ class Logging extends Command{
         });
     }
 
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
+    async execute(ctx: ICommandContext<LoggingModule>, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
         if(!ctx.args[0]){
             return await this.showOverallSettings(ctx, Hyperion);
         }
+        const LowerCaseEvents = eventNames.map(e => e.toLowerCase());
         
-        if(!settingNamesL.includes(ctx.args[0].toLowerCase())){return "Invalid setting provided.";}
+        if(!(settingNamesL.includes(ctx.args[0].toLowerCase()) || LowerCaseEvents.includes(ctx.args[0].toLowerCase()))){return "Invalid setting or event provided.";}
         if(ctx.args[0].toLowerCase() === "logchannel"){
             if(!ctx.args[1]){return "Please specify a channel";}
             const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
@@ -131,6 +136,84 @@ class Logging extends Command{
                 return "Something went wrong.";
             }
             return "The event was disabled.";
+        }
+
+        if(LowerCaseEvents.includes(ctx.args[0].toLowerCase()) && !ctx.args[1]){
+            const index = LowerCaseEvents.indexOf(ctx.args[0].toLowerCase());
+            const eventConfig = await ctx.module.getEventConfig(Hyperion, ctx.guild.id, eventNames[index]);
+            const data = {
+                embed: {
+                    color: Hyperion.colors.default,
+                    timestamp: new Date,
+                    title: `Settings for ${eventNames[index]}`,
+                    description: `**Enabled:** ${eventConfig.enabled}\n**Channel:** ${eventConfig.channel}\n**Ignored Channels:** ${eventConfig.ignoredChannels.length !== 0 ? eventConfig.ignoredChannels.map(c => `<#${c}>`).join(", ") : "None"}\n**Ignored Roles:** ${eventConfig.ignoredRoles.length !== 0 ? eventConfig.ignoredRoles.map(c => `<@&${c}>`).join(", ") : "None"}`
+                }
+            };
+            return data;
+        }
+        if(LowerCaseEvents.includes(ctx.args[0].toLowerCase()) && ctx.args[1]){
+            const index = LowerCaseEvents.indexOf(ctx.args[0].toLowerCase());
+            const eventConfig = await ctx.module.getEventConfig(Hyperion, ctx.guild.id, eventNames[index]);
+            if(ctx.args[1].toLowerCase() === "enable"){
+                if(eventConfig.enabled === true){return "That event is already enabled";}
+                try{
+                    await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, eventNames[index], {enabled: true});
+                    return `Enabled ${eventNames[index]}`;
+                }catch(err){
+                    return err.message;
+                }
+            }
+            if(ctx.args[1].toLowerCase() === "disable"){
+                if(eventConfig.enabled === false){return "That event is already disabled";}
+                try{
+                    await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, eventNames[index], {enabled: false});
+                    return `Disabled ${eventNames[index]}`;
+                }catch(err){
+                    return err.message;
+                }
+            }
+            if(ctx.args[1].toLowerCase() === "reset"){
+                try{
+                    await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, eventNames[index], {enabled: false, channel: "default", ignoredRoles: [], ignoredChannels: []});
+                    return `Reset settings for ${eventNames[index]}`;
+                }catch(err){
+                    return err.message;
+                }
+            }
+            if(ctx.args[1].toLowerCase() === "ignoredchannels"){
+                if(!ctx.args[2]){return "Please specify a channel";}
+                const channel = Hyperion.utils.resolveGuildChannel(ctx.guild, ctx.msg, ctx.args[2])?.id;
+                if(!channel){return "I couldnt find that channel";}
+                if(eventConfig.ignoredChannels.includes(channel)){
+                    const temp = eventConfig.ignoredChannels.indexOf(channel);
+                    eventConfig.ignoredChannels = eventConfig.ignoredChannels.splice(temp);
+                }else{
+                    eventConfig.ignoredChannels.push(channel);
+                }
+                try{
+                    await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, eventNames[index], {ignoredChannels: eventConfig.ignoredChannels});
+                    return `Updated ignored channels for ${eventNames[index]}`;
+                }catch(err){
+                    return err.message;
+                }
+            }
+            if(ctx.args[1].toLowerCase() === "ignoredroles"){
+                if(!ctx.args[2]){return "Please specify a role";}
+                const role = Hyperion.utils.resolveRole(ctx.args[2], ctx.guild.roles)?.id;
+                if(!role){return "I couldnt find that role";}
+                if(eventConfig.ignoredRoles.includes(role)){
+                    const temp = eventConfig.ignoredRoles.indexOf(role);
+                    eventConfig.ignoredRoles = eventConfig.ignoredRoles.splice(temp);
+                }else{
+                    eventConfig.ignoredRoles.push(role);
+                }
+                try{
+                    await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, eventNames[index], {ignoredRoles: eventConfig.ignoredRoles});
+                    return `Updated ignored roles for ${eventNames[index]}`;
+                }catch(err){
+                    return err.message;
+                }
+            }
         }
         return "this should never be reached.";
     }

@@ -107,8 +107,21 @@ export const defaultLog: Types.LogEvent = {
     enabled: false,
     channel: "default",
     ignoredRoles: [],
-    ignoredChannels: []
+    ignoredChannels: [],
 };
+
+export class LogEvent {
+    enabled: boolean;
+    channel: string;
+    ignoredRoles: Array<string>;
+    ignoredChannels: Array<string>;
+    constructor(data: Partial<LogEvent>){
+        this.enabled = data.enabled ?? false;
+        this.channel = data.channel ?? "default";
+        this.ignoredRoles = data.ignoredRoles ?? [];
+        this.ignoredChannels = data.ignoredChannels ?? [];
+    }
+}
 export class LoggingConfig{
     logChannel: string;
     ghostReactTime: number;
@@ -131,6 +144,7 @@ export class LoggingConfig{
     channelUpdate: Types.LogEvent;
     channelDelete: Types.LogEvent;
     memberRoleAdd: Types.LogEvent;
+    memberRoleUpdate: Types.LogEvent;
     memberRoleRemove: Types.LogEvent;
     memberNicknameChange: Types.LogEvent;
     voiceJoin: Types.LogEvent;
@@ -165,6 +179,7 @@ export class LoggingConfig{
         this.channelDelete = data.channelDelete ?? defaultLog;
         this.memberRoleAdd = data.memberRoleAdd ?? defaultLog;
         this.memberRoleRemove = data.memberRoleRemove ?? defaultLog;
+        this.memberRoleUpdate = data.memberRoleUpdate?? defaultLog;
         this.memberNicknameChange = data.memberNicknameChange ?? defaultLog;
         this.voiceJoin = data.voiceJoin ?? defaultLog;
         this.voiceSwitch = data.voiceSwitch ?? defaultLog;
@@ -274,36 +289,36 @@ class MongoGuildManager{
         this.model = model;
     }
 
-    async createConfig(guildID: string): Promise<IGuildDoc>{
-        return await this.model.create({guild: guildID});
+    async createConfig(guild: string): Promise<IGuildDoc>{
+        return await this.model.create({guild: guild});
     }
 
-    async getConfig(guildID: string): Promise<IGuildDoc | IGuild | null>{
-        if(await this.model.exists({guild: guildID})){
-            return await this.model.findOne({guild: guildID}).lean<IGuild>().exec();
+    async getConfig(guild: string): Promise<IGuildDoc | IGuild | null>{
+        if(await this.model.exists({guild: guild})){
+            return await this.model.findOne({guild: guild}).lean<IGuild>().exec();
         }else{
-            return await this.createConfig(guildID);
+            return await this.createConfig(guild);
         }
     }
 
-    async exists(guildID: string): Promise<boolean>{
-        return await this.model.exists({guild: guildID});
+    async exists(guild: string): Promise<boolean>{
+        return await this.model.exists({guild: guild});
     }
 
-    async getPrefix(guildID: string): Promise<string>{
-        const doc: IGuild  | null = await this.getConfig(guildID);
+    async getPrefix(guild: string): Promise<string>{
+        const doc: IGuild  | null = await this.getConfig(guild);
         if(!doc){return "%";}
         if(!doc.prefix){return "%";}
         if(doc.prefix === ""){return "%";}
         return doc.prefix;
     }
 
-    async setPrefix(guildID: string, newPrefix: string): Promise<Types.IMongoUpdateResult>{
-        return await this.model.updateOne({guild: guildID}, {prefix: newPrefix});
+    async setPrefix(guild: string, newPrefix: string): Promise<Types.IMongoUpdateResult>{
+        return await this.model.updateOne({guild: guild}, {prefix: newPrefix});
     }
 
-    async getMods(guildID: string): Promise<Array<string>>{
-        const guildConfig: IGuild  | null = await this.getConfig(guildID);
+    async getMods(guild: string): Promise<Array<string>>{
+        const guildConfig: IGuild  | null = await this.getConfig(guild);
         if(!guildConfig?.mod?.modRoles){return [];}
         const roles = (guildConfig.mod as Types.ModConfig)?.modRoles;
         if(!roles){return [];}
@@ -327,8 +342,8 @@ class MongoGuildManager{
         return new CommandConfig(data);
     }
 
-    async updateModuleStates(guildID: string, newMod: string, newState: boolean, modules: Collection<Module>): Promise<Types.IMongoUpdateResult | undefined>{
-        const guilddata = await this.model.findOne({guild: guildID}, "modules").lean().exec();
+    async updateModuleStates(guild: string, newMod: string, newState: boolean, modules: Collection<Module>): Promise<Types.IMongoUpdateResult | undefined>{
+        const guilddata = await this.model.findOne({guild: guild}, "modules").lean().exec();
         if(!guilddata?.modules){return;}
         const validated = this.validateModuleState(newState, newMod, modules);
         if(validated === false){return;}
@@ -336,27 +351,27 @@ class MongoGuildManager{
         const temp: any = {};
         temp[newMod] = validated;
         const merged = this.merge(guilddata.modules, temp);
-        return await this.model.updateOne({guild: guildID}, {modules: merged}).exec();
+        return await this.model.updateOne({guild: guild}, {modules: merged}).exec();
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async updateCommands(guildID: string, newCmd: string, data: any, commands: Collection<Command>): Promise<string | Types.IMongoUpdateResult>{
-        const guilddata = await this.model.findOne({guild: guildID}, "commands").lean().exec();
-        if(!guilddata?.commands){return "An error occured";}
+    async updateCommands(guild: string, newCmd: string, data: any, commands: Collection<Command>): Promise<string | Types.IMongoUpdateResult>{
+        const guilddata = await this.model.findOne({guild: guild}, "commands").lean().exec();
+        if(!guilddata?.commands){throw new Error("An error occured");}
         const validated = this.validateCommandState(this.merge(guilddata.commands[newCmd] ?? {}, data), newCmd, commands);
-        if(typeof(validated) === "string"){return validated;}
+        if(typeof(validated) === "string"){throw new Error(validated);}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const temp: any = {};
         temp[newCmd] = validated;
         const merged = this.merge(guilddata.commands, temp);
-        return await this.model.updateOne({guild: guildID}, {commands: merged}).exec();
+        return await this.model.updateOne({guild: guild}, {commands: merged}).exec();
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async updateModuleConfig(guildID: string, mod: string, data: any): Promise<string | Types.IMongoUpdateResult>{
+    async updateModuleConfig(guild: string, mod: string, data: any): Promise<string | Types.IMongoUpdateResult>{
         if(!Object.getOwnPropertyNames(nameConfigMap).includes(mod)){
             return "No matching module found";
         }
-        let guilddata = await this.model.findOne({guild: guildID}, mod).lean().exec();
-        if(!guilddata){guilddata = await this.createConfig(guildID);}
+        let guilddata = await this.model.findOne({guild: guild}, mod).lean().exec();
+        if(!guilddata){guilddata = await this.createConfig(guild);}
         if(!guilddata?.[mod]){return "An error occured";}
         const merged = this.merge(guilddata?.[mod], data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -364,12 +379,12 @@ class MongoGuildManager{
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const update: any = {};
         update[mod] = validated;
-        return await this.model.updateOne({guild: guildID}, update).exec();
+        return await this.model.updateOne({guild: guild}, update).exec();
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async update(guildID: string, update: any): Promise<Types.IMongoUpdateResult>{
-        return await this.model.updateOne({guild: guildID}, update).exec();
+    async update(guild: string, update: any): Promise<Types.IMongoUpdateResult>{
+        return await this.model.updateOne({guild: guild}, update).exec();
     }
 
     async getCommandState(guild: string, command: string): Promise<CommandConfig>{
