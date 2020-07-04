@@ -38,3 +38,14 @@ export function resolveCategory(guild: Guild, msg: Message,  search: string): Ca
     if(channel && channel.type !== 4){return;}
     return channel;
 }
+
+export function resolveGuildChannel(guild: Guild, msg: Message, search: string): GuildChannel | undefined{
+    let channel = guild.channels.get(search);
+    if(!channel && msg?.channelMentions && msg.channelMentions[0]){
+        channel = guild.channels.get(msg.channelMentions[0]);
+    }
+    if(!channel){
+        channel = guild.channels.find((C: GuildChannel) => C.name.toLowerCase().startsWith(search.toLowerCase()));
+    }
+    return channel;
+}
