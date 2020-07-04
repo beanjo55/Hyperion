@@ -29,7 +29,8 @@ async function start(): Promise<void>{
         path: __dirname + "/main.js",
         token: config.token,
         clusters: 1,
-        clientOptions: config.clientOptions
+        clientOptions: config.erisOptions,
+        whatToLog: {blacklist: ["stats_update"]}
     };
     const Admiral = new Fleet(options);
     if (isMaster) {
