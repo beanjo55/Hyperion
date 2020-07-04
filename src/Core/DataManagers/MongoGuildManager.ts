@@ -13,9 +13,9 @@ export class CommandConfig{
     disabledRoles: Array<string>;
     allowedChannels: Array<string>;
     disabledChannels: Array<string>;
-    subcommands?: Array<Types.CommandConfig>;
+    subcommands?: Array<CommandConfig>;
     name?: string;
-    constructor(data: Partial<Types.CommandConfig>){
+    constructor(data: Partial<CommandConfig>){
         this.enabled = data.enabled ?? true;
 
         this.allowedRoles = data.allowedRoles ?? [];
@@ -35,7 +35,7 @@ export class CommandConfig{
 
 export class ModuleConfig{
     enabled: boolean;
-    constructor(data: Types.ModuleConfig, defState: boolean){
+    constructor(data: ModuleConfig, defState: boolean){
         this.enabled = data.enabled ?? defState;
     }
 }
@@ -59,7 +59,7 @@ export class ModConfig{
     warnLogChannel: string;
     muteLogChannel: string;
     kickLogChannel: string;
-    constructor(data: Partial<Types.ModConfig>){
+    constructor(data: Partial<ModConfig>){
         this.modRoles = data.modRoles ?? [];
         this.protectedRoles = data.protectedRoles ?? [];
 
@@ -92,7 +92,7 @@ export class StarboardConfig{
     selfStar: boolean;
     customStar: string;
     starCount: number;
-    constructor(data: Partial<Types.StarboardConfig>){
+    constructor(data: Partial<StarboardConfig>){
         this.starChannel = data.starChannel ?? "";
         this.ignoredChannels = data.ignoredChannels ?? [];
         this.ignoredRoles = data.ignoredRoles ?? [];
@@ -130,32 +130,32 @@ export class LoggingConfig{
     specifyChannels: boolean;
     newAccountAge: number;
     showAvatar: boolean;
-    banAdd: Types.LogEvent;
-    banRemove: Types.LogEvent;
-    memberAdd: Types.LogEvent;
-    memberRemove: Types.LogEvent;
-    messageDelete: Types.LogEvent;
-    messageEdit: Types.LogEvent;
-    bulkDelete: Types.LogEvent;
-    roleAdd: Types.LogEvent;
-    roleUpdate: Types.LogEvent;
-    roleDelete: Types.LogEvent;
-    channelAdd: Types.LogEvent;
-    channelUpdate: Types.LogEvent;
-    channelDelete: Types.LogEvent;
-    memberRoleAdd: Types.LogEvent;
-    memberRoleUpdate: Types.LogEvent;
-    memberRoleRemove: Types.LogEvent;
-    memberNicknameChange: Types.LogEvent;
-    voiceJoin: Types.LogEvent;
-    voiceSwitch: Types.LogEvent;
-    voiceLeave: Types.LogEvent;
-    guildUpdate: Types.LogEvent;
-    webhookUpdate: Types.LogEvent;
-    ghostReact: Types.LogEvent;
+    banAdd: LogEvent;
+    banRemove: LogEvent;
+    memberAdd: LogEvent;
+    memberRemove: LogEvent;
+    messageDelete: LogEvent;
+    messageEdit: LogEvent;
+    bulkDelete: LogEvent;
+    roleAdd: LogEvent;
+    roleUpdate: LogEvent;
+    roleDelete: LogEvent;
+    channelAdd: LogEvent;
+    channelUpdate: LogEvent;
+    channelDelete: LogEvent;
+    memberRoleAdd: LogEvent;
+    memberRoleUpdate: LogEvent;
+    memberRoleRemove: LogEvent;
+    memberNicknameChange: LogEvent;
+    voiceJoin: LogEvent;
+    voiceSwitch: LogEvent;
+    voiceLeave: LogEvent;
+    guildUpdate: LogEvent;
+    webhookUpdate: LogEvent;
+    ghostReact: LogEvent;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any
-    constructor(data: Partial<Types.LoggingConfig>){
+    constructor(data: Partial<LoggingConfig>){
         this.logChannel = data.logChannel ?? "";
         this.ghostReactTime = data.ghostReactTime ?? 3;
         this.ignoredChannels = data.ignoredChannels ?? [];
@@ -195,7 +195,20 @@ export class WelcomeConfig{
     content: string | Embed;
     channel?: string;
     dm: boolean;
-    constructor(data: Partial<Types.WelcomeConfig>){
+    constructor(data: Partial<WelcomeConfig>){
+        this.content = data.content ?? "";
+        this.channel = data.channel ?? "";
+        this.messageType = data.messageType ?? "text";
+        this.dm = data.dm ?? false;
+    }
+}
+
+export class GoodbyeConfig{
+    messageType: string;
+    content: string | Embed;
+    channel?: string;
+    dm: boolean;
+    constructor(data: Partial<GoodbyeConfig>){
         this.content = data.content ?? "";
         this.channel = data.channel ?? "";
         this.messageType = data.messageType ?? "text";
@@ -208,7 +221,7 @@ export class TagConfig{
     limitEdit: boolean;
     delete: boolean;
     tags: Array<Types.Tag>;
-    constructor(data: Partial<Types.TagConfig>){
+    constructor(data: Partial<TagConfig>){
         this.allowedEditRoles = data.allowedEditRoles ?? [];
         this.limitEdit = data.limitEdit ?? false;
         this.delete = data.delete ?? false;
@@ -223,7 +236,7 @@ export class RankConfig{
     ranks: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rankGroups: any;
-    constructor(data: Partial<Types.RankConfig>){
+    constructor(data: Partial<RankConfig>){
         this.limitOne = data.limitOne ?? false;
         this.limitOnePerGroup = data.limitOnePerGroup ?? false;
 
@@ -239,7 +252,7 @@ export class RRConfig{
     rr: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rrGroups: any;
-    constructor(data: Partial<Types.RRConfig>){
+    constructor(data: Partial<RRConfig>){
         this.limitOne = data.limitOne ?? false;
         this.limitOnePerGroup = data.limitOnePerGroup ?? false;
 
@@ -252,7 +265,7 @@ export class AutoroleConfig{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     autoroles: any;
     removePrevious: boolean;
-    constructor(data: Partial<Types.AutoroleConfig>){
+    constructor(data: Partial<AutoroleConfig>){
         this.autoroles = data.autoroles ?? {};
         this.removePrevious = data.removePrevious ?? false;
     }
@@ -261,7 +274,7 @@ export class AutoroleConfig{
 export class SocialConfig{
     ignoredChannels: Array<string>;
     levelupChannel: string;
-    constructor(data: Partial<Types.SocialConfig>){
+    constructor(data: Partial<SocialConfig>){
         this.ignoredChannels = data.ignoredChannels ?? [];
         this.levelupChannel = data.levelupChannel ?? "";
     }
@@ -280,7 +293,8 @@ const nameConfigMap: {[key: string]: any} = {
     rank: RankConfig,
     rr: RRConfig,
     social: SocialConfig,
-    autorole: AutoroleConfig
+    autorole: AutoroleConfig,
+    goodbye: GoodbyeConfig
 };
 
 class MongoGuildManager{
@@ -368,11 +382,11 @@ class MongoGuildManager{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async updateModuleConfig(guild: string, mod: string, data: any): Promise<string | Types.IMongoUpdateResult>{
         if(!Object.getOwnPropertyNames(nameConfigMap).includes(mod)){
-            return "No matching module found";
+            throw new Error("No matching module found");
         }
         let guilddata = await this.model.findOne({guild: guild}, mod).lean().exec();
         if(!guilddata){guilddata = await this.createConfig(guild);}
-        if(!guilddata?.[mod]){return "An error occured";}
+        if(!guilddata?.[mod]){guilddata[mod] = {};}
         const merged = this.merge(guilddata?.[mod], data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const validated: any = new nameConfigMap[mod](merged);

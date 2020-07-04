@@ -62,6 +62,11 @@ const guildconf = new Schema({
         default: new confs.WelcomeConfig({})
     },
 
+    goodbye: {
+        type: Object,
+        default: new confs.GoodbyeConfig({})
+    },
+
     mod: {
         type: Object,
         default: new confs.ModConfig({})
@@ -127,6 +132,7 @@ export interface IGuild{
     starboard: Types.StarboardConfig;
     logging: Types.LoggingConfig;
     welcome: Types.WelcomeConfig;
+    goodbye: Types.GoodbyeConfig;
     mod: Types.ModConfig;
     commands: {[key: string]: Types.CommandConfig};
     ignoredChannels: Array<string>;

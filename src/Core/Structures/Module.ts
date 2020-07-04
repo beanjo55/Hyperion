@@ -28,7 +28,7 @@ export class Module{
     [key: string]: any;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(data: any){
+    constructor(data: Partial<Module>){
         this.name = data.name ?? "module";
         this.friendlyName = data.friendlyName ?? this.name;
         this.id = this.name;
