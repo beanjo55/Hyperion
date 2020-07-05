@@ -98,46 +98,6 @@ class Logging extends Command{
             return "Updated Show Avatars Setting";
         }
 
-        if(ctx.args[0].toLowerCase() === "enable"){
-            if(!ctx.args[1]){return "Please specify an event.";}
-            const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
-            if(!eventNames.map((e: string) => e.toLowerCase()).includes(ctx.args[1].toLowerCase())){return "I dont know what event that is";}
-            const name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
-            if(config[name]?.enabled === true){
-                return "That event is already enabled.";
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const data: any = {};
-            data[name] = {enabled: true, channel: "default"};
-            try{
-                await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", data);
-            }catch(err){
-                Hyperion.logger.warn("Hyperion", "Logging Config", `Failed to enable ${name} on ${ctx.guild.id}, error: ${err}`);
-                return "Something went wrong";
-            }
-            return "The event was enabled";
-        }
-
-        if(ctx.args[0].toLowerCase() === "disable"){
-            if(!ctx.args[1]){return "Please specify an event.";}
-            const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
-            if(!eventNames.map((e: string) => e.toLowerCase()).includes(ctx.args[1].toLowerCase())){return "I dont know what event that is";}
-            const name = eventNames[eventNames.map((e: string) => e.toLowerCase()).indexOf(ctx.args[1].toLowerCase())];
-            if(config[name]?.enabled === false){
-                return "That event is already disabled.";
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const data: any = {};
-            data[name] = {enabled: false, channel: "default"};
-            try{
-                await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", data);
-            }catch(err){
-                Hyperion.logger.warn("Hyperion", "Logging Config", `Failed to disable ${name} on ${ctx.guild.id}, error: ${err}`);
-                return "Something went wrong.";
-            }
-            return "The event was disabled.";
-        }
-
         if(LowerCaseEvents.includes(ctx.args[0].toLowerCase()) && !ctx.args[1]){
             const index = LowerCaseEvents.indexOf(ctx.args[0].toLowerCase());
             const eventConfig = await ctx.module.getEventConfig(Hyperion, ctx.guild.id, eventNames[index]);
@@ -193,6 +153,25 @@ class Logging extends Command{
                 try{
                     await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, eventNames[index], {ignoredChannels: eventConfig.ignoredChannels});
                     return `Updated ignored channels for ${eventNames[index]}`;
+                }catch(err){
+                    return err.message;
+                }
+            }
+            if(ctx.args[1].toLowerCase() === "channel"){
+                if(!ctx.args[2]){return "Please specify a channel";}
+                if(ctx.args[2].toLowerCase() === "default"){
+                    try{
+                        await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, eventNames[index], {channel: "default"});
+                        return `Set ${eventNames[index]} to use the default log channel`;
+                    }catch(err){
+                        return err.message;
+                    }
+                }
+                const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[2])?.id;
+                if(!channel){return "I couldnt find that channel";}
+                try{
+                    await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, eventNames[index], {channel: channel});
+                    return `Updated channel for ${eventNames[index]}`;
                 }catch(err){
                     return err.message;
                 }
