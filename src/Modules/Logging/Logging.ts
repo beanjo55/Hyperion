@@ -522,7 +522,6 @@ class Logging extends Module{
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async guildMemberRolesUpdate(Hyperion: IHyperion, guild: Guild, member: Member, oldMember: any){
-        console.log(inspect(oldMember));
         const addedRoles: Array<string> = [];
         const removedRoles: Array<string> = [];
         member.roles.forEach(r => {
