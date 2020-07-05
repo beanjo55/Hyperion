@@ -128,7 +128,7 @@ class Logging extends Module{
         if(!await this.preCheck(Hyperion, guild, "memberRemove", undefined, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberRemove");
         if(!channelObj){return;}
-        if(!(member instanceOf Member)){member = (await Hyperion.client.getRESTUser(member.id)) as unknown as Member;}
+        if(member.bot === undefined){member = (await Hyperion.client.getRESTUser(member.id)) as unknown as Member;}
         if(await Hyperion.redis.get(`${guild.id}:${member.id}:banAdd`) !== null){return;}
         const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
 
