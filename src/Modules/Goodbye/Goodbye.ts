@@ -28,7 +28,7 @@ class Goodbye extends Module{
     }
 
     async guildMemberRemove(Hyperion: IHyperion, guild: Guild, member: Member): Promise<void>{
-        if(member.bot === undefined){member = (await Hyperion.client.getRESTUser(member.id)) as Member;}
+        if(member.bot === undefined){member = (await Hyperion.client.getRESTUser(member.id)) as unknown as Member;}
         if(member.bot){return;}
         if(!await this.checkGuildEnabled(Hyperion, guild.id)){return;}
         const config = await this.getConfig(Hyperion, guild.id);
