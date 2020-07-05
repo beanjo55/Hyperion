@@ -40,7 +40,7 @@ class CommandHandler extends Module{
     logLevel: HandlerLogLevel;
     constructor(data: IHandlerConfig){
         super({
-            name: "Commandandler",
+            name: "Commandhandler",
             private: true,
             alwaysEnabled: true,
             hasCommands: false,
