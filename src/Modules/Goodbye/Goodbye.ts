@@ -24,10 +24,12 @@ class Goodbye extends Module{
         const rx2 = new RegExp("{username}", "gmi");
         const rx3 = new RegExp("{usertag}", "gmi");
         const rx4 = new RegExp("{membercount}", "gmi");
-        return input.replace(rx1, member.username).replace(rx2, member.username).replace(rx3, `${member.username}#${member.discriminator}`).replace(rx4, guild.members.size.toString());
+        return input.replace(rx1, member.username).replace(rx2, member.username).replace(rx3, `${member.username}#${member.discriminator}`).replace(rx4, guild.memberCount.toString());
     }
 
     async guildMemberRemove(Hyperion: IHyperion, guild: Guild, member: Member): Promise<void>{
+        if(member.bot === undefined){member = await Hyperion.client.getRESTUser(member.id) as Member;}
+        if(member.bot){return;}
         if(!await this.checkGuildEnabled(Hyperion, guild.id)){return;}
         const config = await this.getConfig(Hyperion, guild.id);
         if(!config.channel || !config.content || config.channel === "" || config.content === ""){return;}
