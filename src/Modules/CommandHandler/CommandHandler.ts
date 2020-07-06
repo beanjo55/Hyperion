@@ -92,7 +92,7 @@ class CommandHandler extends Module{
         if(!guildConfig.mod){return false;}
         if(!guildConfig.mod.modRoles){return false;}
         if(guildConfig.mod.modRoles.length === 0){return false;}
-        for(const role in guildConfig.mod.modRoles){
+        for(const role of guildConfig.mod.modRoles){
             if(user.roles.includes(role)){return true;}
         }
         return false;
