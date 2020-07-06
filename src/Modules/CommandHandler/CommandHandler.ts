@@ -289,6 +289,8 @@ class CommandHandler extends Module{
 
         if(!this.isManager(ctx.member) && this.isMod(ctx.member, guildConfig)){
             if(results[1] !== null && results[1]){return false;}
+            if(results[0] !== null && results[0]){return true;}
+            if(results[2] !== null && results[2]){return true;}
         }
         if(this.ignored(guildConfig, ctx.member, ctx.channel.id)){
             if(!(this.isManager(ctx.member) || this.isMod(ctx.member, guildConfig))){return false;}
