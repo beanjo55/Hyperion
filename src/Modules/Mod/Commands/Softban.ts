@@ -20,6 +20,7 @@ class Softban extends Command{
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
+        if(!ctx.args[0]){return "Please specify a user to softban";}
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "Cache Failure, couldnt find bot user.";}
         if(!bot.permission.has("banMembers")){return "I cannot ban anyone without the `ban members` permission.";}

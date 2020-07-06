@@ -1,6 +1,7 @@
 import {Command} from "../../../Core/Structures/Command";
 import { ICommandContext, IHyperion } from "../../../types";
 import { User } from "eris";
+import { createVoidZero } from "typescript";
 
 
 
@@ -19,6 +20,7 @@ class Kick extends Command{
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
+        if(!ctx.args[0]){return "Please specify a user to kick";}
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "Cache Failure, couldn't find bot user";}
         if(!bot.permission.has("kickMembers")){return "I cannot kick anyone without the `kick members` permission.";}
