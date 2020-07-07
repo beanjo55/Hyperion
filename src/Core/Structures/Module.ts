@@ -1,4 +1,3 @@
-import {logger} from "./Logger";
 import {default as fs} from "fs";
 import {IHyperion, ConfigOp} from "../../types";
 import {ConfigKey as configkey} from "../../types";
@@ -20,6 +19,7 @@ export class Module{
     hasCfg: boolean;
     subscribedEvents: Array<string>;
     configKeys?: Collection<configkey>;
+    Hyperion: IHyperion;
 
     //legacy module system
     needsLoad: boolean;
@@ -28,7 +28,7 @@ export class Module{
     [key: string]: any;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    constructor(data: Partial<Module>){
+    constructor(data: Partial<Module>, Hyperion: IHyperion){
         this.name = data.name ?? "module";
         this.friendlyName = data.friendlyName ?? this.name;
         this.id = this.name;
@@ -52,6 +52,8 @@ export class Module{
             this.configKeys = data.configKeys;
         }
 
+        this.Hyperion = Hyperion;
+
         
     }
 
@@ -73,34 +75,34 @@ export class Module{
                         }
                         this[name] = modfile;
                     }catch(err){
-                        logger.error("Hyperion", `Error laoding mod file ${e}, error: ${err}`, "Load Mod");
+                        this.Hyperion.logger.error("Hyperion", `Error laoding mod file ${e}, error: ${err}`, "Load Mod");
                     }
                 }
             });
         }catch(err){
-            logger.error("Hyperion", `Error loading module files for module ${this.name}: ${err}`, "Load Mod");
+            this.Hyperion.logger.error("Hyperion", `Error loading module files for module ${this.name}: ${err}`, "Load Mod");
         }
     }
 
     
 
-    loadCommands(Hyperion: IHyperion): void{
+    loadCommands(): void{
         try{
             const cmdFiles = fs.readdirSync(this.cmdpath);
             cmdFiles.forEach((e: string) => {
                 if(!e.startsWith(".")){
                     try{
-                        this.loadCommand(Hyperion, e);
+                        this.loadCommand(e);
                     // eslint-disable-next-line no-empty
                     }catch{}
                 }
             });
         }catch(err){
-            logger.error("Hyperion", `Error loading commands for module ${this.name}: ${err}`, "Load Commands");
+            this.Hyperion.logger.error("Hyperion", `Error loading commands for module ${this.name}: ${err}`, "Load Commands");
         }
     }
 
-    loadCommand(Hyperion: IHyperion, commandFile: string): void{
+    loadCommand(commandFile: string): void{
         try{
             const precmd = require(`${this.cmdpath}/${commandFile}`).default;
             const cmd = new precmd;
@@ -111,28 +113,28 @@ export class Module{
                     cmd.subcommands.add(new scmd);
                 });
             }
-            Hyperion.commands.add(cmd);
+            this.Hyperion.commands.add(cmd);
         }catch(err){
-            logger.error("Hyperion", `Failed to load command ${commandFile} from module ${this.name}. error: ${inspect(err)}`, "Load Commands");
+            this.Hyperion.logger.error("Hyperion", `Failed to load command ${commandFile} from module ${this.name}. error: ${inspect(err)}`, "Load Commands");
             throw err;
         }
     }
 
-    reloadCommands(Hyperion: IHyperion): void | undefined{
+    reloadCommands(): void{
         if(!this.hasCommands){
             return;
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const moduleCommands = Hyperion.commands.filter((c: any) => c.module === this.name);
+        const moduleCommands = this.Hyperion.commands.filter((c: any) => c.module === this.name);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         moduleCommands.forEach((cmd: any) => {
-            Hyperion.commands.remove(cmd.id);
+            this.Hyperion.commands.remove(cmd.id);
         });
 
-        this.loadCommands(Hyperion);
+        this.loadCommands();
     }
 
-    reloadCommand(Hyperion: IHyperion, commandName: string): void{
+    reloadCommand(commandName: string): void{
         const filename = commandName.charAt(0).toUpperCase() + commandName.slice(1) + ".js";
         console.log(filename);
         try{
@@ -143,12 +145,12 @@ export class Module{
                 console.log("reloading command from" + file);
                 delete require.cache[require.resolve(`${this.cmdpath}/${file}`)];
                 console.log("cache cleared");
-                Hyperion.commands.delete(commandName);
+                this.Hyperion.commands.delete(commandName);
                 console.log("command removed");
-                this.loadCommand(Hyperion, filename);
+                this.loadCommand(filename);
             }
         }catch(err){
-            Hyperion.logger.error("Hyperion", `Failed to reload command ${commandName}, error: ${err}`, "Command Reload");
+            this.Hyperion.logger.error("Hyperion", `Failed to reload command ${commandName}, error: ${err}`, "Command Reload");
             throw err;
         }
     }

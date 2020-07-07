@@ -1,7 +1,7 @@
 import {Module} from "../../Core/Structures/Module";
 import { Embed } from "eris";
 import {IEmbed, IEmbedDoc, IEmbedModel, default as model} from "../../MongoDB/Embeds";
-import { IMongoUpdateResult } from "../../types";
+import { IMongoUpdateResult, IHyperion } from "../../types";
 import {randomInt} from "mathjs";
 
 type EmbedMap = Map<string, CustomEmbed>;
@@ -18,14 +18,14 @@ export class CustomEmbed{
 
 class Embeds extends Module{
     model: IEmbedModel;
-    constructor(){
+    constructor(Hyperion: IHyperion){
         super({
             name: "embeds",
             hasCommands: true,
             friendlyName: "Embeds",
             defaultStatus: false,
             dirname: __dirname
-        });
+        }, Hyperion);
         this.model = model;
     }
 

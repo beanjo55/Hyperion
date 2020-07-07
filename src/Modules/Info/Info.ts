@@ -1,7 +1,8 @@
 import {Module} from "../../Core/Structures/Module";
+import { IHyperion } from "../../types";
 
 class Info extends Module{
-    constructor(){
+    constructor(Hyperion: IHyperion){
         super({
             name: "info",
             friendlyName: "Info",
@@ -12,7 +13,7 @@ class Info extends Module{
             needsLoad: false,
             hasCfg: false,
             dirname: __dirname
-        });
+        }, Hyperion);
     }
 }
 export default Info;

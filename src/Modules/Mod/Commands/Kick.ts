@@ -1,7 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 import { ICommandContext, IHyperion } from "../../../types";
 import { User } from "eris";
-import { createVoidZero } from "typescript";
 
 
 

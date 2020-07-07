@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable no-mixed-spaces-and-tabs */
 import * as Eris from "eris";
@@ -204,7 +205,7 @@ export class Cluster {
 
 	    let App = (await import(this.path));
 
-	    let client;
+	    let client: Eris.Client;
 	    if (App.Eris) {
 	        client = new App.Eris.Client(this.token, options);
 	        App = App.BotWorker;
@@ -217,24 +218,40 @@ export class Cluster {
 	        }
 	    }
 	    if(!this.app){this.App = App;}
-	    this.client = client;
-	    this.loadCode();
+		this.client = client;
+
+	    this.client.executeWebhook("730091355128332298", "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW", {
+	        embeds: [
+	            {
+	                title: `Cluster ${this.clusterID} online`,
+					timestamp: new Date,
+					description: `**Shards:** ${this.firstShardID} - ${this.lastShardID}`,
+					color: config.coreOptions.defaultColor,
+					footer: {text: config.coreOptions.build}
+	            }
+	        ]
+	    });
+		await this.loadCode();
 
 	    client.on("connect", (id: number) => {
-	        if (this.whatToLog.includes("shard_connect")) console.log(`Shard ${id} connected!`);
+			if (this.whatToLog.includes("shard_connect")) console.log(`Shard ${id} connected!`);
+
 	    });
 
 	    client.on("shardDisconnect", (err: Error, id: number) => {
-	        if (!this.shutdown) if (this.whatToLog.includes("shard_disconnect")) console.log(`Shard ${id} disconnected with error: ${inspect(err)}`);
+			if (!this.shutdown) if (this.whatToLog.includes("shard_disconnect")) console.log(`Shard ${id} disconnected with error: ${inspect(err)}`);
+
 	    });
 
 
 	    client.on("shardReady", (id: number) => {
-	        if (this.whatToLog.includes("shard_ready")) console.log(`Shard ${id} is ready!`);
+			if (this.whatToLog.includes("shard_ready")) console.log(`Shard ${id} is ready!`);
+
 	    });
 
 	    client.on("shardResume", (id: number) => {
-	        if (this.whatToLog.includes("shard_resume")) console.log(`Shard ${id} has resumed!`);
+			if (this.whatToLog.includes("shard_resume")) console.log(`Shard ${id} has resumed!`);
+
 	    });
 
 	    client.on("warn", (message: string, id: number) => {
@@ -270,7 +287,7 @@ export class Cluster {
 	    this.app = new this.App({client: this.client, clusterID: this.clusterID, workerID: worker.id}, config.coreOptions, config.mongoLogin, config.mongoOptions);
 	    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 	    //@ts-ignore
-	    this.app.launch();
+	    await this.app.launch();
 	    this.loaded = true;
 	}
 }

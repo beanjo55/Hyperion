@@ -201,7 +201,7 @@ export default class HyperionC extends BaseClusterWorker{
     loadMod(modname: string): Module | undefined{
         try{
             const mod = require(`./Modules/${modname}/${modname}.js`).default;
-            return this.modules.add(new mod);
+            return this.modules.add(new mod(this));
         }catch(err){
             this.logger.error("Hyperion", `Failed to load module ${modname}, error: ${err}`, "Module Loading");
         }
@@ -218,7 +218,7 @@ export default class HyperionC extends BaseClusterWorker{
                 reloaded.init(this);
             }
             if(reloaded.hasCommands){
-                reloaded.reloadCommands(this);
+                reloaded.reloadCommands();
             }
         }
     }
@@ -236,14 +236,14 @@ export default class HyperionC extends BaseClusterWorker{
         if(!moduleName){throw new Error("Could not find module name to reload command from!");}
         const module = this.modules.get(moduleName);
         if(!module){throw new Error("could not find module to reload from!");}
-        module.reloadCommand(this, commandName);
+        module.reloadCommand(commandName);
     }
 
     loadCommand(commandName: string, moduleName: string): void{
         const module = this.modules.get(moduleName);
         if(!module){throw new Error("Specify a valid module to load from");}
         if(this.commands.has(commandName)){throw new Error("Can not load a duplicate command");}
-        module.loadCommand(this, commandName.charAt(0).toUpperCase() + commandName.slice(1) +".js");
+        module.loadCommand(commandName.charAt(0).toUpperCase() + commandName.slice(1) +".js");
 
     }
 
@@ -259,7 +259,7 @@ export default class HyperionC extends BaseClusterWorker{
                 mod.init(this);
             }
             if(mod.hasCommands){
-                mod.loadCommands(this);
+                mod.loadCommands();
             }
         });
         

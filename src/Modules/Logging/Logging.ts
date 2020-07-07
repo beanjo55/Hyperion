@@ -12,7 +12,7 @@ import { IGuild } from "../../MongoDB/Guild";
 import HyperionC from "../../main";
 import {inspect} from "util";
 class Logging extends Module{
-    constructor(){
+    constructor(Hyperion: IHyperion){
         super({
             name: "logging",
             hasCommands: true,
@@ -29,7 +29,7 @@ class Logging extends Module{
                 "guildBanRemove",
                 "guildMemberUpdate"
             ]
-        });
+        }, Hyperion);
     }
 
     escapeCodeblock(input: string){

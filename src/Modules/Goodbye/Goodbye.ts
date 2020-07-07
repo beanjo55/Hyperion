@@ -4,14 +4,14 @@ import { Guild, Member } from "eris";
 import { Collection } from "eris";
 
 class Goodbye extends Module{
-    constructor(){
+    constructor(Hyperion: IHyperion){
         super({
             name: "goodbye",
             friendlyName: "Goodbye",
             defaultStatus: false,
             hasCfg: true,
             subscribedEvents: ["guildMemberRemove"]
-        });
+        }, Hyperion);
         this.configKeys = this.loadKeys();
     }
 

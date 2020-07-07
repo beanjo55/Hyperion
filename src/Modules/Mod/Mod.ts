@@ -63,11 +63,11 @@ const actionObj: {[key: string]: ActionInfo} = {
         hasModeration: false
     }
 };
-const timeends = ["d", "day", "m", "minute", "h", "hour"];
+const timeends = ["d", "day", "days", "m", "minute", "min",  "h", "hour", "hours", "week", "w"];
 class Mod extends Module{
     sweepInterval!: NodeJS.Timeout | undefined;
     actions: {[key: string]: ActionInfo};
-    constructor(){
+    constructor(Hyperion: HyperionC){
         super({
             name: "mod",
             friendlyName: "Mod",
@@ -80,7 +80,7 @@ class Mod extends Module{
             dirname: __dirname,
             subscribedEvents: ["guildMemberAdd", "ready"],
             defaultStatus: true
-        });
+        }, Hyperion);
         this.configKeys = this.loadKeys();
         this.actions = actionObj;
     }
@@ -164,7 +164,19 @@ class Mod extends Module{
             if(isNaN(num)){return 0;}
             return Math.abs(num*minute*60);
         }
+        if(input.endsWith("hours")){
+            input = input.substring(0, input.length-4);
+            const num = Number(input);
+            if(isNaN(num)){return 0;}
+            return Math.abs(num*minute*60);
+        }
         if(input.endsWith("day")){
+            input = input.substring(0, input.length-3);
+            const num = Number(input);
+            if(isNaN(num)){return 0;}
+            return Math.abs(num*day);
+        }
+        if(input.endsWith("days")){
             input = input.substring(0, input.length-3);
             const num = Number(input);
             if(isNaN(num)){return 0;}
@@ -176,6 +188,24 @@ class Mod extends Module{
             if(isNaN(num)){return 0;}
             return Math.abs(num*minute);
         }
+        if(input.endsWith("min")){
+            input = input.substring(0, input.length-6);
+            const num = Number(input);
+            if(isNaN(num)){return 0;}
+            return Math.abs(num*minute);
+        }
+        if(input.endsWith("week")){
+            input = input.substring(0, input.length-6);
+            const num = Number(input);
+            if(isNaN(num)){return 0;}
+            return Math.abs(num*day*7);
+        }
+        if(input.endsWith("w")){
+            input = input.substring(0, input.length-6);
+            const num = Number(input);
+            if(isNaN(num)){return 0;}
+            return Math.abs(num*day*7);
+        }
         //should be unreachable but ts angery
         return 0;
     }
@@ -183,6 +213,12 @@ class Mod extends Module{
     async banDM(user: User, guildName: string, reason: string): Promise<void>{
         user.getDMChannel().then(x => {
             x.createMessage(`You were banned in \`${guildName}\` for: ${reason}`).catch(() => {});
+        });
+    }
+
+    async kickDM(user: User, guildName: string, reason: string): Promise<void>{
+        user.getDMChannel().then(x => {
+            x.createMessage(`You were kicked in \`${guildName}\` for: ${reason}`).catch(() => {});
         });
     }
 
@@ -208,6 +244,8 @@ class Mod extends Module{
         }
         return input;
     }
+
+
 
     async makeLog(Hyperion: HyperionC, ctx: IModerationContext, user: User): Promise<void>{
 

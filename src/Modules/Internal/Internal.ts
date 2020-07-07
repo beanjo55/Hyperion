@@ -1,7 +1,8 @@
 import {Module} from "../../Core/Structures/Module";
+import { IHyperion } from "../../types";
 
 class Internal extends Module{
-    constructor(){
+    constructor(Hyperion: IHyperion){
         super({
             name: "internal",
             private: true,
@@ -10,7 +11,7 @@ class Internal extends Module{
             needsInit: false,
             needsLoad: false,
             dirname: __dirname
-        });
+        }, Hyperion);
 
     }
 }

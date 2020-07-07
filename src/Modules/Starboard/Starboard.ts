@@ -5,7 +5,7 @@ import {IHyperion, GuildConfig} from "../../types";
 import { Message, Emoji, Collection } from "eris";
 
 class Starboard extends Module{
-    constructor(){
+    constructor(Hyperion: IHyperion){
         super({
             name: "starboard",
             hasCommands: false,
@@ -13,7 +13,8 @@ class Starboard extends Module{
             hasCfg: true,
             dirname: __dirname,
             needsLoad: true,
-        });
+            defaultStatus: false
+        }, Hyperion);
         this.configKeys = this.loadKeys();
     }
 

@@ -4,14 +4,14 @@ import { Guild, Member } from "eris";
 import { Collection } from "eris";
 
 class Welcome extends Module{
-    constructor(){
+    constructor(Hyperion: IHyperion){
         super({
             name: "welcome",
             friendlyName: "Welcome",
             defaultStatus: false,
             hasCfg: true,
             subscribedEvents: ["guildMemberAdd"]
-        });
+        }, Hyperion);
         this.configKeys = this.loadKeys();
     }
 

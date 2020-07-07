@@ -1,7 +1,8 @@
 import {Module} from "../../Core/Structures/Module";
+import { IHyperion } from "../../types";
 
 class Manager extends Module{
-    constructor(){
+    constructor(Hyperion: IHyperion){
         super({
             name: "manager",
             friendlyName: "Manager",
@@ -12,7 +13,7 @@ class Manager extends Module{
             needsLoad: false,
             hasCfg: false,
             dirname: __dirname
-        });
+        }, Hyperion);
     }
 }
 export default Manager;
