@@ -133,7 +133,7 @@ class CommandHandler extends Module{
         return acks.contrib;
     }
 
-    async isolate(msg: Message, guildPrefix: string): Promise<Isolated | null>{
+    async isolate(msg: Message, guildConfig: IGuild): Promise<Isolated | null>{
         if(msg.content.startsWith(this.Hyperion.devPrefix) && await this.isDev(msg.author.id, )){
             return {
                 type: "dev",
@@ -150,22 +150,22 @@ class CommandHandler extends Module{
             };
         }
 
-        if(msg.content.startsWith(guildPrefix)){
+        if(msg.content.startsWith(guildConfig.prefix)){
             return {
                 type: "normal",
-                label: msg.content.split(" ").slice(0, 1)[0].slice(guildPrefix.length).trim().toLowerCase(),
+                label: msg.content.split(" ").slice(0, 1)[0].slice(guildConfig.prefix.length).trim().toLowerCase(),
                 args: msg.content.split(" ").slice(1)
             };
         }
-        /*
-        if(msg.content.toLowerCase().startsWith(this.Hyperion.client.user.username.toLowerCase())){
+        
+        if(guildConfig.casualPrefix && msg.content.toLowerCase().startsWith(this.Hyperion.client.user.username.toLowerCase())){
             if(!msg.content.split(" ").slice(1, 2)[0]){return null;}
             return {
                 type: "normal",
                 label: msg.content.split(" ").slice(1, 2)[0].trim().toLowerCase(),
                 args: msg.content.split(" ").slice(2)
             };
-        }*/
+        }
 
         if(msg.content.replace("<@!", "<@").startsWith(this.Hyperion.client.user.mention)){
             if(!msg.content.split(" ").slice(1, 2)[0]){return null;}
@@ -488,7 +488,7 @@ class CommandHandler extends Module{
             admin: false
         };
 
-        const isolated: Isolated | null = await this.isolate(msg, ctx.guildConfig!.prefix);
+        const isolated: Isolated | null = await this.isolate(msg, ctx.guildConfig!);
         if(!isolated){return;}
         if(isolated.type === "dev"){
             ctx.dev = true;

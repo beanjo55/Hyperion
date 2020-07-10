@@ -112,6 +112,11 @@ const guildconf = new Schema({
     embedCommonResponses: {
         type: Boolean,
         default: false
+    },
+
+    casualPrefix: {
+        type: Boolean,
+        default: false
     }
 
 
@@ -142,6 +147,7 @@ export interface IGuild{
     botMissingPermsMessages: boolean;
     embedCommonResponses: boolean;
     social: Types.SocialConfig;
+    casualPrefix: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any;
 }
