@@ -157,7 +157,7 @@ class CommandHandler extends Module{
                 args: msg.content.split(" ").slice(1)
             };
         }
-
+        /*
         if(msg.content.toLowerCase().startsWith(this.Hyperion.client.user.username.toLowerCase())){
             if(!msg.content.split(" ").slice(1, 2)[0]){return null;}
             return {
@@ -165,7 +165,7 @@ class CommandHandler extends Module{
                 label: msg.content.split(" ").slice(1, 2)[0].trim().toLowerCase(),
                 args: msg.content.split(" ").slice(2)
             };
-        }
+        }*/
 
         if(msg.content.replace("<@!", "<@").startsWith(this.Hyperion.client.user.mention)){
             if(!msg.content.split(" ").slice(1, 2)[0]){return null;}
