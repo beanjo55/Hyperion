@@ -40,7 +40,7 @@ class CommandHandler extends Module{
     logLevel: HandlerLogLevel;
     constructor(Hyperion: Types.IHyperion, data: IHandlerConfig){
         super({
-            name: "Commandhandler",
+            name: "commandhandler",
             private: true,
             alwaysEnabled: true,
             hasCommands: false,
@@ -158,6 +158,15 @@ class CommandHandler extends Module{
             };
         }
 
+        if(msg.content.toLowerCase().startsWith(this.Hyperion.client.user.username.toLowerCase())){
+            if(!msg.content.split(" ").slice(1, 2)[0]){return null;}
+            return {
+                type: "normal",
+                label: msg.content.split(" ").slice(1, 2)[0].trim().toLowerCase(),
+                args: msg.content.split(" ").slice(2)
+            };
+        }
+
         if(msg.content.replace("<@!", "<@").startsWith(this.Hyperion.client.user.mention)){
             if(!msg.content.split(" ").slice(1, 2)[0]){return null;}
             return {
@@ -253,7 +262,7 @@ class CommandHandler extends Module{
         if(!guildConfig.commands[command]){return null;}
         if(!guildConfig.commands[command].allowedChannels){return null;}
         if(guildConfig.commands[command].allowedChannels.length === 0){return null;}
-        if(guildConfig.commands[command].allowedChannels.includes(channel.id) ||(channel.parentID && guildConfig.commands[command].allowedChannels.includes(channel.parentID!))){return true;}
+        if(guildConfig.commands[command].allowedChannels.includes(channel.id) || (channel.parentID && guildConfig.commands[command].allowedChannels.includes(channel.parentID!))){return true;}
         return false;
     }
 
@@ -263,7 +272,7 @@ class CommandHandler extends Module{
         if(!guildConfig.commands[command]){return null;}
         if(!guildConfig.commands[command].disabledChannels){return null;}
         if(guildConfig.commands[command].disabledChannels.length === 0){return null;}
-        if(guildConfig.commands[command].disabledChannels.includes(channel.id) ||(channel.parentID && guildConfig.commands[command].disabledChannels.includes(channel.parentID!))){return true;}
+        if(guildConfig.commands[command].disabledChannels.includes(channel.id) || (channel.parentID && guildConfig.commands[command].disabledChannels.includes(channel.parentID!))){return true;}
         return false;
     }
 

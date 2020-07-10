@@ -128,6 +128,10 @@ class Config extends Command{
         if(!guilddata){return "There was an error getting the guild data!";}
 
         if(op === 1){
+            
+            if(key.validate !== undefined){
+                if(!key.validate(value)){return "That input isnt valid";}
+            }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data: any = {};
             data[key.id] = value;

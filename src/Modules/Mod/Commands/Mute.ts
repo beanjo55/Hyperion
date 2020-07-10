@@ -70,6 +70,7 @@ class Mute extends Command{
                 data.stringLength = stringLength;
             }
             ctx.module.makeLog(Hyperion, data, target.user);
+            this.modDeleteAfter(ctx, Hyperion);
             return `Muted ${target.username}#${target.discriminator}`;
         }catch{
             return "Something went wrong!";

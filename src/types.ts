@@ -202,6 +202,7 @@ export interface ConfigKey{
     dataType: string;
     array: boolean;
     default: unknown;
+    validate?(input: string): boolean;
 }
 
 export interface GlobalConfig{

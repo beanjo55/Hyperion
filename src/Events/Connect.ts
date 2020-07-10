@@ -11,7 +11,7 @@ class ConnectHandler{
         this.client.executeWebhook("702215838115037264", "bjstmytm7m5qh1jJt2y02ajScn1LXzyVhQi4YY2ilSJUFt7CsV-1C270-QwnScNar6Qk", {
             embeds: [
                 {
-                    title: `Shard ${shardID} conecting`,
+                    title: `Shard ${shardID} connecting`,
                     timestamp: new Date,
                     color: this.colors.default,
                     footer: {text: this.build}

@@ -597,7 +597,17 @@ class Mod extends Module{
             dataType: "role",
             array: false,
             default: ""
-        }));    
+        }));  
+        col.add(new ConfigKey({
+            parent: this.name,
+            id: "deleteAfterUse",
+            ops: [0, 1, 4],
+            description: "If mod commands should be deleted after they are successfully used",
+            friendlyName: "Delete After Use",
+            dataType: "boolean",
+            array: false,
+            default: false
+        }));      
         return col;
     }
 }

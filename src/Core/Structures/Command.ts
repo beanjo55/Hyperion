@@ -79,4 +79,17 @@ export class Command{
         throw new Error("Unimplemented command!");
     }
 
+    async deleteAfterUse(ctx: ICommandContext, Hyperion: IHyperion): Promise<void>{
+        if(!ctx.channel.permissionsOf(Hyperion.client.user.id).has("manageMessages")){return;}
+        try{
+            await ctx.msg.delete();
+            await Hyperion.redis.set(`Deleted:${ctx.msg.id}`, 1, "EX", 5);
+        // eslint-disable-next-line no-empty
+        }catch{}
+    }
+
+    async modDeleteAfter(ctx: ICommandContext, Hyperion: IHyperion): Promise<void>{
+        if(ctx.guildConfig.mod?.deleteAfter){this.deleteAfterUse(ctx, Hyperion);}
+    }
+
 }

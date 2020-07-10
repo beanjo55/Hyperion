@@ -27,7 +27,6 @@ export class Module{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(data: Partial<Module>, Hyperion: IHyperion){
         this.name = data.name ?? "module";
         this.friendlyName = data.friendlyName ?? this.name;
@@ -182,6 +181,7 @@ export class ConfigKey implements configkey{
     dataType: string;
     array: boolean;
     default: unknown;
+    validate?(input: string): boolean;
     constructor(data: Partial<configkey>){
         this.parent = data.parent ?? "dummy";
         this.id = data.id ?? "dummy";
@@ -191,5 +191,6 @@ export class ConfigKey implements configkey{
         this.dataType = data.dataType ?? "string";
         this.array = data.array ?? false;
         this.default = data.default;
+        this.validate = data.validate;
     }
 }

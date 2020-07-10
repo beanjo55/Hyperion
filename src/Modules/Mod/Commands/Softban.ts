@@ -60,6 +60,7 @@ class Softban extends Command{
             time: Date.now(),
             moderationEnd: false
         }, user);
+        this.modDeleteAfter(ctx, Hyperion);
         return `Softbanned ${user.username}#${user.discriminator}`;
     }
 }

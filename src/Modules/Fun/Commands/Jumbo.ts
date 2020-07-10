@@ -20,7 +20,7 @@ class Jumbo extends Command{
         if(!ctx.args[0]){return "You need to give me an emote to enlarge!";}
         const result = EmoteRegex.exec(ctx.args[0]);
         if(!result){return "Thats not an emote or I dont understand it";}
-        const link =  `https://cdn.discordapp.com/emojis/${result[3]}${result[1] ? ".gif" : ".png"}`;
+        const link =  `https://cdn.discordapp.com/emojis/${result[3]}${result[1] ? ".gif" : ".png"}?v=1`;
         const data: EmbedResponse = {
             embed: {
                 color: Hyperion.defaultColor,

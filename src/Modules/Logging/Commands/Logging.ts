@@ -17,9 +17,10 @@ const eventNames: Array<string> = [
     "memberNicknameChange",
     "memberRoleAdd",
     "memberRoleRemove",
-    "memberRoleUpdate"
+    "memberRoleUpdate",
+    "ghostReact"
 ];
-const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar"];
+const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar", "ghostreacttime", "ignoredroles"];
 
 
 class Logging extends Command{
@@ -60,7 +61,7 @@ class Logging extends Command{
             const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
             if(!channel){return "Invalid channel provided.";}
 
-            const config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
+            const config: LoggingConfig = await ctx.module.getLoggingConfig(Hyperion, ctx.guild.id);
             const size = config.ignoredChannels.length;
             if(config.ignoredChannels !== []){
                 if(config.ignoredChannels.includes(channel.id)){
@@ -85,6 +86,36 @@ class Logging extends Command{
             }
         }
 
+        if(ctx.args[0].toLowerCase() === "ignoredroles"){
+            if(!ctx.args[1]){return "Please specify a role.";}
+            const role = Hyperion.utils.resolveRole(ctx.args[1], ctx.guild.roles);
+            if(!role){return "Invalid role provided.";}
+
+            const config: LoggingConfig = await ctx.module.getLoggingConfig(Hyperion, ctx.guild.id);
+            const size = config.ignoredRoles.length;
+            if(config.ignoredRoles !== []){
+                if(config.ignoredRoles.includes(role.id)){
+                    const index: number = config.ignoredRoles.indexOf(role.id);
+                    config.ignoredRoles.splice(index, 1);
+                }else{
+                    config.ignoredRoles.push(role.id);
+                }
+            }else{
+                config.ignoredRoles = [role.id];
+            }
+            try{
+                await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {ignoredRoles: config.ignoredRoles});
+            }catch(err){
+                Hyperion.logger.warn("Hyperion", "Logging Config", `Failed to update ignored logging roles on ${ctx.guild.id}, error: ${err}`);
+                return "Something went wrong";
+            }
+            if(config.ignoredRoles.length > size){
+                return "Added role to ignored role.";
+            }else{
+                return "Removed role from ignored role.";
+            }
+        }
+
         if(ctx.args[0].toLowerCase() === "showavatar"){
             if(!ctx.args[1]){return "Please specify true/false or yes/no.";}
             const result = Hyperion.utils.input2boolean(ctx.args[1]);
@@ -96,6 +127,19 @@ class Logging extends Command{
                 return "Something went wrong";
             }
             return "Updated Show Avatars Setting";
+        }
+
+        if(ctx.args[0].toLowerCase() === "ghostreacttime"){
+            if(!ctx.args[1]){return "Please specify a time";}
+            const result = Number(ctx.args[1]);
+            if(isNaN(result) || (result < 1 || result > 15)){return "Invalid time, try a number between 1 and 15";}
+            try{
+                await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {ghostreacttime: result});
+            }catch(err){
+                Hyperion.logger.warn("Hyperion", "Logging Config", `Failed to update ghostreacttime on ${ctx.guild.id}, error: ${err}`);
+                return "Something went wrong";
+            }
+            return "Updated Ghost React time";
         }
 
         if(LowerCaseEvents.includes(ctx.args[0].toLowerCase()) && !ctx.args[1]){
@@ -197,8 +241,8 @@ class Logging extends Command{
         return "this should never be reached.";
     }
 
-    async showOverallSettings(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
-        let config: LoggingConfig = await ctx.module?.getLoggingConfig(Hyperion, ctx.guild.id);
+    async showOverallSettings(ctx: ICommandContext<LoggingModule>, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
+        let config: LoggingConfig = await ctx.module.getLoggingConfig(Hyperion, ctx.guild.id);
         config = new LoggingConfig(config);
         if(!config){return "An error occured";}
         const chanObj = ctx.guild.channels.get(config.logChannel);
@@ -241,9 +285,10 @@ class Logging extends Command{
                 color: Hyperion.defaultColor,
                 timestamp: new Date,
                 description: `The current logging settings for the server are:
-                **Log Channel:** ${channelName}
+                **Default Log Channel:** ${channelName}
                 **Ignored Channels:** ${ignoredChannels}
                 **Show Avatar:** ${showAv}
+                **Ghost React Time:** ${config.ghostReactTime} seconds
                 `,
                 fields: [
                     {

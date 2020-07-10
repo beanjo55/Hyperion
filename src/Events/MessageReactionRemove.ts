@@ -3,12 +3,17 @@ import {IHyperion} from "../types";
 import {Module} from "../Core/Structures/Module";
 import {Message, Emoji} from "eris";
 import { IGuild } from "../MongoDB/Guild";
+const eventName = "messageReactionRemove";
 class MessageReactionRemoveHandler{
     name: string;
     constructor(){
         this.name = "messageReactionRemove";
     }
     async handle(this: IHyperion, msg: Message, emote: Emoji, userID: string): Promise<void>{
+        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
+        subscribed.forEach((m: Module) => {
+            m.messageReactionRemove(this, msg, emote, userID);
+        });
         //basics
         if(msg.channel.type !== 0){return;}
         const conf: IGuild | null = await this.managers.guild.getConfig(msg.channel.guild.id);

@@ -69,6 +69,7 @@ class Ban extends Command{
             time: Date.now(),
             moderationEnd: false
         }, user);
+        this.modDeleteAfter(ctx, Hyperion);
         return `Banned ${user.username}#${user.discriminator}!`;
     }
 }

@@ -27,7 +27,9 @@ class Logging extends Module{
                 "guildMemberRemove",
                 "guildBanAdd",
                 "guildBanRemove",
-                "guildMemberUpdate"
+                "guildMemberUpdate",
+                "messageReactionAdd",
+                "messageReactionRemove"
             ]
         }, Hyperion);
     }
@@ -498,11 +500,32 @@ class Logging extends Module{
 
     //REACTIONS
     async messageReactionAdd(Hyperion: IHyperion, msg: Message, emote: Emoji, userID: string){
-
+        if(!(msg.channel.type === 5 || msg.channel.type === 0)){return;}
+        const guild = msg.channel.guild;
+        if(!await this.checkGuildEnabled(this.Hyperion, guild.id)){return;}
+        const config = await this.getLoggingConfig(this.Hyperion, guild.id);
+        if(!config.ghostReact.enabled){return;}
+        this.Hyperion.redis.set(`Ghost:${guild.id}:${msg.id}:${userID}:${emote.id}:name`, emote.name, "EX", config.ghostReactTime);
+        this.Hyperion.redis.set(`Ghost:${guild.id}:${msg.id}:${userID}:${emote.id}:time`, Date.now(), "EX", config.ghostReactTime);
+        if(emote.animated){
+            this.Hyperion.redis.set(`Ghost:${guild.id}:${msg.id}:${userID}:${emote.id}:animated`, 1, "EX", config.ghostReactTime);
+        }
     }
 
     async messageReactionRemove(Hyperion: IHyperion, msg: Message, emote: Emoji, userID: string){
-        
+        if(!(msg.channel.type === 5 || msg.channel.type === 0)){return;}
+        const guild = msg.channel.guild;
+        if(!await this.checkGuildEnabled(this.Hyperion, guild.id)){return;}
+        const config = await this.getLoggingConfig(this.Hyperion, guild.id);
+        if(!config.ghostReact.enabled){return;}
+        if(await this.Hyperion.redis.exists(`Ghost:${guild.id}:${msg.id}:${userID}:${emote.id}:name`)){
+            this.ghostReact(guild, msg, userID, {
+                name: emote.name,
+                id: emote.id,
+                animated: await this.Hyperion.redis.exists(`Ghost:${guild.id}:${msg.id}:${userID}:${emote.id}:animated`) === 1 ? true : false,
+                time: Number(await this.Hyperion.redis.get(`Ghost:${guild.id}:${msg.id}:${userID}:${emote.id}:time`)) ?? 0
+            });
+        }
     }
 
     async messageReactionRemoveAll(Hyperion: IHyperion, msg: Message){
@@ -517,8 +540,41 @@ class Logging extends Module{
 
     }
 
-    async ghostReact(Hyperion: IHyperion, member: Member, msg: Message, emote: Emoji){
+    async ghostReact(guild: Guild, msg: Message, userID: string, emote: {name: string; id: string; animated: boolean; time: number}){
+        const member = guild.members.get(userID) ?? (await guild.fetchMembers({query: userID}).then(m => m[0]), () => {}) as unknown as Member;
+        if(!member){return;}
+        if(!await this.preCheck(this.Hyperion, guild, "ghostReact", member.roles, msg.channel.id)){return;}
+        const channelObj = await this.testChannel(this.Hyperion, guild, "ghostReact");
+        if(!channelObj){return;}
 
+        const config: LoggingConfig = await this.getLoggingConfig(this.Hyperion, guild.id);
+        const data: {embed: Partial<Embed>} = {
+            embed: {
+                title: "Ghost React",
+                color: this.Hyperion.colors.blue,
+                footer: {
+                    text: `ID: ${member.id}`
+                },
+                timestamp: new Date,
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}
+                (${member.id})
+                **Emote Name:** ${emote.name}
+                **Message:** [Jump](https://discordapp.com/channels/${guild.id}/${msg.channel.id}/${msg.id})`,
+                thumbnail: {
+                    url: `https://cdn.discordapp.com/emojis/${emote.id}.${emote.animated ? "gif" : "png"}?v=1`
+                }
+            }
+        };
+        if(emote.time !== 0 && !isNaN(emote.time)){
+            data.embed.description += `\nThe emote was there for ${msc(Date.now() - emote.time)}`;
+        }else{
+            data.embed.description += "I couldnt figure out how long the emote was there";
+        }
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            this.Hyperion.logger.warn("Hyperion", `Failed to post log for ghost react, ${err}`, "Logging");
+        }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

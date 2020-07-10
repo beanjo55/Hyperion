@@ -57,6 +57,7 @@ class Kick extends Command{
             time: Date.now(),
             moderationEnd: false
         }, user);
+        this.modDeleteAfter(ctx, Hyperion);
         return `Kicked ${user.username}#${user.discriminator}!`;
     }
 }

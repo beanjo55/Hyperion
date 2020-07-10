@@ -35,8 +35,10 @@ class Warn extends Command{
             let reason = ctx.args.slice(1).join(" ");
             if(reason.length > 1900){reason = reason.substring(0, 1900);}
             await dmChannel.createMessage(`You were warned in ${ctx.guild.name} for: ${reason}`);
+            this.modDeleteAfter(ctx, Hyperion);
             return `Sucessfully warned ${target.username}#${target.discriminator}`;
         }catch{
+            this.modDeleteAfter(ctx, Hyperion);
             return `Warned ${target.username}#${target.discriminator}, but I was unable to send them a DM`;
         }
     }

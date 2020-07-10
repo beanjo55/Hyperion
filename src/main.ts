@@ -35,6 +35,7 @@ import {BaseClusterWorker, Setup} from "./Core/Cluster/BaseClusterWorker";
 import * as sentry from "@sentry/node";
 import {default as embedModel} from "./MongoDB/Embeds";
 import {resolveGuildChannel} from "./Core/Utils/Channels";
+import {default as blocked} from "blocked";
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -171,6 +172,20 @@ export default class HyperionC extends BaseClusterWorker{
         this.global = global;
         
         this.client.connect();
+        blocked((time) => {
+            this.logger.warn("Hyperion", `Process blocked for ${time}ms`, "Process Block");
+            this.client.executeWebhook("731192845716947087", "700BnqlIyPgzfIcOhlvO773zjxr0pdxabLHQodXauJOam2HF30564xzZApDeoXLc78CD", {
+                embeds: [
+                    {
+                        title: "Process blocked",
+                        color: this.colors.default,
+                        timestamp: new Date,
+                        footer: {text: this.build},
+                        description: `Cluster ${this.clusterID} was blocked for ${time}ms`
+                    }
+                ]
+            });
+        }, {threshold: 10000});
     }
 
     async reloadGlobal(): Promise<void>{
@@ -209,9 +224,9 @@ export default class HyperionC extends BaseClusterWorker{
 
     reloadMod(modname: string): void{
         const filename = modname.charAt(0).toUpperCase() + modname.slice(1);
-        if(!this.modules.has(modname)){throw new Error("Can not reload a module that doesnt exist!");}
+        if(!this.modules.has(modname.toLowerCase())){throw new Error("Can not reload a module that doesnt exist!");}
         delete require.cache[require.resolve(`${__dirname}/Modules/${filename}/${filename}.js`)];
-        this.modules.delete(modname);
+        this.modules.delete(modname.toLowerCase());
         const reloaded = this.loadMod(filename);
         if(reloaded){
             if(reloaded.needsInit){
