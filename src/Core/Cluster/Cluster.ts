@@ -157,6 +157,16 @@ export class Cluster {
 	                break;
 	            }
 	            case "shutdown": {
+					this.client.executeWebhook("730091355128332298", "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW", {
+						embeds: [
+							{
+								title: `Cluster ${message.clusterID} shutting down`,
+								timestamp: new Date,
+								color: config.coreOptions.defaultColor,
+								footer: {text: config.coreOptions.build}
+							}
+						]
+					});
 	                this.shutdown = true;
 	                if (this.app) {
 	                    if (this.app.shutdown) {

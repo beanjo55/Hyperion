@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable no-mixed-spaces-and-tabs */
 import {EventEmitter} from "events";
@@ -10,7 +11,8 @@ import * as Eris from "eris";
 import {Cluster} from "../Cluster/Cluster";
 import {Service} from "../Services/Service";
 import * as path from "path";
-import {logger} from "../Structures/Logger";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const config = require("../../../config.json");
 
 interface ServiceCreator {
 	name: string;
@@ -184,6 +186,7 @@ export class Admiral extends EventEmitter {
 		UUID: number;
 		checked: number;
 	}>;
+	private webhookClient: Eris.Client;
 	private fetchTimeout: number;
 
 	public constructor(options: Options) {
@@ -205,7 +208,8 @@ export class Admiral extends EventEmitter {
 	    this.fasterStart = options.fasterStart || false;
 	    this.fetchTimeout = options.fetchTimeout || 10e3;
 	    this.resharding = false;
-	    this.statsStarted = false;
+		this.statsStarted = false;
+		this.webhookClient = new Eris.Client(this.token, {restMode: true});
 	    if (options.startingStatus) this.startingStatus = options.startingStatus;
 	    // Deals with needed components
 	    if (!options.token) throw "No token!";
@@ -693,7 +697,17 @@ export class Admiral extends EventEmitter {
 	                    break;
 	                }
 	                case "restartCluster": {
-	                    const workerID = this.clusters.find((c: ClusterCollection) => c.clusterID == message.clusterID).workerID;
+						const workerID = this.clusters.find((c: ClusterCollection) => c.clusterID == message.clusterID).workerID;
+						this.webhookClient.executeWebhook("730091355128332298", "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW", {
+							embeds: [
+								{
+									title: `Cluster ${message.clusterID} restarting`,
+									timestamp: new Date,
+									color: config.coreOptions.defaultColor,
+									footer: {text: config.coreOptions.build}
+								}
+							]
+						});
 	                    if (workerID) {
 	                        const worker = master.workers[workerID];
 	                        if (worker) {
@@ -843,6 +857,16 @@ export class Admiral extends EventEmitter {
 
 	        // eslint-disable-next-line @typescript-eslint/no-unused-vars
 	        on("exit", (worker, code, signal) => {
+				this.webhookClient.executeWebhook("730091355128332298", "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW", {
+					embeds: [
+						{
+							title: `Cluster ${this.clusters.find((c: ClusterCollection) => c.workerID === worker.id).clusterID} died with code ${code ?? signal}`,
+							timestamp: new Date,
+							color: config.coreOptions.defaultColor,
+							footer: {text: config.coreOptions.build}
+						}
+					]
+				});
 	            this.restartWorker(worker);
 	        });
 
