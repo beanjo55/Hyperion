@@ -326,6 +326,7 @@ class Mod extends Module{
         const data = await Hyperion.managers.guild.getConfig(guild);
         if(!data?.mod){return 1;}
         if((data.mod as ModConfig).lastCase === 0){return 1;}
+        if(!data.mod.lastCase){return 1;}
         return (data.mod as ModConfig).lastCase+1;
     }
 

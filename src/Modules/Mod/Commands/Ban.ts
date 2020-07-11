@@ -30,7 +30,7 @@ class Ban extends Command{
         if(!ctx.args[this.argShift]){return "Please specify a user!";}
         if(!bot.permission.has("banMembers")){return "I cannot ban anyone without the `ban members` permission.";}
         const toBan = await Hyperion.utils.banResolver(ctx.args[this.argShift], ctx.guild.members, Hyperion);
-        if(!toBan){return "Provide a user to ban!";}
+        if(!toBan){return "Provide a valid user to ban!";}
         if(toBan.id === ctx.user.id){return "You can't ban yourself!";}
         if(toBan.id === Hyperion.client.user.id){return "I can't ban myself!";}
         if(toBan instanceof User){
@@ -38,11 +38,11 @@ class Ban extends Command{
         }
         if(toBan instanceof Member){
             if(await ctx.module.isMod(Hyperion, toBan, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
-            if(bot.roles.length === 0){return "I need a role higehr than the user's highest role to ban them, I can't do that with no roles!";}
+            if(bot.roles.length === 0){return "I need a role higher than the user's highest role to ban them, I can't do that with no roles!";}
             const userRoles = Hyperion.utils.sortRoles(toBan.roles, ctx.guild.roles);
             const botRoles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
             if(userRoles[0] && userRoles[0].position >= botRoles[0].position){return "I can't ban someone with the same highest role or a higher role than me";}
-            return await this.doBan(ctx, Hyperion,  toBan.user, ctx.args.slice(this.argShift+1).join(" "));
+            return await this.doBan(ctx, Hyperion, toBan.user, ctx.args.slice(this.argShift+1).join(" "));
         }
         return "You shouldnt be able to see this message, but if you do, Congrats! You found a bug!";
     }
@@ -54,10 +54,12 @@ class Ban extends Command{
             auditReason = auditReason.substring(0, 508) + "...";
         }
         try{
+            console.log("trying to ban");
             await ctx.guild.banMember(user.id, this.banDays, auditReason);
         }catch{
             return "Something went wrong!";
         }
+        console.log("making log");
         ctx.module.makeLog(Hyperion, {
             user: user.id,
             moderator: ctx.member.id,
@@ -69,7 +71,9 @@ class Ban extends Command{
             time: Date.now(),
             moderationEnd: false
         }, user);
+        console.log("check delete");
         this.modDeleteAfter(ctx, Hyperion);
+        console.log("final return");
         return `Banned ${user.username}#${user.discriminator}!`;
     }
 }

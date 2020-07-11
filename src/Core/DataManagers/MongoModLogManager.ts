@@ -3,7 +3,7 @@
 
 import {default as model, IModLogModel, IModLog, IModLogDoc} from "../../MongoDB/Modlog";
 import { IMongoUpdateResult, IModerationContext } from "../../types";
-
+import {inspect} from "util";
 
 
 class MongoModLogManager{
@@ -36,7 +36,7 @@ class MongoModLogManager{
         if(ctx.removedRoles){
             data.removedRoles = ctx.removedRoles;
         }
-        return await this.model.create(data);
+        return await this.model.create(data).catch(err => console.log(inspect(err) + "\n\n\n" + inspect(ctx))) as unknown as IModLogDoc;
     }
 
     async addMessageID(mid: string, id: string): Promise<IMongoUpdateResult>{
