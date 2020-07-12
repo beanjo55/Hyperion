@@ -7,6 +7,7 @@ import {Admiral as Fleet, Options} from "./Core/Sharding/Admiral";
 import {inspect} from "util";
 import {logger} from "./Core/Structures/Logger";
 import {Client} from "eris";
+import {join} from "path";
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,7 +34,11 @@ async function start(): Promise<void>{
         clusters: 1,
         shards: 1,
         clientOptions: config.erisOptions,
-        whatToLog: {blacklist: ["stats_update"]}
+        whatToLog: {blacklist: ["stats_update"]},
+        services: [{
+            name: "Prometheus",
+            path: join(__dirname, "./Services/Prometheus.js")
+        }]
     };
 
     const Admiral = new Fleet(options);
