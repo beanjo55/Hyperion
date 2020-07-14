@@ -30,7 +30,7 @@ class Highlights extends Command{
             if(!ctx.args[1]){return "Please specify a word to add";}
             if(ctx.args[1].length < 4){return "Highlights must be at least 4 letters";}
             try{
-                await ctx.module.addUserHighlight(ctx.user.id, ctx.guild.id, ctx.args[1]);
+                await ctx.module.addUserHighlight(ctx.user.id, ctx.guild.id, ctx.args[1].toLowerCase());
                 return "Successfully added highlight!";
             }catch(err){
                 return err.message;
@@ -40,7 +40,7 @@ class Highlights extends Command{
         if(ctx.args[0].toLowerCase() === "remove"){
             if(!ctx.args[1]){return "Please specify a word to remove";}
             try{
-                await ctx.module.removeUserHighlight(ctx.user.id, ctx.guild.id, ctx.args[1]);
+                await ctx.module.removeUserHighlight(ctx.user.id, ctx.guild.id, ctx.args[1].toLowerCase());
                 return "Successfully removed highlight!";
             }catch(err){
                 return err.message;

@@ -33,27 +33,27 @@ class Highlights extends Module{
     }
 
     async addGuildHighlight(guild: string, highlight: string): Promise<void>{
-        const exists = await this.Hyperion.redis.sismember(`Highlights:${guild}`, highlight);
+        const exists = await this.Hyperion.redis.sismember(`Highlights:${guild}`, highlight.toLowerCase());
         if(exists){
             throw new Error("Highlight already exists");
         }
-        await this.Hyperion.redis.sadd(`Highlights:${guild}`, highlight);
+        await this.Hyperion.redis.sadd(`Highlights:${guild}`, highlight.toLowerCase());
     }
 
     async removeGuildHighlight(guild: string, highlight: string, ): Promise<void>{
-        const exists = await this.Hyperion.redis.sismember(`Highlights:${guild}`, highlight);
+        const exists = await this.Hyperion.redis.sismember(`Highlights:${guild}`, highlight.toLowerCase());
         if(!exists){
             throw new Error("Highlight doesnt exist");
         }
-        await this.Hyperion.redis.srem(`Highlights:${guild}`, highlight);
+        await this.Hyperion.redis.srem(`Highlights:${guild}`, highlight.toLowerCase());
     }
 
     async addHighlightCooldown(guild: string, word: string): Promise<void>{
-        this.Hyperion.redis.set(`HighlightCooldown:${guild}:${word}`, 1, "EX", 60*5);
+        this.Hyperion.redis.set(`HighlightCooldown:${guild}:${word.toLowerCase()}`, 1, "EX", 60*5);
     }
 
     async checkHighlightCooldown(guild: string, word: string): Promise<boolean>{
-        const result = await this.Hyperion.redis.get(`HighlightCooldown:${guild}:${word}`);
+        const result = await this.Hyperion.redis.get(`HighlightCooldown:${guild}:${word.toLowerCase()}`);
         if(result === null){return true;}
         return false;
     }
@@ -69,7 +69,7 @@ class Highlights extends Module{
     }
 
     async checkGuildHighlight(guild: string, word: string): Promise<boolean>{
-        const result = await this.Hyperion.redis.sismember(`Highlights:${guild}`, word);
+        const result = await this.Hyperion.redis.sismember(`Highlights:${guild}`, word.toLowerCase());
         if(result === 0){return false;}
         return true;
     }
@@ -79,7 +79,7 @@ class Highlights extends Module{
         const found: Array<string> = [];
         for(const word of split){
             if(word.length < 4){continue;}
-            if(await this.checkGuildHighlight(guild.id, word.toLowerCase())){found.push(word);}
+            if(await this.checkGuildHighlight(guild.id, word.toLowerCase())){found.push(word.toLowerCase());}
         }
         if(found.length === 0){return;}
         this.routeHighlights(found, guild, channel, msg);
@@ -87,18 +87,18 @@ class Highlights extends Module{
 
     async routeHighlights(highlights: Array<string>, guild: Guild, channel: GuildTextableChannel, msg: Message): Promise<void>{
         for(const highlight of highlights){
-            if(!await this.checkHighlightCooldown(guild.id, highlight)){continue;}
-            const subscribed = await this.model.find({guild: guild.id, highlights: highlight}).lean<IGuildUser>().exec();
+            if(!await this.checkHighlightCooldown(guild.id, highlight.toLowerCase())){continue;}
+            const subscribed = await this.model.find({guild: guild.id, highlights: highlight.toLowerCase()}).lean<IGuildUser>().exec();
             const toDeliver: Array<string> = [];
             for(const user of subscribed){
                 if(guild.members.has(user.user)){toDeliver.push(user.user);}
             }
             if(subscribed.length === 0){
-                this.removeGuildHighlight(guild.id, highlight);
+                this.removeGuildHighlight(guild.id, highlight.toLowerCase());
                 return;
             }
-            this.deliverHighlights(toDeliver, highlight, guild, channel, msg);
-            this.addHighlightCooldown(guild.id, highlight);
+            this.deliverHighlights(toDeliver, highlight.toLowerCase(), guild, channel, msg);
+            this.addHighlightCooldown(guild.id, highlight.toLowerCase());
         }
 
     }
@@ -145,18 +145,18 @@ class Highlights extends Module{
             this.model.create({
                 guild: guild,
                 user: user,
-                highlights: [highlight]
+                highlights: [highlight.toLowerCase()]
             });
         }else{
-            await this.model.updateOne({guild: guild, user: user}, {$addToSet: {highlights: highlight}}).exec();
+            await this.model.updateOne({guild: guild, user: user}, {$addToSet: {highlights: highlight.toLowerCase()}}).exec();
         }
-        if(!await this.checkGuildHighlight(guild, highlight)){
-            this.addGuildHighlight(guild, highlight);
+        if(!await this.checkGuildHighlight(guild, highlight.toLowerCase())){
+            this.addGuildHighlight(guild, highlight.toLowerCase());
         }
     }
 
     async removeUserHighlight(user: string, guild: string, highlight: string): Promise<void>{
-        await this.model.updateOne({guild: guild, user: user}, {$pull: {highlights: highlight}}).exec();
+        await this.model.updateOne({guild: guild, user: user}, {$pull: {highlights: highlight.toLowerCase()}}).exec();
     }
 
     async getUserHighlights(user: string, guild: string): Promise<Array<string>>{
