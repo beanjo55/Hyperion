@@ -271,6 +271,28 @@ export class AutoroleConfig{
     }
 }
 
+export class QuoteConfig{
+    quoteLinks: boolean;
+    guildQuotes: Map<number, Quote>;
+    constructor(data: Partial<QuoteConfig>){
+        this.quoteLinks = data.quoteLinks ?? true;
+        this.guildQuotes = data.guildQuotes ?? new Map<number, Quote>();
+    }
+}
+export class Quote{
+    user: string;
+    link: string;
+    channel: string;
+    content: string;
+    image?: string;
+    constructor(data: Partial<Quote>){
+        this.user = data.user ?? "";
+        this.link = data.link ?? "";
+        this.channel = data.channel ?? "";
+        this.content = data.content ?? "";
+        this.image = data.image;
+    }
+}
 export class SocialConfig{
     ignoredChannels: Array<string>;
     levelupChannel: string;
@@ -294,7 +316,8 @@ const nameConfigMap: {[key: string]: any} = {
     rr: RRConfig,
     social: SocialConfig,
     autorole: AutoroleConfig,
-    goodbye: GoodbyeConfig
+    goodbye: GoodbyeConfig,
+    quotes: QuoteConfig
 };
 
 class MongoGuildManager{

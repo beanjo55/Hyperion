@@ -19,6 +19,7 @@ export class Module{
     hasCfg: boolean;
     subscribedEvents: Array<string>;
     configKeys?: Collection<configkey>;
+    noToggle: boolean;
     Hyperion: IHyperion;
 
     //legacy module system
@@ -36,6 +37,7 @@ export class Module{
         this.alwaysEnabled = data.alwaysEnabled ?? false;
         this.defaultStatus = data.defaultStatus ?? true;
         this.hasCfg = data.hasCfg ?? false;
+        this.noToggle = data.noToggle ?? false;
 
         this.hasCommands = data.hasCommands ?? false;
         this.needsInit = data.needsInit ?? false;
@@ -135,17 +137,12 @@ export class Module{
 
     reloadCommand(commandName: string): void{
         const filename = commandName.charAt(0).toUpperCase() + commandName.slice(1) + ".js";
-        console.log(filename);
         try{
             const cmdFiles = fs.readdirSync(this.cmdpath);
             for(const file of cmdFiles){
-                console.log(file);
                 if(file !== filename){continue;}
-                console.log("reloading command from" + file);
                 delete require.cache[require.resolve(`${this.cmdpath}/${file}`)];
-                console.log("cache cleared");
                 this.Hyperion.commands.delete(commandName);
-                console.log("command removed");
                 this.loadCommand(filename);
             }
         }catch(err){

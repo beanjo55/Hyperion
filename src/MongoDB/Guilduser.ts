@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/interface-name-prefix */
+/* eslint-disable @typescript-eslint/no-empty-interface */
 /*stores an object, guild, and user
 
 */
 
 
-import {Schema, model} from "mongoose";
+import {Schema, model, Document, Model} from "mongoose";
 
 const guilduserdata = new Schema({
 
@@ -21,10 +23,23 @@ const guilduserdata = new Schema({
 
     data: {
         type: Object
+    },
+
+    highlights: {
+        type: Array,
+        default: []
     }
 },{
     autoIndex: true,
     strict: false
 });
 
-export default model("guilduserdata", guilduserdata);
+export interface IGuildUser{
+    guild: string;
+    user: string;
+    highlights: Array<string>;
+}
+export interface IGuildUserDoc extends IGuildUser, Document{}
+export interface IGuildUserModel extends Model<IGuildUserDoc>{}
+
+export default model<IGuildUserDoc>("guilduserdata", guilduserdata);

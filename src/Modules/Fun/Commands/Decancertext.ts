@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {ICommandContext, IHyperion} from "../../../types";
+import {CommandResponse, EmbedResponse, ICommandContext, IHyperion} from "../../../types";
 import {default as limax} from "limax";
 import {default as unorm} from "unorm";
 
@@ -15,9 +15,29 @@ class Decancertext extends Command{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): CommandResponse{
         if(!ctx.args[0]){return "You didn't provide any text to decancer.";}
-        return this.decancer(ctx.args.join(" "));
+        const cleanArgs = ctx.msg.cleanContent?.split(" ");
+        const toDecancer = cleanArgs?.slice(cleanArgs!.indexOf(ctx.args[0])).join(" ");
+        const decancered = this.decancer(toDecancer!);
+        const data: EmbedResponse = {
+            embed: {
+                title: "Decancer Text",
+                color: Hyperion.colors.default,
+                footer: {text: `Requested by ${ctx.user.username}#${ctx.user.discriminator}`},
+                fields: [
+                    {
+                        name: "Input",
+                        value: `\`\`\`${toDecancer!.length > 1000 ? toDecancer!.substr(0, 1000) + "..." : toDecancer!}\`\`\``
+                    },
+                    {
+                        name: "Output",
+                        value: `\`\`\`${decancered.length > 1000 ? decancered.substr(0, 1000)+ "..." : decancered}\`\`\``
+                    }
+                ]
+            }
+        }
+        return data;
     }
 
     decancer(text: string): string{

@@ -72,6 +72,11 @@ const guildconf = new Schema({
         default: new confs.ModConfig({})
     },
 
+    quotes: {
+        type: Object,
+        default: new confs.QuoteConfig({})
+    },
+
     //commands
     commands: {
         type: Object,
@@ -117,6 +122,10 @@ const guildconf = new Schema({
     casualPrefix: {
         type: Boolean,
         default: false
+    },
+
+    highlights: {
+        
     }
 
 
@@ -147,6 +156,7 @@ export interface IGuild{
     botMissingPermsMessages: boolean;
     embedCommonResponses: boolean;
     social: Types.SocialConfig;
+    quotes: Types.QuoteConfig;
     casualPrefix: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any;

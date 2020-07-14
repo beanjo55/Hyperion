@@ -3,7 +3,7 @@
 import {Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, ClientOptions, GuildChannel} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
-import {manager as MGM, GoodbyeConfig as gc, LogEvent as le, WelcomeConfig as wc, AutoroleConfig as arc, SocialConfig as sc, RRConfig as rrc, RankConfig as rc, TagConfig as tc, LoggingConfig as lc, StarboardConfig as sbc, ModuleConfig as mc, ModConfig as modc, CommandConfig as cc} from "./Core/DataManagers/MongoGuildManager";
+import {manager as MGM, QuoteConfig as qc, GoodbyeConfig as gc, LogEvent as le, WelcomeConfig as wc, AutoroleConfig as arc, SocialConfig as sc, RRConfig as rrc, RankConfig as rc, TagConfig as tc, LoggingConfig as lc, StarboardConfig as sbc, ModuleConfig as mc, ModConfig as modc, CommandConfig as cc} from "./Core/DataManagers/MongoGuildManager";
 import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
 import {manager as MMLM} from "./Core/DataManagers/MongoModLogManager";
 import {IGuild} from "./MongoDB/Guild";
@@ -106,6 +106,7 @@ export type ModConfig = modc;
 export type ModuleConfig = mc;
 export type CommandConfig = cc;
 export type GoodbyeConfig = gc;
+export type QuoteConfig = qc;
 export interface GuildConfig {
     guild: string;
     prefix: string;

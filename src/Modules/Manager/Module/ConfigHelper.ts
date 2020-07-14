@@ -43,7 +43,7 @@ function configurableModules(modules: Collection<Module>): Array<Module>{
 
 
 function toggleableModules(modules: Collection<Module>): Array<Module> {
-    return modules.filter((m: Module) => !m.private && !m.alwaysEnabled);
+    return modules.filter((m: Module) => !m.private && !m.alwaysEnabled && !m.noToggle);
 }
 
 
