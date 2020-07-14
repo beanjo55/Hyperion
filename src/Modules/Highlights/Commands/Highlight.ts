@@ -28,6 +28,7 @@ class Highlights extends Command{
         }
         if(ctx.args[0].toLowerCase() === "add"){
             if(!ctx.args[1]){return "Please specify a word to add";}
+            if(ctx.args[1].length < 4){return "Highlights must be at least 4 letters";}
             try{
                 await ctx.module.addUserHighlight(ctx.user.id, ctx.guild.id, ctx.args[1]);
                 return "Successfully added highlight!";

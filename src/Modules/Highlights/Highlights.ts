@@ -121,8 +121,7 @@ class Highlights extends Module{
                 fields: [
                     {
                         name: "Context Info",
-                        value: `${highlight} was said by ${msg.author.username}#${msg.author.discriminator} in ${channel.mention}
-                        **[Jump to message](https://discord.com/channels/${guild.id}/${channel.id}/${msg.id})**`
+                        value: `${highlight} was said by ${msg.author.username}#${msg.author.discriminator} in ${channel.mention}\n**[Jump to message](https://discord.com/channels/${guild.id}/${channel.id}/${msg.id})**`
                     }
                 ],
                 footer: {text: guild.name}
