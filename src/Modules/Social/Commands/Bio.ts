@@ -21,7 +21,7 @@ class Bio extends Command{
         }
         const bio = ctx.args.join(" ");
         if(bio.length > 500){
-            return "That bio is too long, be sure it's under 1020 characters!";
+            return "That bio is too long, be sure it's under 500 characters!";
         }
         Hyperion.managers.user.setBio(ctx.user.id, bio);
         return "Your bio has been set!";
