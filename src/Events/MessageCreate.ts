@@ -22,7 +22,7 @@ class MessageCreateHandler{
         if(!fetchguild){return;}
         if(!fetchguild.fetched){
             try{
-                fetchguild.fetchAllMembers();
+                if(this.fetch){fetchguild.fetchAllMembers();}
             }catch(err){
                 this.logger.error("Hyperion", `failed to fetch guild ${guild.id}, error: ${inspect(err)}`, "Member Fetch");
             }

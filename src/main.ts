@@ -129,6 +129,7 @@ export default class HyperionC extends BaseClusterWorker{
     redis: Redis.Redis;
     colors: IColors;
     private listTokens: {[key: string]: string};
+    fetch: boolean;
     constructor(setup: Setup, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions,){
         super(setup);
         this.build = coreOptions.build;
@@ -157,7 +158,7 @@ export default class HyperionC extends BaseClusterWorker{
         this.redis = new Redis({keyPrefix: `${this.build}:`});
         this.listTokens = listTokens;
         this.colors = colors;
-
+        this.fetch = coreOptions.fetch ?? true;
     }
 
     async launch(): Promise<void>{

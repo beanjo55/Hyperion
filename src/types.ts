@@ -27,6 +27,7 @@ export interface CoreOptions{
     circleCIToken: string;
     init?: boolean;
     dblToken: string;
+    fetch: boolean;
 }
 
 export interface IManagers{
