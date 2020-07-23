@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {IHyperion} from "../types";
 import {inspect} from "util";
 class ErrorHandler{

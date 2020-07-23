@@ -21,7 +21,6 @@ enum HandlerLogLevel{
     debug
 }
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 interface IHandlerConfig{
     type: HandlerType;
     ghost: boolean;
@@ -424,15 +423,16 @@ class CommandHandler extends Module{
                 fields: fieldarr
             }
         };
-        cats.forEach(cat => {
-            const cmds = this.Hyperion.commands.filter(c => !c.unlisted && c.module.toLowerCase() === cat.name.toLowerCase()).map(c => c.name).join(", ");
+        for(const cat of cats){
+            const cmds = this.Hyperion.commands.filter(c => !c.unlisted && (c.listUnder.toLowerCase() === cat.name.toLowerCase())).map(c => c.name).join(", ");
+            if(cmds.length === 0){continue;}
             const toPush: {name: string; value: string; inline: boolean} = {
                 name: cat.friendlyName,
                 value: cmds,
                 inline: false
             };
             data.embed.fields.push(toPush);
-        });
+        }
         this.updateRedisCooldown(ctx.user.id, ({name: "help", cooldownTime: 1000} as Command), this.Hyperion.global.globalCooldown);
         return data;
     }

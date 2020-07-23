@@ -29,7 +29,6 @@ class Modinfo extends Command{
                     thumbnail: {url: user.avatarURL},
                     author: {
                         name: `${user.username}#${user.discriminator} | Mod Info`,
-                        // eslint-disable-next-line @typescript-eslint/camelcase
                         icon_url: user.avatarURL
                     },
                     color: Hyperion.defaultColor,
@@ -55,7 +54,7 @@ class Modinfo extends Command{
                     inline: false
                 });
             }
-            const recents = await Hyperion.managers.modlog.getUserModLogs(ctx.guild.id, user.id, 5);
+            const recents = await Hyperion.managers.modlog.getUserModLogs(ctx.guild.id, user.id, {hideAuto: true, limit: 5, page: 0});
             if(!recents || recents.length === 0){
                 data.embed.fields!.push({name: "Recent Moderations", value: "No recent moderations", inline: false});
             }else{
@@ -79,7 +78,6 @@ class Modinfo extends Command{
                     thumbnail: {url: user.avatarURL},
                     author: {
                         name: `${user.username}#${user.discriminator} | Mod Info`,
-                        // eslint-disable-next-line @typescript-eslint/camelcase
                         icon_url: user.avatarURL
                     },
                     color: Hyperion.defaultColor,
@@ -94,7 +92,7 @@ class Modinfo extends Command{
             data.embed.fields!.push({name: "Total Moderations", value: modstats[0].toString(), inline: true});
             data.embed.fields!.push({name: "Manual Moderations", value: modstats[1].toString(), inline: true});
             data.embed.fields!.push({name: "Auto Moderations", value: modstats[2].toString(), inline: true});
-            const recents = await Hyperion.managers.modlog.getUserModLogs(ctx.guild.id, user.id, 5);
+            const recents = await Hyperion.managers.modlog.getUserModLogs(ctx.guild.id, user.id, {page: 0, hideAuto: true, limit: 5});
             if(!recents || recents.length === 0){
                 data.embed.fields!.push({name: "Recent Moderations", value: "No recent moderations", inline: false});
             }else{

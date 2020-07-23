@@ -4,14 +4,15 @@ import {default as Mod} from "../Mod";
 import { User } from "eris";
 
 
-class Modlogs extends Command{
+class Modhistory extends Command{
     constructor(){
         super({
-            name: "modlogs",
+            name: "modhistory",
             module: "mod",
-            userperms: ["mod"],
+            userperms: ["manager"],
             cooldownTime: 5000,
-            helpDetail: "Shows moderation history for a user.",
+            listUnder: "manager",
+            helpDetail: "Shows moderation history for a moderator.",
             helpUsage: "{prefix}modlogs [user]\n{prefix}modlogs [user] -type [action type]",
             helpUsageExample: "{prefix}modlogs wuper\n{prefix}modlogs boss -type mute"
         });
@@ -29,12 +30,12 @@ class Modlogs extends Command{
         }
 
         if(!ctx.args[1]){
-            const logs = await Hyperion.managers.modlog.getUserModLogs(ctx.guild.id, targetstring, {hideAuto: true, page: 0});
+            const logs = await Hyperion.managers.modlog.getModActions(ctx.guild.id, targetstring, {hideAuto: true, page: 0, limit: 25});
             if(!logs || logs.length === 0){return "No logs found!";}
             const fieldarr: FieldArray = [];
             const data: EmbedResponse = {
                 embed: {
-                    title: "User Mod Logs",
+                    title: "User Mod History",
                     timestamp: new Date,
                     color: Hyperion.defaultColor,
                     fields: fieldarr
@@ -44,7 +45,7 @@ class Modlogs extends Command{
                 data.embed.fields!.push(await this.makeField(await ctx.module.logToContext(log, Hyperion), Hyperion));
             }
             if(target){
-                data.embed.title = `Mod Logs for ${target.username}#${target.discriminator}`;
+                data.embed.title = `Mod History for ${target.username}#${target.discriminator}`;
                 data.embed.footer = {text: `User ID: ${target.id}`};
             }else{
                 data.embed.footer = {text: `User ID: ${targetstring}`};
@@ -56,12 +57,12 @@ class Modlogs extends Command{
             if(!ctx.args[2]){return "You need to specify a type of mod action when using the `-type` option.";}
             const action = ctx.module.actions[ctx.args[2].toLowerCase()];
             if(!action){return "Invalid user provided, try their user ID or mention.";}
-            const logs = await Hyperion.managers.modlog.getUserModLogs(ctx.guild.id, targetstring, {filter: ctx.args[2].toLowerCase(), hideAuto: true, page: 0});
+            const logs = await Hyperion.managers.modlog.getModActions(ctx.guild.id, targetstring, {filter: ctx.args[2].toLowerCase(), hideAuto: true, page: 0});
             if(!logs || logs.length === 0){return "No logs found!";}
             const fieldarr: FieldArray = [];
             const data: EmbedResponse = {
                 embed: {
-                    title: "User Mod Logs",
+                    title: "User Mod History",
                     timestamp: new Date,
                     color: Hyperion.defaultColor,
                     fields: fieldarr
@@ -71,7 +72,7 @@ class Modlogs extends Command{
                 data.embed.fields!.push(await this.makeField(await ctx.module.logToContext(log, Hyperion), Hyperion));
             }
             if(target){
-                data.embed.title = `Mod Logs for ${target.username}#${target.discriminator}`;
+                data.embed.title = `Mod History for ${target.username}#${target.discriminator}`;
                 data.embed.footer = {text: `User ID: ${target.id}`};
             }else{
                 data.embed.footer = {text: `User ID: ${targetstring}`};
@@ -83,11 +84,11 @@ class Modlogs extends Command{
 
     async makeField(ctx: IModerationContext, Hyperion: IHyperion): Promise<Field>{
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        let moderator = Hyperion.client.users.get(ctx.moderator) ?? await Hyperion.client.getRESTUser(ctx.moderator).catch(() => {});
-        moderator = moderator as User;
+        let user = Hyperion.client.users.get(ctx.user) ?? await Hyperion.client.getRESTUser(ctx.user).catch(() => {});
+        user = user as User;
         const data: Field = {
             name: `Case ${ctx.case}`,
-            value: `**Action:** ${Hyperion.modules.get("mod")!.actions[ctx.moderationType].friendlyName}\n**Date:** ${new Date(ctx.time).toDateString()}\n**Moderator:** ${moderator.username}#${moderator.discriminator}\n**Reason:** ${ctx.reason}`,
+            value: `**Action:** ${Hyperion.modules.get("mod")!.actions[ctx.moderationType].friendlyName}\n**Date:** ${new Date(ctx.time).toDateString()}\n**User:** ${user.username}#${user.discriminator}\n**Reason:** ${ctx.reason}`,
             inline: false
         };
         if(ctx.stringLength){
@@ -96,4 +97,4 @@ class Modlogs extends Command{
         return data;
     }
 }
-export default Modlogs;
+export default Modhistory;

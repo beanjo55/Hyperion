@@ -49,7 +49,8 @@ class Starboard extends Module{
             description: "Posts in ignored channels will never show on the starboard, even if they are starred",
             friendlyName: "Ignored Channels",
             dataType: "channel",
-            array: true
+            array: true,
+            default: []
         }));
 
         col.add(new ConfigKey({

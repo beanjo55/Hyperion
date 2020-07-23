@@ -2,7 +2,6 @@
 import {inspect} from "util";
 import {IHyperion, HyperionGuild} from "../types";
 import {Message, Guild} from "eris";
-import {Module} from "../Core/Structures/Module";
 const eventName = "messageCreate";
 class MessageCreateHandler{
     name: string;
@@ -30,12 +29,10 @@ class MessageCreateHandler{
             (this.client.guilds.get(guild.id) as HyperionGuild).fetched = true;
         }
         
-        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
-        subscribed.forEach((m: Module) => {
+        const subscribed = this.modules.filter(M => M.subscribedEvents.includes(eventName));
+        subscribed.forEach(m => {
             m.messageCreate(this, msg);
         });
-        //this.handler.handler(msg, this);
-        //msg.channel.createMessage("```js\n" + inspect(await this.handler(msg), {depth: 1}) + "```");
     }
 }
 export default new MessageCreateHandler;

@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix */
+
 /* eslint-disable no-unused-vars */
-import {Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, ClientOptions, GuildChannel} from "eris";
+import {Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, GuildChannel} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
 import {manager as MGM, QuoteConfig as qc, GoodbyeConfig as gc, LogEvent as le, WelcomeConfig as wc, AutoroleConfig as arc, SocialConfig as sc, RRConfig as rrc, RankConfig as rc, TagConfig as tc, LoggingConfig as lc, StarboardConfig as sbc, ModuleConfig as mc, ModConfig as modc, CommandConfig as cc} from "./Core/DataManagers/MongoGuildManager";
@@ -59,13 +59,15 @@ export interface IUtils{
     getColor(roles: Collection<Role>, guildRoles: Collection<Role>): number;
     sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>): Array<Role>;
     resolveTextChannel(guild: Guild, msg: Message, search: string): GuildTextableChannel | undefined;
-    resolveVoicechannel(guild: Guild, msg: Message, search: string): VoiceChannel | undefined;
+    resolveVoiceChannel(guild: Guild, msg: Message, search: string): VoiceChannel | undefined;
     resolveCategory(guild: Guild, msg: Message, search: string): CategoryChannel | undefined;
     input2boolean(input: string): boolean | undefined;
     strictResolver(search: string, members: Collection<Member>): Member | undefined;
     banResolver(search: string, members: Collection<Member>, Hyperion: IHyperion): Promise<Member | User | undefined>;
     resolveRole(input: string, roles: Collection<Role>): Role | undefined;
     resolveGuildChannel(guild: Guild, msg: Message, search: string): GuildChannel | undefined;
+    parseMessageLink(input: string): null | {guild: string; channel: string; message: string};
+    hasUnicodeEmote(input: string): boolean;
 }
 
 
@@ -218,155 +220,6 @@ export interface GlobalConfig{
     data: any;
 }
 
-
-export enum IPCEvents {
-	EVAL = "eval",
-	SERVICE_EVAL = "serviceEval",
-	READY = "ready",
-	SHARD_READY = "shardReady",
-	SHARD_CONNECTED = "shardConnected",
-	SHARD_RESUMED = "shardResumed",
-	SHARD_DISCONNECTED = "shardDisconnected",
-	ERROR = "error",
-	SHUTDOWN = "shutdown",
-	GET = "get",
-	SET = "set",
-	FETCH_USER = "fetchUser",
-	FETCH_GUILD = "fetchGuild",
-	FETCH_CHANNEL = "fetchChannel",
-	SERVICE_COMMAND = "serviceCommand",
-	GET_STATS = "getStats"
-}
-
-export enum SharderEvents {
-	SERVICE_SPAWN = "serviceSpawn",
-	SERVICE_READY = "serviceReady",
-	CLUSTER_SPAWN = "clusterSpawn",
-	CLUSTER_READY = "clusterReady",
-	SHARD_CONNECTED = "shardConnected",
-	SHARD_READY = "shardReady",
-	SHARD_RESUMED = "shardResumed",
-	SHARD_DISCONNECT = "shardDisconnect",
-	STATS_UPDATED = "statsUpdated",
-	DEBUG = "debug",
-	ERROR = "error"
-}
-
-export interface IPCEvent {
-	op: IPCEvents;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	d?: any;
-}
-
-export interface IPCResult {
-	success: boolean;
-	d: unknown;
-}
-
-export interface IPCError {
-	name: string;
-	message: string;
-	stack?: string;
-}
-
-export interface IPCEvalResults {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	results: any[];
-	errors: IPCError[];
-}
-
-export interface ProcessStats {
-	/** https://nodejs.org/api/process.html#process_process_memoryusage */
-	memory: NodeJS.MemoryUsage;
-	/** https://nodejs.org/api/process.html#process_process_cpuusage_previousvalue */
-	cpu: NodeJS.CpuUsage;
-	discord?: {
-		guilds: number;
-		/** The current latency between the shard and Discord, in milliseconds */
-		latencies: number[];
-		/** How long in milliseconds the bot has been up for */
-        uptime: number;
-        users: number;
-	};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	[key: string]: any;
-}
-
-export interface HyperionStats {
-	clusters: Record<number, ProcessStats>;
-	services: Record<string, ProcessStats>;
-	manager: ProcessStats;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	[key: string]: any;
-}
-
-export interface ShardOptions {
-	first: number;
-	last: number;
-	total: number;
-}
-
-export interface IClusterOptions {
-	id: number;
-	shards: ShardOptions;
-}
-
-export interface ServiceOptions {
-	name: string;
-	/** How many milliseconds to wait for the service worker to be ready */
-	timeout?: number;
-}
-
-export interface ISharderOptions {
-	/** Path to the js file for clusters to run */
-	path: string;
-	/** Discord bot token */
-	token: string;
-	/** Number of guilds each shard should have (at initial sharding) (Only used if shardCount is set to 'auto') */
-	guildsPerShard?: number;
-	/** Number of shards to create */
-	shardCount?: number | "auto";
-	/** Maximum number of clusters to create */
-	clusterCount?: number;
-	/** Options to pass to the Eris client constructor */
-	clientOptions?: ClientOptions;
-	/** How long to wait for a cluster to connect before throwing an error, multiplied by the number of thousands of guilds */
-	timeout?: number;
-	/** An array of arguments to pass to the cluster node processes */
-	nodeArgs?: string[];
-	/** The socket/port for IPC to run on */
-	ipcSocket?: string | number;
-	/** How often to update stats (in milliseconds) */
-    statsInterval?: number;
-    delay: number;
-}
-
-export interface ISessionObject {
-	url: string;
-	shards: number;
-	session_start_limit: {
-		total: number;
-		remaining: number;
-        reset_after: number;
-        max_concurency: number;
-	};
-}
-
-export interface IClusterShardInfo {
-	/** First 0-indexed shard for this cluster */
-	first: number;
-	/** Last 0-indexed shard for this cluster */
-	last: number;
-	/** Total number of shards across all clusters */
-	total: number;
-}
-
-export interface IClusteringOptions{
-    clusters: number;
-    shards: number | "auto";
-    delay: number;
-}
-
 export interface IMongoUpdateResult{
     n: number;
     nModified: number;
@@ -394,6 +247,8 @@ export interface IModerationContext{
     mid?: string;
     stringLength?: string;
     moderationEnd?: boolean;
+    autoEnd: boolean;
+    logChannel?: string;
 }
 
 export type EmbedResponse = {embed: Partial<Embed>};

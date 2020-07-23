@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix */
 import {Schema, model, Model, Document} from "mongoose";
 import * as Types from "../types";
 import * as confs from "../Core/DataManagers/MongoGuildManager";
@@ -131,7 +130,8 @@ const guildconf = new Schema({
 
 },{
     minimize: false,
-    autoIndex: true
+    autoIndex: true,
+    strict: false
 });
 
 export interface IGuild{

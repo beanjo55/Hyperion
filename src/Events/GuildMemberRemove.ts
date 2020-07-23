@@ -1,7 +1,6 @@
 
 import {IHyperion} from "../types";
 import {Guild, Member} from "eris";
-import {Module} from "../Core/Structures/Module";
 const eventName = "guildMemberRemove";
 class GuildMemberRemoveHandler{
     name: string;
@@ -10,8 +9,8 @@ class GuildMemberRemoveHandler{
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async handle(this: IHyperion, guild: Guild, member: Member|any): Promise<void>{
-        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
-        subscribed.forEach((m: Module) => {
+        const subscribed = this.modules.filter(M => M.subscribedEvents.includes(eventName));
+        subscribed.forEach(m => {
             m.guildMemberRemove(this, guild, member);
         });
     }

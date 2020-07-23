@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import {IHyperion} from "../types";
 import {Guild, User} from "eris";
-import {Module} from "../Core/Structures/Module";
 const eventName = "guildBanRemove";
 class GuildBanRemoveHandler{
     name: string;
@@ -9,8 +8,8 @@ class GuildBanRemoveHandler{
         this.name = "guildBanRemove";
     }
     async handle(this: IHyperion, guild: Guild, user: User): Promise<void>{
-        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
-        subscribed.forEach((m: Module) => {
+        const subscribed = this.modules.filter(M => M.subscribedEvents.includes(eventName));
+        subscribed.forEach(m => {
             m.guildBanRemove(this, guild, user);
         });
     }

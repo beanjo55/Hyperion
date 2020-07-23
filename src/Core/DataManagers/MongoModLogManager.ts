@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
-
 import {default as model, IModLogModel, IModLog, IModLogDoc} from "../../MongoDB/Modlog";
 import { IMongoUpdateResult, IModerationContext } from "../../types";
 import {inspect} from "util";
@@ -22,7 +19,8 @@ class MongoModLogManager{
             caseNumber: ctx.case!,
             auto: ctx.auto,
             timeGiven: Date.now(),
-            reason: ctx.reason
+            reason: ctx.reason,
+            autoEnd: ctx.autoEnd
         };
         if(ctx.stringLength){
             data.stringLength = ctx.stringLength;
@@ -39,8 +37,16 @@ class MongoModLogManager{
         return await this.model.create(data).catch(err => console.log(inspect(err) + "\n\n\n" + inspect(ctx))) as unknown as IModLogDoc;
     }
 
-    async addMessageID(mid: string, id: string): Promise<IMongoUpdateResult>{
-        return this.model.updateOne({mid: mid}, {logPost: id});
+    async removeModerationTime(mid: string): Promise<void>{
+        await this.model.updateOne({mid: mid}, {length: 0, stringLength: ""});
+    }
+
+    async updateModerationTime(mid: string, length: number, stringLength: string): Promise<void>{
+        await this.model.updateOne({mid: mid}, {length: length, stringLength: stringLength});
+    }
+
+    async addMessageID(mid: string, id: string, channelID: string): Promise<IMongoUpdateResult>{
+        return this.model.updateOne({mid: mid}, {logPost: id, logChannel: channelID});
     }
 
     async markExpired(mid: string): Promise<IMongoUpdateResult>{
@@ -80,39 +86,42 @@ class MongoModLogManager{
         return await this.model.updateOne({mid: mid}, {reason: reason});
     }
 
-    async getUserModLogs(guild: string, user: string, limit?: number, filter?: string, hideAuto = true): Promise<Array<IModLog> | null>{
-        let query = null;
-        if(filter){
-            if(hideAuto){
-                query = this.model.find({guild: guild, user: user, moderationType: filter, auto: false}).sort({caseNumber: -1});
-            }else{
-                query = this.model.find({guild: guild, user: user, moderationType: filter}).sort({caseNumber: -1});
+    async getUserModLogs(guild: string, user: string, options: {hideAuto: boolean; filter?: string; page: number, limit?: number}): Promise<Array<IModLog> | null>{
+        const query = this.model.find({guild: guild, user: user});
+        
+        if(options.hideAuto !== undefined && options.hideAuto === true){
+            query.where({auto: false});
+        }
+        if(options.filter !== undefined){
+            query.where({moderationType: options.filter});
+        }
+        if(options.page !== undefined){
+            if(options.page !== 0){
+                query.skip(25*options.page);
             }
-            
         }else{
-            if(hideAuto){
-                query = this.model.find({auto: false, guild: guild, user: user}).sort({caseNumber: -1});
-            }else{
-                query = this.model.find({guild: guild, user: user}).sort({caseNumber: -1});
-            }
+            query.limit(options.limit ?? 25);
         }
-        if(limit){
-            query = query.limit(limit);
-        }
-        return await query.lean<IModLog>().exec();
+        return await query.sort({caseNumber: -1}).lean<IModLog>().exec();
     }
 
-    async getModActions(guild: string, user: string, filter?: string, limit?: number): Promise<Array<IModLog> | null>{
-        let query = null;
-        if(filter){
-            query = this.model.find({guild: guild, moderator: user, moderationType: filter});
+    async getModActions(guild: string, user: string, options: {hideAuto: boolean; filter?: string; page: number, limit?: number}): Promise<Array<IModLog> | null>{
+        const query = this.model.find({guild: guild, moderator: user});
+        
+        if(options.hideAuto !== undefined && options.hideAuto === true){
+            query.where({auto: false});
+        }
+        if(options.filter !== undefined){
+            query.where({moderationType: options.filter});
+        }
+        if(options.page !== undefined){
+            if(options.page !== 0){
+                query.skip(25*options.page);
+            }
         }else{
-            query = this.model.find({guild: guild, moderator: user});
+            query.limit(options.limit ?? 25);
         }
-        if(limit){
-            query = query.limit(limit);
-        }
-        return await query.lean<IModLog>().exec();
+        return await query.sort({caseNumber: -1}).lean<IModLog>().exec();
     }
 
     async moderationCount(guild: string, user: string): Promise<Array<number>>{

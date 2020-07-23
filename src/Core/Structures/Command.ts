@@ -28,6 +28,7 @@ export class Command{
     contrib: boolean;
     unlisted: boolean;
     noSubList = false;
+    listUnder: string;
 
 
     constructor(data: Partial<Command>){
@@ -69,6 +70,7 @@ export class Command{
         if(data.noSubList !== undefined){
             this.noSubList = data.noSubList;
         }
+        this.listUnder = data.listUnder ?? this.module;
     }
 
 

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable no-unused-vars */
 import {IHyperion} from "../types";
 import {Member, VoiceChannel} from "eris";
 class VoiceChannelJoinHandler{

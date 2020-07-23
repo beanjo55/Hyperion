@@ -1,5 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 import {IHyperion, ICommandContext} from "../../../types";
+import {default as mod} from "../Mod";
 
 class Unban extends Command{
     constructor(){
@@ -14,7 +15,7 @@ class Unban extends Command{
         });
     }
 
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
+    async execute(ctx: ICommandContext<mod>, Hyperion: IHyperion): Promise<string>{
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "Cache falure, could not find bot user";}
         if(!bot.permission.has("banMembers")){return "I need the `Ban Members` permission to unban members";}
@@ -33,14 +34,16 @@ class Unban extends Command{
             await ctx.guild.unbanMember(ctx.args[0], auditReason);
             const user = Hyperion.client.users.get(ctx.args[0]) ?? await Hyperion.client.getRESTUser(ctx.args[0]);
             if(!user){return "This should be an unreachable error!";}
-            ctx.module.makeLog(Hyperion, {
+            ctx.module.makeLog({
                 user: user.id,
                 moderator: ctx.member.id,
                 moderationType: "unban",
                 reason: reason,
                 auto: false,
                 case: -1,
-                guild: ctx.guild
+                guild: ctx.guild,
+                autoEnd: false,
+                time: Date.now()
             }, user);
             return `Successfuly unbanned ${user.username}#${user.discriminator}`;
         }catch{

@@ -56,7 +56,6 @@ class Eval extends Command{
         }
         const data ={
             embed: {
-                // eslint-disable-next-line @typescript-eslint/camelcase
                 author: { name: "Eval Results", icon_url: ctx.user.avatarURL },
                 description: "```js\n" + output + "```",
                 color: Hyperion.defaultColor,

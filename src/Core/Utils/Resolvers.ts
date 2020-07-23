@@ -1,14 +1,5 @@
-// eslint-disable-next-line no-unused-vars
 import {Member, Role, Message, Collection, User} from "eris";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import  HyperionC  from "../../main";
-
-
-
-
-
-
-
 
 export function resolveUser(msg: Message, search: string, members: Collection<Member>): Member | undefined{
     if(!(msg.channel.type === 0 || msg.channel.type === 5)){ return;}
@@ -26,7 +17,7 @@ export function resolveUser(msg: Message, search: string, members: Collection<Me
     return member;
 }
 
-// eslint-disable-next-line no-unused-vars
+
 export function hoistUserResolver(msg: Message, search: string, members: Collection<Member>): Member | undefined{
     if(!(msg.channel.type === 0 || msg.channel.type === 5)){ return;}
     if(!search){

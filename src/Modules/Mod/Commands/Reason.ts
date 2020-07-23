@@ -15,8 +15,7 @@ class Reason extends Command{
         });
     }
 
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        const module = (ctx.module as Mod);
+    async execute(ctx: ICommandContext<Mod>, Hyperion: IHyperion): Promise<string>{
         if(!ctx.args[0]){return "Please specify a case number!";}
         const caseNum = Number(ctx.args[0]);
         if(isNaN(caseNum) || caseNum < 1){return "Please enter a valid case number!";}
@@ -27,13 +26,13 @@ class Reason extends Command{
         await Hyperion.managers.modlog.updateReason(caseData.mid, ctx.args.slice(1).join(" "));
         caseData.reason = ctx.args.slice(1).join(" ");
         if(caseData.logPost){
-            const channel = await module.getLogChannel(Hyperion, ctx.guild.id);
+            const channel = caseData.logChannel !== undefined ? caseData.logChannel : undefined ?? await ctx.module.getLogChannel(ctx.guild.id);
             if(channel){
                 const channelObj = ctx.guild.channels.get(channel);
                 if(channelObj && channelObj?.type === 0){
                     // eslint-disable-next-line @typescript-eslint/no-empty-function
                     const user = (Hyperion.client.users.get(caseData.user) ?? await Hyperion.client.getRESTUser(caseData.user).catch(() => {})) as User;
-                    const post = module.makeEmbed(module.logToContext(caseData, Hyperion), user);
+                    const post = ctx.module.makeEmbed(await ctx.module.logToContext(caseData), user);
                     // eslint-disable-next-line @typescript-eslint/no-empty-function
                     const oldPost = (channelObj.messages.get(caseData.logPost) ?? await channelObj.getMessage(caseData.logPost).catch(() => {})) as Message;
                     if(!oldPost){return "Success!";}

@@ -1,6 +1,7 @@
 import {Command} from "../../../Core/Structures/Command";
-import { ICommandContext, IHyperion } from "../../../types";
+import { ICommandContext, IHyperion, ModConfig } from "../../../types";
 import { User, Member } from "eris";
+import {default as mod} from "../Mod";
 
 
 
@@ -24,7 +25,7 @@ class Ban extends Command{
         this.argShift = 0;
     }
 
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
+    async execute(ctx: ICommandContext<mod>, Hyperion: IHyperion): Promise<string>{
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "Cache Failure, couldn't find bot user";}
         if(!ctx.args[this.argShift]){return "Please specify a user!";}
@@ -37,7 +38,8 @@ class Ban extends Command{
             return await this.doBan(ctx, Hyperion, toBan, ctx.args.slice(this.argShift+1).join(" "));
         }
         if(toBan instanceof Member){
-            if(await ctx.module.isMod(Hyperion, toBan, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
+            if(await ctx.module.isMod(toBan, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
+            if(await ctx.module.isProtected(toBan, ctx.guild)){return "That user is protected from mod actions!";}
             if(bot.roles.length === 0){return "I need a role higher than the user's highest role to ban them, I can't do that with no roles!";}
             const userRoles = Hyperion.utils.sortRoles(toBan.roles, ctx.guild.roles);
             const botRoles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
@@ -47,12 +49,14 @@ class Ban extends Command{
         return "You shouldnt be able to see this message, but if you do, Congrats! You found a bug!";
     }
 
-    async doBan(ctx: ICommandContext, Hyperion: IHyperion, user: User, reason: string): Promise<string>{
+    async doBan(ctx: ICommandContext<mod>, Hyperion: IHyperion, user: User, reason: string): Promise<string>{
         if(!reason){reason = "No reason given.";}
         let auditReason = reason;
         if(auditReason.length > 509){
             auditReason = auditReason.substring(0, 508) + "...";
         }
+        const config = await Hyperion.managers.guild.getModuleConfig<ModConfig>(ctx.guild.id, "mod");
+        if(config.dmOnBan){await ctx.module.banDM(user, ctx.guild.name, reason);}
         try{
             console.log("trying to ban");
             await ctx.guild.banMember(user.id, this.banDays, auditReason);
@@ -60,7 +64,7 @@ class Ban extends Command{
             return "Something went wrong!";
         }
         console.log("making log");
-        ctx.module.makeLog(Hyperion, {
+        ctx.module.makeLog({
             user: user.id,
             moderator: ctx.member.id,
             moderationType: "ban",
@@ -69,7 +73,8 @@ class Ban extends Command{
             case: -1,
             guild: ctx.guild,
             time: Date.now(),
-            moderationEnd: false
+            moderationEnd: false,
+            autoEnd: false
         }, user);
         console.log("check delete");
         this.modDeleteAfter(ctx, Hyperion);

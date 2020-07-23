@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import { Guild, GuildChannel, Message, VoiceChannel, CategoryChannel, GuildTextableChannel } from "eris";
 
 

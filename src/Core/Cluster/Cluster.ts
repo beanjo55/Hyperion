@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable indent */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable no-mixed-spaces-and-tabs */
@@ -125,7 +126,7 @@ export class Cluster {
 	            }
 	            case "collectStats": {
 	                if (!this.client) return;
-	                const shardStats: { id: number; ready: boolean; latency: number; status: string; guilds: number; users: number}[] = [];
+	                const shardStats: { id: number; ready: boolean; latency: number; status: string; guilds: number; users: number, unavailableGuilds: number}[] = [];
 	                const getShardUsers = (id: number) => {
 	                    let users = 0;
 	                    for(const [key, value] of Object.entries(this.client.guildShardMap)) {
@@ -141,7 +142,8 @@ export class Cluster {
 	                        latency: shard.latency,
 	                        status: shard.status,
 	                        guilds: Object.values(this.client.guildShardMap).filter(e => e == shard.id).length,
-	                        users: getShardUsers(shard.id)
+							users: getShardUsers(shard.id),
+							unavailableGuilds: this.client.guilds.filter(g => (g.shard.id === shard.id) && g.unavailable).length
 	                    });
 	                });
 	                if (process.send) process.send({op: "collectStats", stats: {
@@ -151,7 +153,9 @@ export class Cluster {
 	                    voice: this.client.voiceConnections.size,
 	                    largeGuilds: this.client.guilds.filter(g => g.large).length,
 	                    shardStats: shardStats,
-	                    ram: process.memoryUsage().rss / 1e6
+						ram: process.memoryUsage().rss / 1e6,
+						unavailableGuilds: this.client.guilds.filter(g => g.unavailable).length,
+						exclusiveGuilds: this.client.guilds.filter(g => g.members.filter(m => m.bot).length === 1).length
 	                }});
 
 	                break;
@@ -202,7 +206,20 @@ export class Cluster {
 	                this.loadCode();
 
 	                break;
-	            }
+				}
+				case "eval": {
+					let result;
+					let error = false;
+					try{
+						result = await eval(message.msg.code);
+					}catch(err){
+						result = err.message;
+						error = true;
+					}
+					if(typeof(result) !== "string"){ result = inspect(result, {depth: 0});}
+					if(process.send) process.send({op: "sendTo", cluster: message.msg.from, event: {msg: {result: result, error: error}, op: "evalResponse"}});
+
+				}
 	            }
 	        }
 	    });
@@ -284,8 +301,6 @@ export class Cluster {
 		
 	    //this.client.connect();
 	    // Connects the bot
-	    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-	    //@ts-ignore
 	    //this.launch();
 	}
 
@@ -295,7 +310,6 @@ export class Cluster {
 	    //App = App.default ? App.default : App;
 	    if(this.loaded){return;}
 	    this.app = new this.App({client: this.client, clusterID: this.clusterID, workerID: worker.id}, config.coreOptions, config.mongoLogin, config.mongoOptions);
-	    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 	    //@ts-ignore
 	    await this.app.launch();
 	    this.loaded = true;

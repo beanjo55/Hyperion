@@ -15,7 +15,8 @@ class Embeds extends Command{
             helpUsage: "[See the command usage on the docs](https://docs.beanjo55.dev)",
             noExample: true,
             hasSub: true,
-            noSubList: true
+            noSubList: true,
+            listUnder: "manager"
         });
     }
 

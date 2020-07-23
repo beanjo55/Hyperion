@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {inspect} from "util";
 import {IHyperion} from "../types";
 class RawWSHandler{

@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {IHyperion, ICommandContext, IModerationContext} from "../../../types";
+import {IHyperion, ICommandContext, IModerationContext, ModConfig} from "../../../types";
 import {default as Mod} from "../Mod";
 
 class Mute extends Command{
@@ -16,7 +16,7 @@ class Mute extends Command{
     }
 
     async execute(ctx: ICommandContext<Mod>, Hyperion: IHyperion): Promise<string>{
-        const roleCheck = await ctx.module.checkMuteRole(Hyperion, ctx.guild);
+        const roleCheck = await ctx.module.checkMuteRole(ctx.guild);
         if(typeof roleCheck === "string"){return roleCheck;}
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){
@@ -24,13 +24,14 @@ class Mute extends Command{
             return "Somehthing went wrong";
         }
         if(!bot.permission.has("manageRoles")){return "I need the `Manage Roles` permission to mute users.";}
-        if(!await ctx.module.canManageRole(Hyperion, ctx.guild, roleCheck, bot)){
+        if(!await ctx.module.canManageRole(ctx.guild, roleCheck, bot)){
             return "I can't manage the mute role, make sure I have a role that is above the mute role in the role list!";
         }
         if(!ctx.args[0]){return "Please specify a user to mute!";}
         const target = Hyperion.utils.strictResolver(ctx.args[0], ctx.guild.members);
         if(!target){return "Invalid user provided, try their user ID or mention.";}
-        if(await ctx.module.isMod(Hyperion, target, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
+        if(await ctx.module.isMod(target, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
+        if(await ctx.module.isProtected(target, ctx.guild)){return "That user is protected from mod actions!";}
         if(target.roles.includes(roleCheck.id)){return "That user is already muted!";}
         let reason = "No reason provided.";
         let time = 0;
@@ -49,6 +50,8 @@ class Mute extends Command{
                 reason = ctx.args.slice(1).join(" ");
             }
         }
+        const config = await Hyperion.managers.guild.getModuleConfig<ModConfig>(ctx.guild.id, "mod");
+        if(config.dmOnMute){await ctx.module.muteDM(target.user, ctx.guild.name, reason, stringLength !== "" ? stringLength : undefined);}
         try{
             await target.addRole(roleCheck.id, "Hyperion Mute");
             const data: IModerationContext = {
@@ -61,7 +64,8 @@ class Mute extends Command{
                 case: -1,
                 auto: false,
                 guild: ctx.guild,
-                moderationEnd: false
+                moderationEnd: false,
+                autoEnd: false
             };
             if(time !== 0){
                 data.length = time;
@@ -69,7 +73,7 @@ class Mute extends Command{
             if(stringLength !== ""){
                 data.stringLength = stringLength;
             }
-            ctx.module.makeLog(Hyperion, data, target.user);
+            ctx.module.makeLog(data, target.user);
             this.modDeleteAfter(ctx, Hyperion);
             return `Muted ${target.username}#${target.discriminator}`;
         }catch{

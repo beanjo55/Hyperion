@@ -29,6 +29,7 @@ class Logging extends Command{
             name: "logging",
             module: "logging",
             userperms: ["manager"],
+            listUnder: "manager",
             
             helpDetail: "Configures the logging settings for the server, running the command with no inputs shows current settings",
             helpUsage: "{prefix}logging\n{prefix}logging [setting] [value]\n{prefix}logging enable [event name]\n{prefix}logging disable [event name]",

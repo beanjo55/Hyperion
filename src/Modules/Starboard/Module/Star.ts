@@ -21,7 +21,6 @@ async function createPost(Hyperion: IHyperion, starred: Message, conf: GuildConf
             timestamp: new Date,
             description: `**[Original Message](${msglink})**\n${starred.channel.mention}\n${starred.cleanContent}`,
             author: {
-                // eslint-disable-next-line @typescript-eslint/camelcase
                 icon_url: starred.author.avatarURL,
                 name: `${starred.author.username}#${starred.author.discriminator}`
             }

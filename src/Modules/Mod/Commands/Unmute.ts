@@ -15,9 +15,8 @@ class Unmute extends Command{
         });
     }
 
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        const module = ctx.module as Mod;
-        const roleCheck = await module.checkMuteRole(Hyperion, ctx.guild);
+    async execute(ctx: ICommandContext<Mod>, Hyperion: IHyperion): Promise<string>{
+        const roleCheck = await ctx.module.checkMuteRole(ctx.guild);
         if(typeof roleCheck === "string"){return roleCheck;}
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){
@@ -25,19 +24,20 @@ class Unmute extends Command{
             return "Somehthing went wrong";
         }
         if(!bot.permission.has("manageRoles")){return "I need the `Manage Roles` permission to unmute users.";}
-        if(!await ctx.module.canManageRole(Hyperion, ctx.guild, roleCheck, bot)){
+        if(!await ctx.module.canManageRole(ctx.guild, roleCheck, bot)){
             return "I can't manage the mute role, make sure I have a role that is above the mute role in the role list!";
         }
         if(!ctx.args[0]){return "Please specify a user to unmute";}
         const target = Hyperion.utils.strictResolver(ctx.args[0], ctx.guild.members);
         if(!target){return "Invalid user provided, try their user ID or mention.";}
-        if(await module.isMod(Hyperion, target, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
+        if(await ctx.module.isMod(target, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
+        if(await ctx.module.isProtected(target, ctx.guild)){return "That user is protected from mod actions!";}
         if(!target.roles.includes(roleCheck.id)){return "That user is not muted!";}
         let reason = "No reason provided";
         if(ctx.args[1]){
             reason = ctx.args.slice(1).join(" ");
         }
-        module.removeActiveMutes(ctx.guild.id, target.id);
+        ctx.module.removeActiveMutes(ctx.guild.id, target.id);
         try{
             await target.removeRole(roleCheck.id, "Hyperion Unmute");
             const data: IModerationContext = {
@@ -50,9 +50,10 @@ class Unmute extends Command{
                 case: -1,
                 auto: false,
                 guild: ctx.guild,
-                moderationEnd: false
+                moderationEnd: false,
+                autoEnd: false
             };
-            module.makeLog(Hyperion, data, target.user);
+            ctx.module.makeLog(data, target.user);
             return `Unmuted ${target.username}#${target.discriminator}`;
         }catch{
             return "Something went wrong!";

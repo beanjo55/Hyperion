@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
 import {IHyperion} from "../types";
 import {Message} from "eris";
 class MessageReactionRemoveAllHandler{

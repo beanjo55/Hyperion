@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import {Schema, model, Document, Model} from "mongoose";
 const modlog = new Schema({
@@ -81,13 +80,21 @@ const modlog = new Schema({
     },
     stringLength: {
         type: String
+    },
+    autoEnd: {
+        type: Boolean,
+        default: false
+    },
+    logChannel: {
+        type: String
     }
     
     
 
 },{
     autoIndex: true,
-    minimize: false
+    minimize: false,
+    strict: false
 });
 modlog.index({guild: 1, user: 1});
 modlog.index({guild: 1, moderator: 1});
@@ -113,6 +120,8 @@ export interface IModLog{
     logPost?: string;
     auto: boolean;
     stringLength?: string;
+    autoEnd: boolean;
+    logChannel?: string;
 }
 export interface IModLogDoc extends Document, IModLog{}
 export interface IModLogModel extends Model<IModLogDoc>{}

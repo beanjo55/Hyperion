@@ -9,7 +9,8 @@ class Channelinfo extends Command{
             module: "info",
             helpDetail: "Shows information on a channel.",
             helpUsage: "{prefix}channelinfo [channel]",
-            helpUsageExample: "{prefix}channelinfo #contribs"
+            helpUsageExample: "{prefix}channelinfo #contribs",
+            unlisted: true
         });
     }
 

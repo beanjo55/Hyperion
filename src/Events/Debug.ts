@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {IHyperion} from "../types";
 class DebugHandler{
     name: string;

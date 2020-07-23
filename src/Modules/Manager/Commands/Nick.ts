@@ -9,7 +9,7 @@ class Nick extends Command{
             module: "manager",
             aliases: ["nickname"],
             userperms: ["manager"],
-            cooldownTime: 30000,
+            cooldownTime: 10000,
 
             helpDetail: "Changes the bot nickname in the server.",
             helpUsage: "{prefix}nick [new nickname]",

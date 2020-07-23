@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {IGuild, IGuildDoc, IGuildModel, default as model} from "../../MongoDB/Guild";
 import * as Types from "../../types";
 import {Embed, Collection} from "eris";
@@ -59,9 +58,11 @@ export class ModConfig{
     warnLogChannel: string;
     muteLogChannel: string;
     kickLogChannel: string;
+    protectWarns: boolean;
     constructor(data: Partial<ModConfig>){
         this.modRoles = data.modRoles ?? [];
         this.protectedRoles = data.protectedRoles ?? [];
+        this.protectWarns = data.protectWarns ?? false;
 
         this.deleteAfter = data.deleteAfter ?? -1;
         this.modLogChannel = data.modLogChannel ?? "";
@@ -78,10 +79,10 @@ export class ModConfig{
         this.dmOnMute = data.dmOnMute ?? false;
         this.dmOnUnmute = data.dmOnUnmute ?? false;
 
-        this.banLogChannel = data.banLogChannel ?? this.modLogChannel ?? "";
-        this.kickLogChannel = data.kickLogChannel ?? this.modLogChannel ?? "";
-        this.muteLogChannel = data.muteLogChannel ?? this.modLogChannel ?? "";
-        this.warnLogChannel = data.warnLogChannel ?? this.modLogChannel ?? "";
+        this.banLogChannel = data.banLogChannel ?? "";
+        this.kickLogChannel = data.kickLogChannel ?? "";
+        this.muteLogChannel = data.muteLogChannel ?? "";
+        this.warnLogChannel = data.warnLogChannel ?? "";
     }
 }
 
@@ -245,18 +246,38 @@ export class RankConfig{
     }
 }
 
+export class ReactionRole{
+    channel: string;
+    erMap: Map<string, string>;
+    name: string;
+    constructor(data: Partial<ReactionRole>){
+        this.channel = data.channel ?? "";
+        if(data.erMap){
+            if(!(data.erMap instanceof Map)){this.erMap = new Map<string, string>(Object.entries(data.erMap));}
+            this.erMap = data.erMap;
+        }else{
+            this.erMap = new Map<string, string>();
+        }
+        this.name = data.name ?? "unnamed";
+    }
+}
+
 export class RRConfig{
     limitOne: boolean;
     limitOnePerGroup: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rr: any;
+    rr: Map<string, ReactionRole>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rrGroups: any;
     constructor(data: Partial<RRConfig>){
         this.limitOne = data.limitOne ?? false;
         this.limitOnePerGroup = data.limitOnePerGroup ?? false;
 
-        this.rr = data.rr ?? {};
+        if(data.rr){
+            if(!(data.rr instanceof Map)){this.rr = new Map<string, ReactionRole>(Object.entries(data.rr));}
+            this.rr = data.rr;
+        }else{
+            this.rr = new Map<string, ReactionRole>();
+        }
         this.rrGroups = data.rrGroups ?? {};
     }
 }
@@ -313,7 +334,7 @@ const nameConfigMap: {[key: string]: any} = {
     welcome: WelcomeConfig,
     starboard: StarboardConfig,
     rank: RankConfig,
-    rr: RRConfig,
+    reactionRoles: RRConfig,
     social: SocialConfig,
     autorole: AutoroleConfig,
     goodbye: GoodbyeConfig,
@@ -363,6 +384,7 @@ class MongoGuildManager{
     }
 
     validateModuleState(state: boolean, module: string, modules: Collection<Module>): false | ModuleConfig{
+        if(module === "reactionRoles"){module = "reactionroles";}
         const mod: undefined | Module = modules.get(module);
         if(mod === undefined){return false;}
         if(mod.private){return false;}
@@ -404,6 +426,7 @@ class MongoGuildManager{
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async updateModuleConfig(guild: string, mod: string, data: any): Promise<string | Types.IMongoUpdateResult>{
+        if(mod === "reactionroles"){mod = "reactionRoles";}
         if(!Object.getOwnPropertyNames(nameConfigMap).includes(mod)){
             throw new Error("No matching module found");
         }
@@ -430,6 +453,7 @@ class MongoGuildManager{
     }
 
     async getModuleConfig<T>(guild: string, module: string): Promise<T>{
+        if(module === "reactionroles"){module = "reactionRoles";}
         const data = await this.getConfig(guild);
         if(!data){throw new Error("Could not get guild config");}
         const config = nameConfigMap[module];

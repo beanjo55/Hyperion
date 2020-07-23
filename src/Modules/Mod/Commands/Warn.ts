@@ -19,7 +19,9 @@ class Warn extends Command{
         if(!ctx.args[1]){return "Please give a reason";}
         const target = Hyperion.utils.strictResolver(ctx.args[0], ctx.guild.members);
         if(!target){return "Im not sure who that is.";}
-        ctx.module.makeLog(Hyperion, {
+        if(await ctx.module.isMod(target, ctx.guild, true)){return "That user is a mod and cannot be warned";}
+        if(await ctx.module.isProtected(target, ctx.guild, true)){return "That user is protected and cannot be warned";}
+        ctx.module.makeLog({
             user: target.user.id,
             moderator: ctx.member.id,
             moderationType: "warn",
@@ -28,7 +30,8 @@ class Warn extends Command{
             case: -1,
             guild: ctx.guild,
             time: Date.now(),
-            moderationEnd: false
+            moderationEnd: false,
+            autoEnd: false
         }, target.user);
         try{
             const dmChannel = await target.user.getDMChannel();

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {IHyperion} from "../types";
 import {Module} from "../Core/Structures/Module";
 import {Message, Emoji} from "eris";
@@ -10,8 +9,8 @@ class MessageReactionAddHandler{
         this.name = "messageReactionAdd";
     }
     async handle(this: IHyperion, msg: Message, emote: Emoji, userID: string): Promise<void>{
-        const subscribed: Array<Module> = this.modules.filter((M: Module) => M.subscribedEvents.includes(eventName));
-        subscribed.forEach((m: Module) => {
+        const subscribed = this.modules.filter(M => M.subscribedEvents.includes(eventName));
+        subscribed.forEach(m => {
             m.messageReactionAdd(this, msg, emote, userID);
         });
 

@@ -25,7 +25,7 @@ class Quotes extends Module{
         if(!await this.checkGuildEnabled(this.Hyperion, guild.id)){return;}
         const config = await this.Hyperion.managers.guild.getModuleConfig<QuoteConfig>(guild.id, this.name);
         if(config.quoteLinks === undefined || config.quoteLinks === false){return;}
-        const rx = new RegExp(/^https:\/\/(canary.|ptb.)?(discord|discordapp).com\/channels\/(\d+)\/(\d+)\/(\d+)$/, "gmi");
+        const rx = new RegExp(/^https:\/\/(canary\.|ptb\.)?discord(app)?\.com\/channels\/(\d+)\/(\d+)\/(\d+)$/, "gmi");
         const result = rx.exec(msg.content);
         if(result === null){return;}
         if(result[3] !== guild.id){return msg.addReaction("error:732383200436813846").catch(() => undefined);}
@@ -37,7 +37,6 @@ class Quotes extends Module{
 
         const data: Partial<EmbedResponse> = {
             embed: {
-                // eslint-disable-next-line @typescript-eslint/camelcase
                 author: {name: targetMessage.author.username + "#" + targetMessage.author.discriminator, icon_url: targetMessage.author.avatarURL},
                 description: `Message by ${targetMessage.author.username}#${targetMessage.author.discriminator} in ${targetChannel.mention}: **[Jump](https://discord.com/channels/${result[3]}/${result[4]}/${result[5]})**\n${targetMessage.content}${targetMessage.embeds.length !== 0 ? "\n **This message had an embed**" : ""}`,
                 color: this.Hyperion.colors.default,

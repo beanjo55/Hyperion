@@ -81,6 +81,7 @@ interface ShardStats {
 	status: "disconnected" | "connecting" | "handshaking" | "ready";
 	guilds: number;
 	users: number;
+	unavailableguilds: number;
 }
 
 interface ClusterStats {
@@ -92,6 +93,8 @@ interface ClusterStats {
 	largeGuilds: number;
 	ram: number;
 	shardStats: ShardStats[] | [];
+	unavailableGuilds: number;
+	exclusiveGuilds: number
 }
 
 interface ServiceStats {
@@ -111,6 +114,8 @@ export interface Stats {
 	shardCount: number;
 	clusters: ClusterStats[];
 	services: ServiceStats[];
+	unavailableGuilds: number;
+	exclusiveGuilds: number;
 }
 
 interface ClusterCollection {
@@ -188,9 +193,11 @@ export class Admiral extends EventEmitter {
 	}>;
 	private webhookClient: Eris.Client;
 	private fetchTimeout: number;
+	private restarting: {[key: number]: boolean};
 
 	public constructor(options: Options) {
-	    super();
+		super();
+		this.restarting = {};
 	    this.objectLogging = options.objectLogging || false;
 	    this.path = options.path;
 	    this.token = options.token;
@@ -304,7 +311,9 @@ export class Admiral extends EventEmitter {
 	            largeGuilds: 0,
 	            shardCount: 0,
 	            clusters: [],
-	            services: [],
+				services: [],
+				unavailableGuilds: 0,
+				exclusiveGuilds: 0
 	        };
 	    }
 
@@ -635,7 +644,9 @@ export class Admiral extends EventEmitter {
 	                            this.prelimStats.users += message.stats.users;
 	                            this.prelimStats.voice += message.stats.voice;
 	                            this.prelimStats.clustersRam += message.stats.ram;
-	                            this.prelimStats.largeGuilds += message.stats.largeGuilds;
+								this.prelimStats.largeGuilds += message.stats.largeGuilds;
+								this.prelimStats.exclusiveGuilds += message.stats.exclusiveGuilds;
+								this.prelimStats.unavailableGuilds += message.stats.unavailableGuilds;
 	                            this.prelimStats.shardCount += message.stats.shardStats.length;
 
 	                            this.prelimStats.clusters.push(
@@ -698,6 +709,7 @@ export class Admiral extends EventEmitter {
 	                }
 	                case "restartCluster": {
 						const workerID = this.clusters.find((c: ClusterCollection) => c.clusterID == message.clusterID).workerID;
+						this.restarting[workerID] = true;
 						this.webhookClient.executeWebhook("730091355128332298", "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW", {
 							embeds: [
 								{
@@ -722,7 +734,8 @@ export class Admiral extends EventEmitter {
 	                        process.nextTick(() => {
 	                            const workerID = this.clusters.find(
 	                                (c: ClusterCollection) => c.clusterID == cluster.clusterID,
-	                            ).workerID;
+								).workerID;
+								this.restarting[workerID] = true;
 	                            const worker = master.workers[workerID];
 	                            if (worker) this.restartWorker(worker, true, message.hard ? false : true);
 	                        });
@@ -857,16 +870,19 @@ export class Admiral extends EventEmitter {
 
 	        // eslint-disable-next-line @typescript-eslint/no-unused-vars
 	        on("exit", (worker, code, signal) => {
-				this.webhookClient.executeWebhook("730091355128332298", "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW", {
-					embeds: [
-						{
+				if(!(this.restarting[worker.id] === true)){
+					this.webhookClient.executeWebhook("730091355128332298", "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW", {
+						embeds: [
+							{
 							title: `Cluster ${this.clusters.find((c: ClusterCollection) => c.workerID === worker.id).clusterID} died with code ${code ?? signal}`,
 							timestamp: new Date,
 							color: config.coreOptions.defaultColor,
 							footer: {text: config.coreOptions.build}
-						}
-					]
-				});
+							}
+						]
+					});
+					delete this.restarting[worker.id];
+				}
 	            this.restartWorker(worker);
 	        });
 
@@ -1491,7 +1507,9 @@ export class Admiral extends EventEmitter {
 	                largeGuilds: 0,
 	                shardCount: 0,
 	                clusters: [],
-	                services: [],
+					services: [],
+					exclusiveGuilds: 0,
+					unavailableGuilds: 0
 	            };
 	            this.statsWorkersCounted = 0;
 	            this.clusters.forEach((c: ClusterCollection) => {

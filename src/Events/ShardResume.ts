@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import {IHyperion} from "../types";
 class ShardResumeHandler{
     name: string;

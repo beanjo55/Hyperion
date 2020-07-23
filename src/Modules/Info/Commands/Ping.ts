@@ -19,9 +19,10 @@ class Ping extends Command{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<Message>{
-        return await ctx.channel.createMessage("Ping?").then((msg: Message) => {
-            return msg.edit(`Pong! ${msg.timestamp-ctx.msg.timestamp}ms`);
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<void>{
+        const start = Date.now();
+        await ctx.channel.createMessage("Ping?").then((msg: Message) => {
+            return msg.edit(`Pong! ${Date.now()-start}ms`).catch(() => undefined);
         });
     }
 }

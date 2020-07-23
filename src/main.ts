@@ -36,6 +36,7 @@ import * as sentry from "@sentry/node";
 import {default as embedModel} from "./MongoDB/Embeds";
 import {resolveGuildChannel} from "./Core/Utils/Channels";
 import {default as blocked} from "blocked";
+import {hasUnicodeEmote} from "./Core/Utils/Emote";
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -66,21 +67,30 @@ function input2boolean(input: string): boolean | undefined{
     return;
 }
 
+function parseMessageLink(input: string): null | {guild: string; channel: string; message: string} {
+    const rx = new RegExp(/^https:\/\/(canary\.|ptb\.)?discord(app)?\.com\/channels\/(\d+)\/(\d+)\/(\d+)$/, "gmi");
+    const result = rx.exec(input);
+    if(result === null){return null;}
+    return {guild: result[3], channel: result[4], message: result[5]};
+}
+
 
 
 const utils: IUtils = {
     hoistResolver: hoistUserResolver,
     resolveUser: userResolver,
-    sortRoles: sortRoles,
-    getColor: getColor,
-    resolveCategory: resolveCategory,
-    resolveTextChannel: resolveTextChannel,
-    resolveVoicechannel: resolveVoiceChannel,
-    input2boolean: input2boolean,
-    banResolver: banResolver,
-    strictResolver: strictResolver,
-    resolveRole: resolveRole,
-    resolveGuildChannel: resolveGuildChannel
+    sortRoles,
+    getColor,
+    resolveCategory,
+    resolveTextChannel,
+    resolveVoiceChannel,
+    input2boolean,
+    banResolver,
+    strictResolver,
+    resolveRole,
+    resolveGuildChannel,
+    parseMessageLink,
+    hasUnicodeEmote
 };
 
 const colors: IColors = {
@@ -302,9 +312,7 @@ export default class HyperionC extends BaseClusterWorker{
     async postDBL(): Promise<void>{
         try{
             await axios.post(`https://top.gg/api/bots/${this.client.user.id}/stats`,{
-                // eslint-disable-next-line @typescript-eslint/camelcase
                 server_count: this.client.guilds.size,
-                // eslint-disable-next-line @typescript-eslint/camelcase
                 shard_count: this.client.shards.size
             },
             {
@@ -321,7 +329,6 @@ export default class HyperionC extends BaseClusterWorker{
     async postDBoats(): Promise<void>{
         try{
             await axios.post(`https://discord.boats/api/bot/${this.client.user.id}`,{
-                // eslint-disable-next-line @typescript-eslint/camelcase
                 shard_count: this.client.shards.size
             },
             {

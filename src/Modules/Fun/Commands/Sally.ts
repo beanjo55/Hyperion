@@ -2,7 +2,8 @@ import {Command} from "../../../Core/Structures/Command";
 import {ICommandContext, IHyperion} from "../../../types";
 import { Embed } from "eris";
 
-export const sallys = ["https://cdn.discordapp.com/attachments/225182513465786369/660282554649149490/image0.jpg",
+export const sallys = [
+    "https://cdn.discordapp.com/attachments/225182513465786369/660282554649149490/image0.jpg",
     "https://cdn.discordapp.com/attachments/225182513465786369/660188937704308778/image0.jpg",
     "https://cdn.discordapp.com/attachments/225182513465786369/660123365570510878/image0.jpg",
     "https://cdn.discordapp.com/attachments/648349778429739009/659358356376649728/image0.jpg",
@@ -19,9 +20,9 @@ export const sallys = ["https://cdn.discordapp.com/attachments/22518251346578636
     "https://cdn.discordapp.com/attachments/668889812333494273/694379108590682182/image3.jpg",
     "https://cdn.discordapp.com/attachments/668889812333494273/694379106430746714/image0.jpg",
     "https://cdn.discordapp.com/attachments/668889812333494273/691323183688843314/image0.jpg",
-    "https://images-ext-1.discordapp.net/external/LrC2B2JUOQ6OXH9n4355xMvIwk-GTeTCHZv4ayBDN4Q/https/media.discordapp.net/attachments/698588216001036400/726518399823380490/cute.jpg",
-    "https://images-ext-1.discordapp.net/external/gIHEv-uxbrhYcWeJfANYogtXey2dqt_f76Ms6vkysc0/https/media.discordapp.net/attachments/698588216001036400/726518457629147176/cute.jpg",
-    "https://images-ext-2.discordapp.net/external/l5389FrKj-5hKCJ0Oy2ZD7sWtGkSTxW8oFK-1dIE0u4/https/media.discordapp.net/attachments/698588216001036400/726518356659798046/cute.jpg",
+    "https://media.discordapp.net/attachments/698588216001036400/726518399823380490/cute.jpg",
+    "https://media.discordapp.net/attachments/698588216001036400/726518457629147176/cute.jpg",
+    "https://media.discordapp.net/attachments/698588216001036400/726518356659798046/cute.jpg",
     "https://cdn.discordapp.com/attachments/225182513465786369/727656964703780894/image0.jpg",
     "https://cdn.discordapp.com/attachments/513025490760630272/727542599426244668/image0.jpg",
     "https://cdn.discordapp.com/attachments/225182513465786369/727182389511585832/image0.jpg",

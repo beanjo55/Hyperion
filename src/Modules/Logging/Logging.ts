@@ -265,7 +265,7 @@ class Logging extends Module{
                 inline: false
             });
         }
-        if(msg.cleanContent){msg.content = msg.cleanContent;}
+        if(msg?.cleanContent){msg.content = msg.cleanContent;}
         if(msg.content){
             if(msg.content.length > 1000){
                 data.embed.fields.push({
@@ -368,7 +368,7 @@ class Logging extends Module{
                 inline: false
             });
         }
-        if(oldMessage.cleanContent){oldMessage.content = oldMessage.cleanContent;}
+        if(oldMessage?.cleanContent){oldMessage.content = oldMessage.cleanContent;}
         if(oldMessage?.content){
             if(oldMessage?.content.length > 1000){
                 data.embed.fields.push({
