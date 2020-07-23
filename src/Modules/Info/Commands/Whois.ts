@@ -61,7 +61,6 @@ class Whois extends Command{
                 description: "",
                 author: {
                     name: `${target.username}#${target.discriminator}`,
-                    // eslint-disable-next-line @typescript-eslint/camelcase
                     icon_url: target.avatarURL
                 },
                 footer: {
@@ -81,8 +80,8 @@ class Whois extends Command{
                         inline: true
                     },
                     {
-                        name: "Join Position",
-                        value: joinPos,
+                        name: Hyperion.fetch ? "Join Position" : "\u200b",
+                        value: Hyperion.fetch ? joinPos : "\u200b",
                         inline: true
                     },
                     {
