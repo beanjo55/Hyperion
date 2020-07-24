@@ -20,7 +20,7 @@ const eventNames: Array<string> = [
     "memberRoleUpdate",
     "ghostReact"
 ];
-const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar", "ghostreacttime", "ignoredroles"];
+const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar", "ghostreacttime", "ignoredroles", "enableall", "disableall"];
 
 
 class Logging extends Command{
