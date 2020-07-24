@@ -26,6 +26,7 @@ class Retime extends Command{
             return err.message;
         }
         if((modlog.moderator !== ctx.user.id) && !ctx.member.permission.has("manageGuild")){return "Only managers can retime cases they did not make";}
+        if(modlog.expired === true){return "That case has ended and cannot be retimed";}
         if(!ctx.args[1]){return "Please specify a new time";}
         if(ctx.args[1].toLowerCase() === "perm"){
             await ctx.module.removeModerationTime(modlog.mid);

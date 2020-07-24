@@ -37,6 +37,7 @@ class Unmute extends Command{
         if(ctx.args[1]){
             reason = ctx.args.slice(1).join(" ");
         }
+        Hyperion.managers.modlog.markMutesExpired(target.id, ctx.guild.id);
         ctx.module.removeActiveMutes(ctx.guild.id, target.id);
         try{
             await target.removeRole(roleCheck.id, "Hyperion Unmute");

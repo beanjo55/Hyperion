@@ -595,6 +595,7 @@ class Mod extends Module{
             mid: mid,
             autoEnd: true
         };
+        await this.Hyperion.managers.modlog.setExpired(ctx.mid!);
         await this.Hyperion.managers.modlog.newCase(newctx);
         if(channel){
             const channelobj = ctx.guild.channels.get(channel);
@@ -629,6 +630,7 @@ class Mod extends Module{
                     }
                 ]
             }};
+            
             channelobj.createMessage(data).then((x: Message) => {
                 this.Hyperion.managers.modlog.addMessageID(mid, x.id, channelobj.id);
             }).catch(err => this.Hyperion.logger.warn("Hyperion", `Failed to post auto unmute log, error: ${err}`, "Moderation Sweep"));

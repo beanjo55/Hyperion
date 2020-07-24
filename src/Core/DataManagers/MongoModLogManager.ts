@@ -53,6 +53,10 @@ class MongoModLogManager{
         return this.model.updateOne({mid: mid}, {expired: true});
     }
 
+    async markMutesExpired(user: string, guild: string): Promise<void>{
+        await this.model.updateMany({guild: guild, user: user, expired: false, moderationType: "mute"}, {expired: true});
+    }
+
     async delwarn(guild: string, caseNum: number, userID: string, manager = false): Promise<IMongoUpdateResult>{
         const Case = await this.getCaseByCasenumber(guild, caseNum);
         if(!Case){throw new Error("I couldnt find that case");}
@@ -62,6 +66,10 @@ class MongoModLogManager{
 
     async clearwarn(guild: string, user: string): Promise<IMongoUpdateResult>{
         return await this.model.updateMany({guild: guild, user: user, moderationType: "warn"}, {revoked: true}).exec();
+    }
+
+    async setExpired(mid: string): Promise<void>{
+        await this.model.updateOne({mid: mid}, {expired: true}).exec();
     }
 
     genMID(guild: string, caseNum: number): string{

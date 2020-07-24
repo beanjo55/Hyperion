@@ -117,6 +117,28 @@ class Logging extends Command{
             }
         }
 
+        if(ctx.args[0].toLowerCase() === "enableall"){
+            for(const event of eventNames){
+                try{
+                    await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, event, {enabled: true});
+                }catch(err){
+                    return err.message;
+                }
+            }
+            return "Enabled all events.";
+        }
+
+        if(ctx.args[0].toLowerCase() === "disableall"){
+            for(const event of eventNames){
+                try{
+                    await ctx.module.updateLogEvent(Hyperion, ctx.guild.id, event, {enabled: false});
+                }catch(err){
+                    return err.message;
+                }
+            }
+            return "Disabled all events.";
+        }
+
         if(ctx.args[0].toLowerCase() === "showavatar"){
             if(!ctx.args[1]){return "Please specify true/false or yes/no.";}
             const result = Hyperion.utils.input2boolean(ctx.args[1]);
@@ -238,6 +260,7 @@ class Logging extends Command{
                     return err.message;
                 }
             }
+            return "Please specify a valid option";
         }
         return "this should never be reached.";
     }
