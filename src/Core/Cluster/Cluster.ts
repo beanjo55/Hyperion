@@ -34,15 +34,15 @@ export class Cluster {
 	    console.debug = (str: unknown) => {if (process.send) process.send({op: "debug", msg: str, source: "Cluster " + this.clusterID});};
 	    console.error = (str: unknown) => {if (process.send) process.send({op: "error", msg: str, source: "Cluster " + this.clusterID});};
 	    console.warn = (str: unknown) => {if (process.send) process.send({op: "warn", msg: str, source: "Cluster " + this.clusterID});};
-
+		/*
 	    //Spawns
 	    process.on("uncaughtException", (err: Error) => {
-	        if (process.send) process.send({op: "error", msg: inspect(err)});
+	        if (process.send) process.send({op: "error", msg: inspect(err, {depth: 0})});
 	    });
 
 	    process.on("unhandledRejection", (reason, promise) => {
 	        if (process.send) process.send({op: "error", msg: "Unhandled Rejection at: " + inspect(promise) + " reason: " + reason});
-	    });
+	    });*/
 
 	    if (process.send) process.send({op: "launched"});
 		
