@@ -170,7 +170,7 @@ export class Cluster {
 								footer: {text: config.coreOptions.build}
 							}
 						]
-					});
+					}).catch(() => undefined);
 	                this.shutdown = true;
 	                if (this.app) {
 	                    if (this.app.shutdown) {
@@ -257,7 +257,7 @@ export class Cluster {
 					footer: {text: config.coreOptions.build}
 	            }
 	        ]
-	    });
+	    }).catch(() => undefined);
 		await this.loadCode();
 
 	    client.on("connect", (id: number) => {

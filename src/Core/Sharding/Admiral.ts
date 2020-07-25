@@ -719,7 +719,7 @@ export class Admiral extends EventEmitter {
 									footer: {text: config.coreOptions.build}
 								}
 							]
-						});
+						}).catch(() => undefined);
 	                    if (workerID) {
 	                        const worker = master.workers[workerID];
 	                        if (worker) {
@@ -880,7 +880,7 @@ export class Admiral extends EventEmitter {
 							footer: {text: config.coreOptions.build}
 							}
 						]
-					});
+					}).catch(() => undefined);
 					delete this.restarting[worker.id];
 				}
 	            this.restartWorker(worker);
