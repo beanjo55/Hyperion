@@ -166,9 +166,9 @@ export default class HyperionC extends BaseClusterWorker{
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (process as NodeJS.EventEmitter).on("uncaughtException", (err: Error, origin: string) =>{
             this.logger.fatal("Hyperion", "An uncaught execption was encountered", "Uncaught Exception");
-            this.logger.fatal("Hyperion", inspect(err, {depth: 0}), "Uncaught Exception Error");
-            this.logger.fatal("Hyperion", inspect(origin, {depth: 0}), "Uncaught Exception Origin");
-            this.sentry.captureException(inspect(err, {depth: 0}));
+            this.logger.fatal("Hyperion", inspect(err.toString()), "Uncaught Exception Error");
+            this.logger.fatal("Hyperion", inspect(origin.toString()), "Uncaught Exception Origin");
+            this.sentry.captureException(inspect(err.toString()));
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (process as NodeJS.EventEmitter).on("unhandledRejection", (reason: Error | any) => {
