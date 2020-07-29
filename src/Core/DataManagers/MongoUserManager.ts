@@ -10,6 +10,7 @@ class Acks implements Types.AckInterface{
     developer: boolean;
     owner: boolean;
     custom: string;
+    pro: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any;
     constructor(data: Partial<Types.AckInterface>){
@@ -20,6 +21,7 @@ class Acks implements Types.AckInterface{
         this.admin = data.admin ?? false;
         this.developer = data.developer ?? false;
         this.owner = data.owner ?? false;
+        this.pro = data.pro ?? false;
         this.custom = data.custom ?? "";
     }
 }

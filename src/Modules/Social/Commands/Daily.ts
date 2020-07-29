@@ -23,15 +23,17 @@ class Daily extends Command{
         const payout: number = randomInt(lower, upper);
         const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
         const time: number = await Hyperion.managers.user.getDailyTime(ctx.user.id);
+        const acks = await Hyperion.managers.user.getAcks(ctx.user.id);
+        const period = acks.pro ? day/2 : day;
         if(ctx.args[0] && ctx.args[0].toLowerCase() === "check"){
-            if(Date.now() - time <= day){
-                return `You can collect or give daily money in ${msc(day - (Date.now()-time))}`;
+            if(Date.now() - time <= period){
+                return `You can collect or give daily money in ${msc(period - (Date.now()-time))}`;
             }else{
                 return "You can collect or give daily money now!";
             }
         }
-        if((Date.now() - time <= day) && !ctx.admin){
-            return `You can collect or give daily money in ${msc(day - (Date.now()-time))}`;
+        if((Date.now() - time <= period) && !ctx.admin){
+            return `You can collect or give daily money in ${msc(period - (Date.now()-time))}`;
         }
         if(!target && ctx.args[0]){return "A valid user was not found!";}
         if(!target && !ctx.args[0]){

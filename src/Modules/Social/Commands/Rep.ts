@@ -3,7 +3,7 @@ import {IHyperion, ICommandContext} from "../../../types";
 import {Member} from "eris";
 import {default as msc} from "pretty-ms";
 const day = 86400000;
-
+import {randomInt} from "mathjs";
 class Rep extends Command{
     constructor(){
         super({
@@ -16,24 +16,32 @@ class Rep extends Command{
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
+        const lucky = randomInt(0, 100) === 69;
         const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
         const time: number = await Hyperion.managers.user.getRepTime(ctx.user.id);
+        const acks = await Hyperion.managers.user.getAcks(ctx.user.id);
+        const period = acks.pro ? day/2 : day;
         if(ctx.args.length === 0){
-            if(Date.now() - time <= day){
-                return `You can give more rep in ${msc(day - (Date.now()-time))}`;
+            if(Date.now() - time <= period){
+                return `You can give more rep in ${msc(period - (Date.now()-time))}`;
             }else{
                 return "You can give a rep point now!";
             }
         }
-        if((Date.now() - time <= day) && !ctx.admin){
-            return `You can give more rep in ${msc(day - (Date.now()-time))}`;
+        if((Date.now() - time <= period) && !ctx.admin){
+            return `You can give more rep in ${msc(period - (Date.now()-time))}`;
         }
         if(!target){return "A valid user was not found!";}
         if(target.id === ctx.user.id){return "You can't rep yourself!";}
         Hyperion.managers.user.gotRep(target.id);
         Hyperion.managers.user.gaveRep(ctx.user.id);
         Hyperion.managers.user.setRepTime(ctx.user.id);
-        return `${ctx.user.mention} gave ${target.mention} 1 rep point!`;
+        let out = `${ctx.user.mention} gave ${target.mention} 1 rep point!`;
+        if(lucky){
+            Hyperion.managers.user.gotRep(ctx.user.id);
+            out += "\nLooks like it's your lucky day! You have also gained a rep point! <a:happykitty:734450859026546699>"
+        }
+        return out;
     }
 }
 export default Rep;

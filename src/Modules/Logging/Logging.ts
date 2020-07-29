@@ -609,7 +609,7 @@ class Logging extends Module{
                     text: `ID: ${member.id}`
                 },
                 timestamp: new Date,
-                description: `**Roles Added**\n${sorted.map(r => `<@&${r}>`).join("\n")}`
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Roles Added**\n${sorted.map(r => `<@&${r}>`).join("\n")}`
             }
         };
 
@@ -639,7 +639,7 @@ class Logging extends Module{
                     text: `ID: ${member.id}`
                 },
                 timestamp: new Date,
-                description: `**Roles Removed**\n${sorted.map(r => `<@&${r}>`).join("\n")}`
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Roles Removed**\n${sorted.map(r => `<@&${r}>`).join("\n")}`
             }
         };
 
@@ -670,7 +670,7 @@ class Logging extends Module{
                     text: `ID: ${member.id}`
                 },
                 timestamp: new Date,
-                description: `**Roles Added**\n${sortedAdd.map(r => `<@&${r}>`).join("\n")}\n**Roles Removed**\n${sortedRemove.map(r => `<@&${r}>`).join("\n")}`
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Roles Added**\n${sortedAdd.map(r => `<@&${r}>`).join("\n")}\n**Roles Removed**\n${sortedRemove.map(r => `<@&${r}>`).join("\n")}`
             }
         };
 

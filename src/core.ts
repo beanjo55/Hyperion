@@ -54,12 +54,12 @@ async function start(): Promise<void>{
                     footer: {text: "Assuming direct control"}
                 }
             ]
-        });
+        }).catch(() => undefined);
         // Code to only run for your master process
         Admiral.on("log", m => logWrapper(m, "info"));
         Admiral.on("debug", m => logWrapper(m, "debug"));
         Admiral.on("warn", m => logWrapper(m, "warn"));
-        Admiral.on("error", m => logWrapper(inspect(m), "error"));
+        Admiral.on("error", m => logWrapper(inspect(m, {depth: 0}), "error"));
     
         // Logs stats when they arrive
         //Admiral.on("stats", m => console.log(m));
