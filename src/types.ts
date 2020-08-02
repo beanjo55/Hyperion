@@ -69,6 +69,7 @@ export interface IUtils{
     resolveGuildChannel(guild: Guild, msg: Message, search: string): GuildChannel | undefined;
     parseMessageLink(input: string): null | {guild: string; channel: string; message: string};
     hasUnicodeEmote(input: string): boolean;
+    sanitizeQuotes(input: string): string;
 }
 
 

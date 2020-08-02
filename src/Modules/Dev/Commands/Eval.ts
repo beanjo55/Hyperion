@@ -16,7 +16,7 @@ class Eval extends Command{
             alwaysEnabled: true,
 
             dev: true,
-
+            unlisted: true,
             hasSub: true,
 
             helpDetail: "Evaluates JavaScript code",
@@ -27,7 +27,7 @@ class Eval extends Command{
 
     }
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
-        const code = ctx.args.join(" ");
+        const code = Hyperion.utils.sanitizeQuotes(ctx.args.join(" "));
        
         try{
             let evaled = await eval(code);
@@ -58,7 +58,7 @@ class Eval extends Command{
             embed: {
                 author: { name: "Eval Results", icon_url: ctx.user.avatarURL },
                 description: "```js\n" + output + "```",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date()
             }
         };

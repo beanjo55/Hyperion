@@ -8,10 +8,12 @@ type EmbedMap = Map<string, CustomEmbed>;
 
 export class CustomEmbed{
     embed: Partial<Embed>;
-    randoms: Array<string>
+    randoms: Array<string>;
+    timestamp: boolean | number;
     constructor(data: Partial<CustomEmbed>){
         this.embed = data.embed ?? {};
         this.randoms = data.randoms ?? [];
+        this.timestamp = data.timestamp ?? false;
     }
 }
 
@@ -138,6 +140,13 @@ class Embeds extends Module{
     async requestEmbed(guild: string, name: string): Promise<undefined | Partial<Embed>>{
         const guildEmbeds = await this.getGuildEmbedMap(guild);
         const embed = await this.getEmbed(guild, name, guildEmbeds);
+        if(embed.timestamp){
+            if(typeof(embed.timestamp) === "number"){
+                embed.embed.timestamp = new Date(embed.timestamp);
+            }else{
+                embed.embed.timestamp = new Date;
+            }
+        }
         if(embed.randoms){
             return this.formatRandoms(embed);
         }else{

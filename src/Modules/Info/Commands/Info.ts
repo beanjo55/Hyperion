@@ -56,7 +56,7 @@ class Info extends Command{
                     },
                     {
                         name: "Invite",
-                        value: "[Invite Hyperion here!](https://discord.com/oauth2/authorize?client_id=633056645194317825&permissions=939912310&scope=bot)",
+                        value: "[Invite Hyperion here!](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&scope=bot&permissions=2110123134)",
                         inline: true
                     },
                     {

@@ -21,10 +21,9 @@ class Invite extends Command{
                 color: Hyperion.defaultColor,
                 author: {
                     name: "Hyperion Invite",
-                    // eslint-disable-next-line @typescript-eslint/camelcase
                     icon_url: Hyperion.client.user.avatarURL
                 },
-                description: "[You can invite Hyperion Here!](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&permissions=939912310&scope=bot)"
+                description: "[You can invite Hyperion Here!](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&scope=bot&permissions=2110123134)"
             }
         };
         return data;

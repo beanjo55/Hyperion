@@ -37,6 +37,7 @@ import {default as embedModel} from "./MongoDB/Embeds";
 import {resolveGuildChannel} from "./Core/Utils/Channels";
 import {default as blocked} from "blocked";
 import {hasUnicodeEmote} from "./Core/Utils/Emote";
+import {sanitizeQuotes} from "./Core/Utils/Sanitize";
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -90,7 +91,8 @@ const utils: IUtils = {
     resolveRole,
     resolveGuildChannel,
     parseMessageLink,
-    hasUnicodeEmote
+    hasUnicodeEmote,
+    sanitizeQuotes
 };
 
 const colors: IColors = {
@@ -166,9 +168,9 @@ export default class HyperionC extends BaseClusterWorker{
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (process as NodeJS.EventEmitter).on("uncaughtException", (err: Error, origin: string) =>{
             this.logger.fatal("Hyperion", "An uncaught execption was encountered", "Uncaught Exception");
-            this.logger.fatal("Hyperion", inspect(err.toString()), "Uncaught Exception Error");
+            this.logger.fatal("Hyperion", inspect(err.message.toString()), "Uncaught Exception Error");
             this.logger.fatal("Hyperion", inspect(origin.toString()), "Uncaught Exception Origin");
-            this.sentry.captureException(inspect(err.toString()));
+            this.sentry.captureException(inspect(err.message.toString()));
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (process as NodeJS.EventEmitter).on("unhandledRejection", (reason: Error | any) => {

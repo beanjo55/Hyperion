@@ -371,6 +371,11 @@ class MongoGuildManager{
         return doc.prefix;
     }
 
+    async isPro(guild: string): Promise<boolean>{
+        const data = await this.model.findOne({guild: guild}).lean<IGuild>().exec();
+        return data?.pro ?? false;
+    }
+
     async setPrefix(guild: string, newPrefix: string): Promise<Types.IMongoUpdateResult>{
         return await this.model.updateOne({guild: guild}, {prefix: newPrefix});
     }

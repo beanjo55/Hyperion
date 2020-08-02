@@ -1,6 +1,7 @@
 import {Schema, model, Model, Document} from "mongoose";
 import * as Types from "../types";
 import * as confs from "../Core/DataManagers/MongoGuildManager";
+import { boolean } from "mathjs";
 
 const guildconf = new Schema({
 
@@ -123,8 +124,9 @@ const guildconf = new Schema({
         default: false
     },
 
-    highlights: {
-        
+    pro: {
+        type: boolean,
+        default: false
     }
 
 
@@ -158,6 +160,7 @@ export interface IGuild{
     social: Types.SocialConfig;
     quotes: Types.QuoteConfig;
     casualPrefix: boolean;
+    pro: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any;
 }

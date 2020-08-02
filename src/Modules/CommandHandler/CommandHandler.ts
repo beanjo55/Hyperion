@@ -219,7 +219,7 @@ class CommandHandler extends Module{
 
     ignored(guildConfig: IGuild, user: Member, channel: string): boolean{
         if(guildConfig.ignoredRoles !== undefined){
-            for(const role in guildConfig.ignoredRoles){
+            for(const role of guildConfig.ignoredRoles){
                 if(user.roles.includes(role)){return true;}
             }
         }
