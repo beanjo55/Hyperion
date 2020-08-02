@@ -16,7 +16,7 @@ class Rep extends Command{
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        if(ctx.args[0].toLowerCase() === "void" || (ctx.args[0].toLowerCase() === "the" && ctx.args[1].toLowerCase() === "void")){
+        if(ctx.args[0] && ctx.args[1] && (ctx.args[0].toLowerCase() === "void" || (ctx.args[0].toLowerCase() === "the" && ctx.args[1].toLowerCase() === "void"))){
             const time: number = await Hyperion.managers.user.getRepTime(ctx.user.id);
             const acks = await Hyperion.managers.user.getAcks(ctx.user.id);
             const period = acks.pro ? day/2 : day;
