@@ -210,8 +210,8 @@ class CommandHandler extends Module{
     }
 
     guildModuleEnabled(guildConfig: IGuild, module: Module): boolean{
-        if(!guildConfig.modules){return true;}
-        if(!guildConfig.modules[module.name]){return true;}
+        if(!guildConfig.modules){return module.defaultStatus;}
+        if(!guildConfig.modules[module.name]){return module.defaultStatus;}
         if(module.alwaysEnabled){return true;}
         if(guildConfig.modules[module.name].enabled !== undefined){return guildConfig.modules[module.name].enabled;}
         return module.defaultStatus;
