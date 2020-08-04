@@ -651,6 +651,8 @@ class Logging extends Module{
         let changes = false;
         for(const key of Object.keys(oldRole)){
             if(key === "position"){continue;}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-ignore
             if(oldRole[key] && role[key] && oldRole[key] !== role[key]){
                 changes = true;
                 break;
