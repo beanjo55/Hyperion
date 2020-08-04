@@ -202,7 +202,7 @@ class Logging extends Module{
         if(config.showAvatar && member.avatarURL){
             data.embed.thumbnail = {url: member.avatarURL};
         }
-        if(member.roles.length !== 0){
+        if((member.roles ?? []).length !== 0){
             data.embed.fields = [{name: "Previous Roles", value: member.roles.map((r: string) => guild.roles.get(r)?.name ?? "Unknown Role").join(", "), inline: false}];
         }
 
