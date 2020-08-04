@@ -104,7 +104,7 @@ class Highlights extends Module{
     }
 
     async deliverHighlights(users: Array<string>, highlight: string, guild: Guild, channel: GuildTextableChannel, msg: Message): Promise<void>{
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         const messages: Array<Message> = channel.messages.map(m => m).sort((a, b) => b.timestamp - a.timestamp);
         let reference = "";
@@ -127,14 +127,11 @@ class Highlights extends Module{
                 footer: {text: guild.name}
             }
         };
-        console.log(inspect(users));
         for(const user of users){
             const userobj = guild.members.get(user);
             if(!userobj){continue;}
             if(!channel.permissionsOf(user).has("readMessages")){continue;}
-            console.log("found user");
             if(!await this.checkUserCooldown(user, guild.id)){continue;}
-            console.log("about to send");
             userobj.user.getDMChannel().then(chan => chan.createMessage(data)).catch((err) => inspect(err));
 
         }

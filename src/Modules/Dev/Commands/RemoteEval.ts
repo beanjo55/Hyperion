@@ -46,7 +46,7 @@ class RemoteEval extends Command{
             embed: {
                 author: { name: "Eval Results", icon_url: ctx.user.avatarURL },
                 description: "```js\n" + output + "```",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date()
             }
         };

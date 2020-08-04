@@ -13,6 +13,7 @@ class Exec extends Command{
             internal: true,
             alwaysEnabled: true,
             dev: true,
+            unlisted: true,
             selfResponse: true,
         
             helpDetail: "Executes a system command on the host system",

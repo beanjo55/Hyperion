@@ -38,6 +38,7 @@ import {resolveGuildChannel} from "./Core/Utils/Channels";
 import {default as blocked} from "blocked";
 import {hasUnicodeEmote} from "./Core/Utils/Emote";
 import {sanitizeQuotes} from "./Core/Utils/Sanitize";
+import {op8} from "./Core/Utils/Resolvers";
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -92,7 +93,8 @@ const utils: IUtils = {
     resolveGuildChannel,
     parseMessageLink,
     hasUnicodeEmote,
-    sanitizeQuotes
+    sanitizeQuotes,
+    op8
 };
 
 const colors: IColors = {
@@ -116,7 +118,6 @@ export default class HyperionC extends BaseClusterWorker{
     readonly modlist: Array<string>;
     readonly version: string;
     readonly adminPrefix: string;
-    readonly defaultColor: number;
     readonly mongoOptions: mongoose.ConnectionOptions;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     readonly models: {[key: string]: mongoose.Model<any>};
@@ -149,7 +150,6 @@ export default class HyperionC extends BaseClusterWorker{
         this.devPrefix = coreOptions.devPrefix;
         this.adminPrefix = coreOptions.adminPrefix;
         this.mongoOptions = mongoOptions;
-        this.defaultColor = coreOptions.defaultColor;
         this.db = this.mongoDB(mongoLogin);
         this.version = require("../package.json").version;
         this.logLevel = coreOptions.defaultLogLevel;

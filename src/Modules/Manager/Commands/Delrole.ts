@@ -10,7 +10,7 @@ class Delrole extends Command{
             userperms: ["manager"],
             needsRolepos: true,
             cooldownTime: 6000,
-
+            botperms: ["manageRoles"],
             helpDetail: "Deletes a role.",
             helpUsage: "{prefix}delrole [role]",
             helpUsageExample: "{prefix}delrole developers"

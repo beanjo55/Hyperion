@@ -89,7 +89,7 @@ class Mod extends Module{
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async guildMemberAdd(Hyperion: HyperionC, guild: Guild, member: Member): Promise<void>{
-        if(!await this.checkGuildEnabled(Hyperion, guild.id)){return;}
+        if(!await this.checkGuildEnabled(guild.id)){return;}
         const active = await ModerationModel.find({guild: guild.id, user: member.id}).lean<IModeration>().exec();
         let muterole: Role | string | undefined;
         for(const moderation of active){
@@ -516,7 +516,7 @@ class Mod extends Module{
                 }
                 continue;
             }
-            if((await this.checkGuildEnabled(this.Hyperion, guild.id)) === false){continue;}
+            if((await this.checkGuildEnabled(guild.id)) === false){continue;}
             const ctx: IModerationContext = {
                 mid: moderation.mid,
                 user: moderation.user,

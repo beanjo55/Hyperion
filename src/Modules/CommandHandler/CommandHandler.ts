@@ -500,6 +500,59 @@ class CommandHandler extends Module{
         }
 
         ctx.args = isolated.args;
+        if(isolated.label.toLowerCase() === "diagnose"){
+            if(!(this.isMod(ctx.member!, ctx.guildConfig!) || ctx.admin)){return;}
+            if(!ctx.args[0]){
+                msg.channel.createMessage("Please specify a command or module to diagnose.").catch(() => undefined);
+                return;
+            }
+            let forceType = 0;
+            if(ctx.args[1] && ctx.args[1].toLowerCase() === "-command"){forceType = 1;}
+            if(ctx.args[1] && ctx.args[1].toLowerCase() === "-module"){forceType = 2;}
+            let toDiagnose: Command | Module | undefined = undefined;
+            if(forceType === 0){
+                toDiagnose = this.findCommand(ctx.args[0]) ?? this.Hyperion.modules.get(ctx.args[0].toLowerCase());
+                if(!toDiagnose){
+                    msg.channel.createMessage("I couldnt find a command or module by that name.").catch(() => undefined);
+                    return;
+                }
+            }
+            if(forceType === 1){
+                toDiagnose = this.findCommand(ctx.args[0]);
+                if(!toDiagnose){
+                    msg.channel.createMessage("I couldnt find a command by that name.").catch(() => undefined);
+                    return;
+                }
+            }
+            if(forceType === 2){
+                toDiagnose = this.Hyperion.modules.get(ctx.args[0].toLowerCase());
+                if(!toDiagnose || toDiagnose.name === "highlights"){
+                    msg.channel.createMessage("I couldnt find a module by that name.").catch(() => undefined);
+                    return;
+                }
+            }
+            if(toDiagnose instanceof Command){
+                const result = await (toDiagnose as Command).diagnose(this.Hyperion, ctx.guild!);
+                if(!result){
+                    msg.channel.createMessage("I couldnt find a command or module by that name.").catch(() => undefined);
+                    return;
+                }
+                result.embed.title = result.embed.title?.replace("{prefix}", ctx.guildConfig!.prefix ?? "%");
+                msg.channel.createMessage(result).catch(() => undefined);
+                return;
+            }
+            if(toDiagnose instanceof Module){
+                const result = await (toDiagnose as Module).diagnose(ctx.guild!);
+                if(!result){
+                    msg.channel.createMessage("I couldnt find a command or module by that name.").catch(() => undefined);
+                    return;
+                }
+                msg.channel.createMessage(result).catch(() => undefined);
+                return;
+            }
+            msg.channel.createMessage("I couldnt find a command or module by that name.").catch(() => undefined);
+            return ;
+        }
         if(isolated.label.toLowerCase() === "help"){
             if(!await this.checkRedisCooldown(ctx.user!.id, ({name: "help"} as Command))){return;}
             const out = this.sendHelp(ctx);

@@ -1,44 +1,68 @@
-import {Member, Role, Message, Collection, User} from "eris";
+import {Member, Role, Collection, User, Guild} from "eris";
 import  HyperionC  from "../../main";
 
-export function resolveUser(msg: Message, search: string, members: Collection<Member>): Member | undefined{
-    if(!(msg.channel.type === 0 || msg.channel.type === 5)){ return;}
-    if(!members){
-        members = msg.channel.guild.members;
-    } 
-    let member = members.find(user => (`${user.username}#${user.discriminator}` === search) || (user.id === search) ||
-        (user.username === search) || (msg.mentions[0] && user.id === msg.mentions[0].id) || (user.nick != undefined && user.nick === search));
+export async function resolveUser(search: string, guild: Guild, members: Collection<Member>): Promise<Member | undefined>{
+    if(!members){members = guild.members;}
+    let member = members.get(search);
+    if(member){return member;}
+    const test = search.match(/<@!?(\d+)>/);
+    if(test && test[1]){
+        const temp = members.get(test[1]);
+        if(!temp){
+            const fetch = await guild.fetchMembers({userIDs: [test[1]], limit: 1});
+            return fetch[0];
+        }else{
+            return temp;
+        }
+        
+    }
+    if(member === undefined) {
+        member = members.find(user => (`${user.username}#${user.discriminator}` === search) || (user.id === search) ||
+        (user.username === search)  || (user.nick !== undefined && user.nick === search));
+    }
 
-    if (member == undefined) member = members.find(user => (user.username.toLowerCase() + "#" + user.discriminator === search.toLowerCase()) ||
-        (user.username.toLowerCase() === search.toLowerCase()) || (user.nick != undefined && user.nick.toLowerCase() === search.toLowerCase()));
+    if (member === undefined){
+        member = members.find(user => (user.username.toLowerCase() + "#" + user.discriminator === search.toLowerCase()) ||
+        (user.username.toLowerCase() === search.toLowerCase()) || (user.nick !== undefined && user.nick.toLowerCase() === search.toLowerCase()));
+    }
 
-    if (member == undefined) member = members.find(user => (user.username.toLowerCase().includes(search.toLowerCase())) ||
-        (user.nick != undefined && user.nick.toLowerCase().includes(search.toLowerCase())));
+    if (member === undefined){
+        member = members.find(user => (user.username.toLowerCase().includes(search.toLowerCase())) ||
+        (user.nick !== undefined && user.nick.toLowerCase().includes(search.toLowerCase())));
+    }
     return member;
 }
 
 
-export function hoistUserResolver(msg: Message, search: string, members: Collection<Member>): Member | undefined{
-    if(!(msg.channel.type === 0 || msg.channel.type === 5)){ return;}
+export async function hoistUserResolver(search: string, guild: Guild, members: Collection<Member>): Promise<Member | undefined>{
     if(!search){
-        return undefined;
+        return;
     }
-
-    const guild = msg.channel.guild;
+    const test = search.match(/<@!?(\d+)>/);
+    if(test && test[1]){
+        const temp = members.get(test[1]);
+        if(!temp){
+            const fetch = await guild.fetchMembers({userIDs: [test[1]], limit: 1});
+            return fetch[0];
+        }else{
+            return temp;
+        }
+        
+    }
     const hroles: Array<Role> = guild.roles.filter((r: Role) => r.hoist);
     hroles.sort((a: Role, b: Role) => b.position - a.position);
     for(let i = 0; i < hroles.length; i++){
         const r: Role = hroles[i];
         const tempColl = new Collection(Member);
-        const tempArr = members.filter((m: Member) => m.roles.includes(r.id));
+        const tempArr = members.filter((m: Member) => (m.roles ?? []).includes(r.id));
         tempArr.forEach((m: Member) => {
             tempColl.add(m);
         });
-        const pass: Member | undefined = resolveUser(msg, search, tempColl);
+        const pass: Member | undefined = await resolveUser(search, guild, tempColl);
 
         if(pass !== undefined){return pass;}
     }
-    return resolveUser(msg, search, members);
+    return await resolveUser(search, guild, members);
 }
 
 export function strictResolver(search: string, members: Collection<Member>, ): Member | undefined{
@@ -70,6 +94,23 @@ export async function banResolver(search: string, members: Collection<Member>, H
         }catch{}
     }
     return user;
+}
+
+export async function op8(search: string, guild: Guild): Promise<Member | undefined>{
+    const result = await guild.fetchMembers({query: search, limit: 50});
+    if(result.length === 0){
+        if(!isNaN(Number(search))){
+            const idFetch = await guild.fetchMembers({userIDs: [search]});
+            if(idFetch.length !== 0){
+                return idFetch[0];
+            }else{
+                return;
+            }
+        }
+    }
+    const members = new Collection<Member>(Member);
+    for(const m of result){members.add(m);}
+    return await hoistUserResolver(search, guild, members);
 }
 
 

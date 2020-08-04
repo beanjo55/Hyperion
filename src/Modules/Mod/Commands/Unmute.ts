@@ -11,7 +11,8 @@ class Unmute extends Command{
             cooldownTime: 3000,
             helpDetail: "Unmutes a user.",
             helpUsage: "{prefix}unmute [user] [optional reason]",
-            helpUsageExample: "{prefix}unmute sally\n{prefix}unmute bean appealed"
+            helpUsageExample: "{prefix}unmute sally\n{prefix}unmute bean appealed",
+            botperms: ["manageRoles"]
         });
     }
 

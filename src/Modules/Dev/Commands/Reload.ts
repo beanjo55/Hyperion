@@ -10,7 +10,8 @@ class Reload extends Command{
             helpDetail: "Dont worry about it",
             helpUsage: "Dont worry about it",
             noExample: true,
-            dev: true
+            dev: true,
+            unlisted: true
         });
     }
 

@@ -1,6 +1,6 @@
 import {Module} from "../../Core/Structures/Module";
 import { Embed } from "eris";
-import {IEmbed, IEmbedDoc, IEmbedModel, default as model} from "../../MongoDB/Embeds";
+import {IEmbedDoc, IEmbedModel, default as model} from "../../MongoDB/Embeds";
 import { IMongoUpdateResult, IHyperion } from "../../types";
 import {randomInt} from "mathjs";
 

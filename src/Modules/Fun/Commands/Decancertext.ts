@@ -36,7 +36,7 @@ class Decancertext extends Command{
                     }
                 ]
             }
-        }
+        };
         return data;
     }
 

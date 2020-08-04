@@ -39,7 +39,7 @@ class Moderators extends Command{
             embed: {
                 title: "Moderators",
                 timestamp: new Date,
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 fields: fieldarr
             }
         };

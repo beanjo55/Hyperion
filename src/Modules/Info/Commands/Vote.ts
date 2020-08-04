@@ -17,7 +17,7 @@ class Vote extends Command{
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>}>{
         return {
             embed: {
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date,
                 title: "Vote for Hyperion!",
                 description: "[Top.gg](https://top.gg/bot/633056645194317825/vote)\n[Discord Boats](https://discord.boats/bot/633056645194317825/vote)\n[Glenn Bot List](https://glennbotlist.xyz/bot/633056645194317825/vote)",

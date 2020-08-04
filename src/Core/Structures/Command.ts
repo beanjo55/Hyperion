@@ -1,5 +1,5 @@
-import {Collection} from "eris";
-import {IHyperion, ICommandContext} from "../../types";
+import {Collection, EmbedField, Guild} from "eris";
+import {IHyperion, ICommandContext, EmbedResponse} from "../../types";
 
 export class Command{
     name: string;
@@ -29,7 +29,7 @@ export class Command{
     unlisted: boolean;
     noSubList = false;
     listUnder: string;
-
+    diagnoseAddon?(Hyperion: IHyperion, guild: Guild): Promise<string | EmbedField>
 
     constructor(data: Partial<Command>){
         this.name = data.name ?? "dummy";
@@ -92,6 +92,55 @@ export class Command{
 
     async modDeleteAfter(ctx: ICommandContext, Hyperion: IHyperion): Promise<void>{
         if(ctx.guildConfig.mod?.deleteAfter){this.deleteAfterUse(ctx, Hyperion);}
+    }
+
+    async diagnose(Hyperion: IHyperion, guild: Guild): Promise<EmbedResponse | null>{
+        if(this.unlisted){return null;}
+        const commandConfig = await Hyperion.managers.guild.getCommandState(guild.id, this.name);
+        const module = Hyperion.modules.get(this.module);
+        if(!module){throw new Error("Can not find command module");}
+        let error = false;
+        const data: EmbedResponse = {
+            embed: {
+                title: `Status for {prefix}${this.name}`,
+                fields: [
+                    {name: "Enabled", value: commandConfig.enabled ? "Yes" : "No", inline: true},
+                    {name: "Module Enabled", value: await module.checkGuildEnabled(guild.id) ? "Yes" : "No", inline: true},
+                    {name: "Required Roles", value: commandConfig.allowedRoles.length !== 0 ? commandConfig.allowedRoles.map(r => `<@&${r}>`).join("\n") : "None", inline: true},
+                    {name: "Required Channels", value: commandConfig.allowedChannels.length !== 0 ? commandConfig.allowedChannels.map(r => `<#${r}>`).join("\n") : "None", inline: true},
+                    {name: "Disabled Roles", value: commandConfig.disabledRoles.length !== 0 ? commandConfig.disabledRoles.map(r => `<@&${r}>`).join("\n") : "None", inline: true},
+                    {name: "Required Roles", value: commandConfig.disabledChannels.length !== 0 ? commandConfig.disabledChannels.map(r => `<#${r}>`).join("\n") : "None", inline: true}
+                ],
+                timestamp: new Date,
+                color: Hyperion.colors.green
+            }
+        };
+        if(Hyperion.global.gDisabledMods.includes(module.name)){
+            data.embed.description ? data.embed.description += "This command's module has been globally disabled and can not be used" : data.embed.description = "This command's module has been globally disabled and can not be used";
+            data.embed.fields![0].value = "No";
+        }
+        if(Hyperion.global.gDisabledCommands.includes(this.name)){
+            data.embed.description ? data.embed.description += "This command has been globally disabled and can not be used" : data.embed.description = "This command has been globally disabled and can not be used";
+            data.embed.fields![0].value = "No";
+        }
+        if(this.botperms.length !== 0){
+            const missing: Array<string> = [];
+            const botUser = guild.members.get(Hyperion.client.user.id);
+            if(!botUser){throw new Error("Could not find bot user");}
+            for(const perm of this.botperms){
+                if(!botUser.permission.has(perm)){missing.push(perm);}
+            }
+            if(missing.length !== 0){
+                data.embed.fields!.push({name: "Permissions", value: `Hyperion is missing the following permissions: ${missing.join(", ")}`});
+                error = true;
+            }else{
+                data.embed.fields!.push({name: "Permissions", value: "Hyperion has all the needed permissions for this command"});
+            }
+        }
+        if(data.embed.fields![0].value === "No" || data.embed.fields![1].value === "No" || error){
+            data.embed.color = Hyperion.colors.red;
+        }
+        return data;
     }
 
 }

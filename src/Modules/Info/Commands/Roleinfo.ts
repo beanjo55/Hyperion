@@ -32,7 +32,7 @@ class Roleinfo extends Command{
         const frole: Role = role;
 
         const count = ctx.guild.members.filter((m: Member) => m.roles.includes(frole.id)).length;
-        let color = Hyperion.defaultColor;
+        let color = Hyperion.colors.default;
         if(role.color !== 0){
             color = role.color;
         }

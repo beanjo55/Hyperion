@@ -20,7 +20,7 @@ class Support extends Command{
         }else{
             return {
                 embed: {
-                    color: Hyperion.defaultColor,
+                    color: Hyperion.colors.default,
                     timestamp: new Date,
                     title: "Hyperion Support Server",
                     description: "[Join the support server here!](https://discord.gg/Vd8vmBD)"

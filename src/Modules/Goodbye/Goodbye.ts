@@ -30,7 +30,7 @@ class Goodbye extends Module{
     async guildMemberRemove(Hyperion: IHyperion, guild: Guild, member: Member): Promise<void>{
         if(member.bot === undefined){member = (await Hyperion.client.getRESTUser(member.id)) as unknown as Member;}
         if(member.bot){return;}
-        if(!await this.checkGuildEnabled(Hyperion, guild.id)){return;}
+        if(!await this.checkGuildEnabled(guild.id)){return;}
         const config = await this.getConfig(Hyperion, guild.id);
         if(!config.channel || !config.content || config.channel === "" || config.content === ""){return;}
         const channel = guild.channels.get(config.channel!);

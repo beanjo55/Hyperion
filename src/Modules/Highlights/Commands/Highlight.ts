@@ -10,7 +10,8 @@ class Highlights extends Command{
             aliases: ["highlight"],
             helpDetail: "Manages your highlights - DM notifications for certain words said while you are away",
             helpUsage: "{prefix}highlights\n{prefix}highlights add [word]\n{prefix}highlights remove [word]",
-            helpUsageExample: "{prefix}highlights add sally\n{prefix}highlights remove banana"
+            helpUsageExample: "{prefix}highlights add sally\n{prefix}highlights remove banana",
+            listUnder: "info"
         });
     }
 

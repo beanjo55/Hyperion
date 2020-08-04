@@ -21,7 +21,7 @@ class Whois extends Command{
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
         let target: Member | undefined;
         if(ctx.args[0]){
-            target = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
+            target = await Hyperion.utils.op8(ctx.args[0], ctx.guild);
         }else{
             target = ctx.member;
         }
@@ -29,7 +29,7 @@ class Whois extends Command{
         if(!target){return "That user was not found!";}
         
         const roleList: Array<string> = [];
-        let color = Hyperion.defaultColor;
+        let color = Hyperion.colors.default;
         if(target.roles){
             const roleObj = Hyperion.utils.sortRoles(target.roles, ctx.guild.roles);
             const temp = new Collection(Role);
@@ -42,9 +42,8 @@ class Whois extends Command{
         }else{
             roleList.push("None");
         }
-        if(!color){color = Hyperion.defaultColor;}
-        if(color === 0){color = Hyperion.defaultColor;}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if(!color){color = Hyperion.colors.default;}
+        if(color === 0){color = Hyperion.colors.default;}
         let joinPos = (ctx.guild.members.filter((m: Member) => !m.bot).sort((a: Member, b: Member) => a.joinedAt - b.joinedAt).map((m: Member) => m.id).indexOf(target.id) + 1).toString();
 
         if(joinPos === undefined){joinPos = "N/A";}

@@ -16,7 +16,8 @@ class Softban extends Command{
             cooldownTime: 5000,
             helpDetail: "Bans then unbans a user to clear their recent messages.",
             helpUsage: "{prefix}softban [user] [reason]",
-            helpUsageExample: "{prefix}softban wuper trolling"
+            helpUsageExample: "{prefix}softban wuper trolling",
+            botperms: ["banMembers"]
         });
     }
 

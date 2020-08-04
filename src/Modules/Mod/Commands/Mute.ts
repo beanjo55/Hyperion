@@ -11,7 +11,8 @@ class Mute extends Command{
             cooldownTime: 3000,
             helpDetail: "Adds a role to prevent a user from speaking, with an optional time limit.",
             helpUsage: "{prefix}mute [user] [reason]\n{prefix}mute [user] [time] [reason]",
-            helpUsageExample: "{prefix}mute wuper shitposting\n{prefix}mute boss 1d shitposting"
+            helpUsageExample: "{prefix}mute wuper shitposting\n{prefix}mute boss 1d shitposting",
+            botperms: ["manageRoles"]
         });
     }
 

@@ -22,7 +22,7 @@ class Quotes extends Module{
         if(!(msg.channel.type === 5 || msg.channel.type === 0)){return;}
         const channel = msg.channel;
         const guild = msg.channel.guild;
-        if(!await this.checkGuildEnabled(this.Hyperion, guild.id)){return;}
+        if(!await this.checkGuildEnabled(guild.id)){return;}
         const config = await this.Hyperion.managers.guild.getModuleConfig<QuoteConfig>(guild.id, this.name);
         if(config.quoteLinks === undefined || config.quoteLinks === false){return;}
         const rx = new RegExp(/^https:\/\/(canary\.|ptb\.)?discord(app)?\.com\/channels\/(\d+)\/(\d+)\/(\d+)$/, "gmi");

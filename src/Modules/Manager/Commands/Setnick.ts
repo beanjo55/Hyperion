@@ -9,7 +9,7 @@ class Setnick extends Command{
             module: "manager",
             userperms: ["manager"],
             cooldownTime: 10000,
-
+            botperms: ["manageRoles"],
             helpDetail: "Changes a users nickname or resets it.",
             helpUsage: "{prefix}setnick [user] [new nickname]\n{prefix}setnick [user]",
             helpUsageExample: "{prefix}setnick Sally Harbringer"
@@ -22,7 +22,7 @@ class Setnick extends Command{
         if(!bot.permission.has("manageNicknames")){return "I don't have permissions to manage nicknames";}
         if(bot.roles.length === 0){return "Due to discord permissions, I need to have a higher role than someone to manage their nickname. I can't do that with no roles!";}
         if(!ctx.args[0]){return "Please specify a user!";}
-        const target = Hyperion.utils.resolveUser(ctx.msg, ctx.args[0], ctx.guild.members);
+        const target = await Hyperion.utils.resolveUser(ctx.args[0], ctx.guild, ctx.guild.members);
         if(!target){return "Invalid user provided!";}
 
         const botroles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);

@@ -18,7 +18,7 @@ class Invite extends Command{
         const data = {
             embed: {
                 timestamp: new Date(),
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 author: {
                     name: "Hyperion Invite",
                     icon_url: Hyperion.client.user.avatarURL

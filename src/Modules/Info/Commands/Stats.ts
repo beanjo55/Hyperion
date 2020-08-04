@@ -29,7 +29,7 @@ class Stats extends Command{
         const data = {
             embed:{
                 title: "Hyperion Stats",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date(),
                 fields: [
                     {

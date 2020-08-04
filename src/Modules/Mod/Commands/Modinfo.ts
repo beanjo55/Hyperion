@@ -31,7 +31,7 @@ class Modinfo extends Command{
                         name: `${user.username}#${user.discriminator} | Mod Info`,
                         icon_url: user.avatarURL
                     },
-                    color: Hyperion.defaultColor,
+                    color: Hyperion.colors.default,
                     footer: {text: `User ID: ${user.id}`},
                     timestamp: new Date,
                     fields: fields,
@@ -80,7 +80,7 @@ class Modinfo extends Command{
                         name: `${user.username}#${user.discriminator} | Mod Info`,
                         icon_url: user.avatarURL
                     },
-                    color: Hyperion.defaultColor,
+                    color: Hyperion.colors.default,
                     footer: {text: `User ID: ${user.id}`},
                     timestamp: new Date,
                     fields: fields,
@@ -111,7 +111,7 @@ class Modinfo extends Command{
         moderator = moderator as User;
         const data: Field = {
             name: `Case ${ctx.case}`,
-            value: `**Action:** ${Hyperion.modules.get("mod")!.actions[ctx.moderationType].friendlyName}\n**Date:** ${new Date(ctx.time).toDateString()}\n**Moderator:** ${moderator.username}#${moderator.discriminator}\n**Reason:** ${ctx.reason}`,
+            value: `**Action:** ${Hyperion.modules.get("mod")!.actions[ctx.moderationType]?.friendlyName || "Unknown"}\n**Date:** ${new Date(ctx.time).toDateString()}\n**Moderator:** ${moderator.username}#${moderator.discriminator}\n**Reason:** ${ctx.reason}`,
             inline: false
         };
         if(ctx.stringLength){

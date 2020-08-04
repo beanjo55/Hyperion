@@ -23,7 +23,7 @@ class Reactionroles extends Module{
         const channel = msg.channel;
         if(!(msg.channel.type === 5 || msg.channel.type === 0)){return;}
         const guild = msg.channel.guild;
-        if(!await this.checkGuildEnabled(this.Hyperion, guild.id)){return;}
+        if(!await this.checkGuildEnabled(guild.id)){return;}
         const config = await this.Hyperion.managers.guild.getModuleConfig<RRConfig>(guild.id, this.name);
         if(!(config.rr instanceof Map)){config.rr = new Map<string, ReactionRole>(Object.entries(config.rr ?? {}));}
         if(config.rr.size === 0){return;}
@@ -45,7 +45,7 @@ class Reactionroles extends Module{
         const channel = msg.channel;
         if(!(msg.channel.type === 5 || msg.channel.type === 0)){return;}
         const guild = msg.channel.guild;
-        if(!await this.checkGuildEnabled(this.Hyperion, guild.id)){return;}
+        if(!await this.checkGuildEnabled(guild.id)){return;}
         const config = await this.Hyperion.managers.guild.getModuleConfig<RRConfig>(guild.id, this.name);
         if(!(config.rr instanceof Map)){config.rr = new Map<string, ReactionRole>(Object.entries(config.rr ?? {}));}
         if(config.rr.size === 0){return;}

@@ -76,7 +76,7 @@ class Config extends Command{
         const data = {
             embed: {
                 title: "Hyperion Configuration",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 description: `To see the settings for a module, run ${ctx.guildConfig.prefix}config [Module Name]\nThe modules that can be configured are listed below.\n\`\`\`${confMods.join(" \n")}\`\`\``,
                 timestamp: new Date
             }
@@ -90,7 +90,7 @@ class Config extends Command{
         const data = {
             embed: {
                 title: `${module.friendlyName} Configuration`,
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date,
                 description: `The Configurable settings for ${module.friendlyName} are:\n\`\`\`x1\n${output.join("\n\n")}\`\`\``
             }
@@ -106,7 +106,7 @@ class Config extends Command{
         const data = {
             embed: {
                 title: `${key.friendlyName} Configuration`,
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date,
                 description: `Valid operations for ${key.friendlyName} are:\n\`\`\`\n${output.join((", "))}\`\`\``
             }
@@ -314,7 +314,7 @@ class Config extends Command{
         if(!out){return "This value hasnt been set!";}
         const output = {
             embed: {
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date,
                 title: `Value for ${key.friendlyName}`,
                 description: `\`\`\`\n${inspect(out)}\`\`\``

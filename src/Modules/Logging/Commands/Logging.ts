@@ -18,9 +18,18 @@ const eventNames: Array<string> = [
     "memberRoleAdd",
     "memberRoleRemove",
     "memberRoleUpdate",
-    "ghostReact"
+    "ghostReact",
+    "voiceJoin",
+    "voiceLeave",
+    "voiceSwitch",
+    "roleAdd",
+    "roleDelete",
+    "roleUpdate",
+    "channelAdd",
+    "channelDelete",
+    "channelUpdate"
 ];
-const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar", "ghostreacttime", "ignoredroles", "enableall", "disableall"];
+const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar", "ghostreacttime", "ignoredroles", "enableall", "disableall", "newaccountage"];
 
 
 class Logging extends Command{
@@ -33,7 +42,7 @@ class Logging extends Command{
             
             helpDetail: "Configures the logging settings for the server, running the command with no inputs shows current settings",
             helpUsage: "{prefix}logging\n{prefix}logging [setting] [value]\n{prefix}logging enable [event name]\n{prefix}logging disable [event name]",
-            helpUsageExample: "{prefix}logging logChannel #logs\n{prefix}logging enable messagedelete\n{prefix}logging disable messagedelete"
+            helpUsageExample: "{prefix}logging logChannel #logs\n{prefix}logging enable messagedelete\n{prefix}logging disable messagedelete\n{prefix}logging newaccountage 3"
         });
     }
 
@@ -44,7 +53,7 @@ class Logging extends Command{
         const LowerCaseEvents = eventNames.map(e => e.toLowerCase());
         
         if(!(settingNamesL.includes(ctx.args[0].toLowerCase()) || LowerCaseEvents.includes(ctx.args[0].toLowerCase()))){return "Invalid setting or event provided.";}
-        if(ctx.args[0].toLowerCase() === "logchannel"){
+        if(ctx.args[0].toLowerCase() === "logchannel" || ctx.args[0].toLowerCase() === "channel"){
             if(!ctx.args[1]){return "Please specify a channel";}
             const channel = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, ctx.args[1]);
             if(!channel){return "Invalid channel provided.";}
@@ -150,6 +159,19 @@ class Logging extends Command{
                 return "Something went wrong";
             }
             return "Updated Show Avatars Setting";
+        }
+
+        if(ctx.args[0].toLowerCase() === "newaccountage"){
+            if(!ctx.args[1]){return "Please specify a number of days.";}
+            const result = Number(ctx.args[1]);
+            if(isNaN(result) || result < 0 || result > 14){return "Invalid argument, try a number betyween 0 and 14.";}
+            try{
+                await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {newAccountAge: Math.floor(result)*86400000});
+            }catch(err){
+                Hyperion.logger.warn("Hyperion", "Logging Config", `Failed to update new account age on ${ctx.guild.id}, error: ${err}`);
+                return "Something went wrong";
+            }
+            return "Updated New Account Age Setting";
         }
 
         if(ctx.args[0].toLowerCase() === "ghostreacttime"){
@@ -306,13 +328,14 @@ class Logging extends Command{
         const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Logging Configuration",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date,
                 description: `The current logging settings for the server are:
                 **Default Log Channel:** ${channelName}
                 **Ignored Channels:** ${ignoredChannels}
                 **Show Avatar:** ${showAv}
                 **Ghost React Time:** ${config.ghostReactTime} seconds
+                **New Account Age:** ${config.newAccountAge/86400000} days
                 `,
                 fields: [
                     {

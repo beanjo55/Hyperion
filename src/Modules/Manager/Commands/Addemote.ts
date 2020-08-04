@@ -10,6 +10,7 @@ class AddEmote extends Command{
             userperms: ["manager"],
             aliases: ["addemoji", "steal"],
             cooldownTime: 10000,
+            botperms: ["manageEmojis"],
 
             helpDetail: "Adds an emote to the server from a link.",
             helpUsage: "{prefix}addemote [name] [Link]",
@@ -26,7 +27,7 @@ class AddEmote extends Command{
         try{
             await ctx.guild.createEmoji({name: ctx.args[0], image: img});
         }catch(err){
-            console.log(err);
+            Hyperion.logger.warn("Hyperion", `Failed to add emote to ${ctx.guild.id}, error: ${err.message}`, "Add Emote");
             return "Something went wrong.";
         }
         return "Successfully added emote!";

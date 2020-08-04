@@ -1,8 +1,8 @@
 import {default as fs} from "fs";
-import {IHyperion, ConfigOp} from "../../types";
+import {IHyperion, ConfigOp, EmbedResponse} from "../../types";
 import {ConfigKey as configkey} from "../../types";
 import {inspect} from "util";
-import {Collection} from "eris";
+import {Collection, Guild} from "eris";
 import { IGuild } from "../../MongoDB/Guild";
 
 
@@ -158,14 +158,33 @@ export class Module{
         throw new Error("Init was expected, but not implemented");
     }
 
-    async checkGuildEnabled(Hyperion: IHyperion, guildID: string): Promise<boolean>{
-        if(Hyperion.global.gDisabledMods.includes(this.name)){return false;}
-        const config: IGuild | null = await Hyperion.managers.guild.getConfig(guildID);
+    async checkGuildEnabled(guildID: string): Promise<boolean>{
+        if(this.Hyperion.global.gDisabledMods.includes(this.name)){return false;}
+        const config: IGuild | null = await this.Hyperion.managers.guild.getConfig(guildID);
         if(!config){return this.defualtState;}
         if(!config.modules){return this.defualtState;}
         if(!config.modules[this.name]){return this.defaultState;}
         if(config.modules[this.name].enabled !== undefined){return config.modules[this.name].enabled;}
         return this.defaultState;
+    }
+
+    async diagnose(guild: Guild): Promise<EmbedResponse | null>{
+        if(this.private){return null;}
+        const data: EmbedResponse = {
+            embed: {
+                title: `Status for ${this.friendlyName}`,
+                fields: [
+                    {name: "Enabled", value: await this.checkGuildEnabled(guild.id) ? "Yes" : "No", inline: true}
+                ],
+                timestamp: new Date,
+                color: this.Hyperion.colors.green
+            }
+        };
+        if(this.Hyperion.global.gDisabledMods.includes(this.name)){
+            data.embed.description = "This module has been globally disabled and can not be used";
+        }
+        if(data.embed.fields![0].value === "No"){data.embed.color === this.Hyperion.colors.red;}
+        return data;
     }
 }
 

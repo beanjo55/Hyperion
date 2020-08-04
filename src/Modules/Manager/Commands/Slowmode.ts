@@ -8,6 +8,7 @@ class Slowmode extends Command{
             module: "manager",
             userperms: ["manager"],
             cooldownTime: 5000,
+            botperms: ["manageChannels"],
             helpDetail: "Sets slowmode in a channel.",
             helpUsage: "{prefix}slowmode [channel] [time]",
             helpUsageExample: "{prefix}slowmode #general 3"

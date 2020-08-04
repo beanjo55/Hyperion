@@ -1,16 +1,56 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import {Module} from "../../Core/Structures/Module";
 // eslint-disable-next-line no-unused-vars
-import {IHyperion, GuildConfig} from "../../types";
+import {IHyperion, GuildConfig, EmbedResponse} from "../../types";
 // eslint-disable-next-line no-unused-vars
-import { Guild, Member, User, Message, VoiceChannel, Role, GuildChannel, Emoji, TextChannel, Embed } from "eris";
+import { Guild, Member, User, Message, VoiceChannel, Role, GuildChannel, Emoji, TextChannel, Embed, NewsChannel, StoreChannel, CategoryChannel, Channel } from "eris";
 import {LoggingConfig, LogEvent} from "../../Core/DataManagers/MongoGuildManager";
 import {default as msc} from "pretty-ms";
 import { IGuild } from "../../MongoDB/Guild";
 import HyperionC from "../../main";
 import {inspect} from "util";
+
+const permMap: {[key: number]: string} = {
+    0: "Create Invite",
+    1: "Kick Members",
+    2: "Ban Members",
+    3: "Administrator",
+    4: "Manage Channels",
+    5: "Manage Server",
+    6: "Add Reactions",
+    7: "View Audit Logs",
+    8: "Priority Speaker",
+    9: "Go Live",
+    10: "Read Messages",
+    11: "Send Messages",
+    12: "Send TTS Messages",
+    13: "Manage Messages",
+    14: "Embed Links",
+    15: "Attach Files",
+    16: "Read Message History",
+    17: "Mention Everyone, Mention Here, Mention All Roles",
+    18: "Use External Emotes",
+    19: "View Server Insights",
+    20: "Voice Connect",
+    21: "Voice Speak",
+    22: "Mute Members",
+    23: "Deafen Members",
+    24: "Move Members",
+    25: "Use Voice Activity",
+    26: "Change Nickname",
+    27: "Manage Nicknames",
+    28: "Manage Roles",
+    29: "Manage Webhooks",
+    30: "Manage Emotes"
+};
+const cNameType: {[key: number]: string} = {
+    0: "Text Channel",
+    2: "Voice Channel",
+    4: "Category",
+    5: "Announcement Channel",
+    6: "Store Channel"
+};
 class Logging extends Module{
     constructor(Hyperion: IHyperion){
         super({
@@ -29,7 +69,16 @@ class Logging extends Module{
                 "guildBanRemove",
                 "guildMemberUpdate",
                 "messageReactionAdd",
-                "messageReactionRemove"
+                "messageReactionRemove",
+                "voiceChannelJoin",
+                "voiceChannelLeave",
+                "voiceChannelSwitch",
+                "guildRoleCreate",
+                "guildRoleDelete",
+                "guildRoleUpdate",
+                "channelCreate",
+                "channelDelete",
+                "channelUpdate"
             ]
         }, Hyperion);
     }
@@ -58,8 +107,8 @@ class Logging extends Module{
         return await Hyperion.managers.guild.getModuleConfig<LoggingConfig>(guild, this.name);
     }
 
-    async preCheck(Hyperion: IHyperion, guild: Guild, eventName: string, roles?: Array<string>, channel?: string): Promise<boolean>{
-        if(!await this.checkGuildEnabled(Hyperion, guild.id)){return false;}
+    async preCheck(Hyperion: IHyperion, guild: Guild, eventName: string, roles?: Array<string>, channel?: string | Array<string>): Promise<boolean>{
+        if(!await this.checkGuildEnabled(guild.id)){return false;}
         const econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
         if(!econfig){return false;}
         if(econfig.enabled === false){return false;}
@@ -68,9 +117,13 @@ class Logging extends Module{
             if(config?.ignoredRoles?.some((r: string) => roles.indexOf(r) >= 0)){return false;}
             if(econfig?.ignoredRoles?.some((r: string) => roles.indexOf(r) >= 0)){return false;}
         }
-        if(channel){
-            if(config?.ignoredChannels?.includes(channel)){return false;}
-            if(econfig?.ignoredChannels?.includes(channel)){return false;}
+        if(channel && channel.length === undefined){
+            if(config?.ignoredChannels?.includes(channel as string)){return false;}
+            if(econfig?.ignoredChannels?.includes(channel as string)){return false;}
+        }
+        if(channel && channel.length !== undefined){
+            if(config?.ignoredChannels?.some((c: string) => channel.indexOf(c) >= 0)){return false;}
+            if(econfig?.ignoredChannels?.some((c: string) => channel.indexOf(c) >= 0)){return false;}
         }
         return true;
     }
@@ -148,6 +201,9 @@ class Logging extends Module{
 
         if(config.showAvatar && member.avatarURL){
             data.embed.thumbnail = {url: member.avatarURL};
+        }
+        if(member.roles.length !== 0){
+            data.embed.fields = [{name: "Previous Roles", value: member.roles.map((r: string) => guild.roles.get(r)?.name ?? "Unknown Role").join(", "), inline: false}];
         }
 
 
@@ -227,8 +283,6 @@ class Logging extends Module{
             Hyperion.logger.warn("Hyperion", `Failed to post log for ban remove, ${err}`, "Logging");
         }
     }
-
-
 
     //MESSGAES
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -390,19 +444,26 @@ class Logging extends Module{
                 inline: false
             });
         }
-
-        if(msg.content.length > 1000){
+        if(msg.content === undefined){
             data.embed.fields.push({
                 name: "New Message Content",
-                value: `\`\`\`\n${this.escapeCodeblock(msg.cleanContent.substring(0, 1001))}...\n\`\`\``,
+                value: "The new message had no content",
                 inline: false
             });
         }else{
-            data.embed.fields.push({
-                name: "New Message Content",
-                value: `\`\`\`\n${this.escapeCodeblock(msg.cleanContent)}\n\`\`\``,
-                inline: false
-            });
+            if(msg.content.length > 1000){
+                data.embed.fields.push({
+                    name: "New Message Content",
+                    value: `\`\`\`\n${this.escapeCodeblock(msg.cleanContent.substring(0, 1001))}...\n\`\`\``,
+                    inline: false
+                });
+            }else{
+                data.embed.fields.push({
+                    name: "New Message Content",
+                    value: `\`\`\`\n${this.escapeCodeblock(msg.cleanContent)}\n\`\`\``,
+                    inline: false
+                });
+            }
         }
 
         try{
@@ -437,74 +498,412 @@ class Logging extends Module{
         }
     }
 
-
-
     //VOICE
-    async voiceJoin(Hyperion: IHyperion, member: Member, channel: VoiceChannel){
+    async voiceChannelJoin(Hyperion: IHyperion, member: Member, channel: VoiceChannel): Promise<void | undefined>{
+        const guild = member.guild;
+        if(!await this.preCheck(Hyperion, guild, "voiceJoin", member.roles, channel.id)){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "voiceJoin");
+        if(!channelObj){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
 
+        const data: EmbedResponse = {
+            embed: {
+                color: Hyperion.colors.green,
+                timestamp: new Date,
+                title: "Voice Channel Join",
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Channel Joined:** ${channel.name}`
+            }
+        };
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: member.avatarURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for voice join, ${err}`, "Logging");
+        }
     }
 
-    async voiceLeave(Hyperion: IHyperion, member: Member, channel: VoiceChannel){
-        
+    async voiceChannelLeave(Hyperion: IHyperion, member: Member, channel: VoiceChannel): Promise<void | undefined>{
+        const guild = member.guild;
+        if(!await this.preCheck(Hyperion, guild, "voiceLeave", member.roles, channel.id)){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "voiceLeave");
+        if(!channelObj){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        const data: EmbedResponse = {
+            embed: {
+                color: Hyperion.colors.orange,
+                timestamp: new Date,
+                title: "Voice Channel Leave",
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Channel Left:** ${channel.name}`
+            }
+        };
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: member.avatarURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for voice leave, ${err}`, "Logging");
+        }
     }
 
-    async voiceSwitch(Hyperion: IHyperion, member: Member, newChannel: VoiceChannel, oldChannel: VoiceChannel){
-        
+    async voiceChannelSwitch(Hyperion: IHyperion, member: Member, newChannel: VoiceChannel, oldChannel: VoiceChannel): Promise<void | undefined>{
+        const guild = member.guild;
+        if(!await this.preCheck(Hyperion, guild, "voiceJoin", member.roles, [oldChannel.id, newChannel.id])){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "voiceJoin");
+        if(!channelObj){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        const data: EmbedResponse = {
+            embed: {
+                color: Hyperion.colors.blue,
+                timestamp: new Date,
+                title: "Voice Channel Switch",
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Channel Left:** ${oldChannel.name}\n**Channel Joined:** ${newChannel.name}`
+            }
+        };
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: member.avatarURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for voice switch, ${err}`, "Logging");
+        }
     }
 
-
-
+    permsToName(perms: number): Array<string>{
+        const out: Array<string> = [];
+        if((perms & (1 << 3)) === (1 << 3)){return ["Administrator"];}
+        for(let i = 0; i < 31; i++){
+            if((perms & (1 << i)) === (1 << i)){out.push(permMap[i]);}
+        }
+        if(out.length === 0){return ["None"];}
+        return out;
+    }
     //ROLE
-    async roleCreate(Hyperion: IHyperion, guild: Guild, role: Role){
+    async roleCreate(Hyperion: IHyperion, guild: Guild, role: Role): Promise<void | undefined>{
+        if(!await this.preCheck(Hyperion, guild, "roleAdd")){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "roleAdd");
+        if(!channelObj){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
 
+        const data: EmbedResponse = {
+            embed: {
+                color: Hyperion.colors.green,
+                timestamp: new Date,
+                title: "Role Created",
+                description: `**Name:** ${role.name}\n**Position:** ${role.position}\n**Hoisted:** ${role.hoist ? "Yes" : "No"}\n**Mentionable:** ${role.mentionable ? "Yes" : "No"}\n**Managed:** ${role.managed ? "Yes" : "No"}\n**Color:** #${role.color.toString(16)}`,
+                fields: [{name: "Permissions", value: this.permsToName(role.permissions.allow).join(", "), inline: false}],
+                footer: {text: `Role ID: ${role.id}`}
+            }
+        };
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: guild.iconURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for role add, ${err}`, "Logging");
+        }
     }
 
-    async roleDelete(Hyperion: IHyperion, guild: Guild, role: Role){
-        
+    async roleDelete(Hyperion: IHyperion, guild: Guild, role: Role): Promise<void | undefined>{
+        if(!await this.preCheck(Hyperion, guild, "roleDelete")){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "roleDelete");
+        if(!channelObj){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        const data: EmbedResponse = {
+            embed: {
+                color: Hyperion.colors.red,
+                timestamp: new Date,
+                title: "Role Deleted",
+                description: `**Name:** ${role.name}\n**Position:** ${role.position}\n**Hoisted:** ${role.hoist ? "Yes" : "No"}\n**Mentionable:** ${role.mentionable ? "Yes" : "No"}\n**Managed:** ${role.managed ? "Yes" : "No"}\n**Color:** #${role.color.toString(16)}`,
+                fields: [{name: "Permissions", value: this.permsToName(role.permissions.allow).join(", "), inline: false}],
+                footer: {text: `Role ID: ${role.id}`}
+            }
+        };
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: guild.iconURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for role add, ${err}`, "Logging");
+        }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async roleUpdate(Hyperion: IHyperion, guild: Guild, role: Role, oldRole: any){
-        
+    async roleUpdate(Hyperion: IHyperion, guild: Guild, role: Role, oldRole: any): Promise<void | undefined>{
+        if(!await this.preCheck(Hyperion, guild, "roleUpdate")){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "roleUpdate");
+        if(!channelObj){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        let changes = false;
+        for(const key of Object.keys(oldRole)){
+            if(key === "position"){continue;}
+            if(oldRole[key] && role[key] && oldRole[key] !== role[key]){
+                changes = true;
+                break;
+            }
+        }
+
+        const data: EmbedResponse = {
+            embed: {
+                color: Hyperion.colors.blue,
+                timestamp: new Date,
+                title: "Role Updated",
+                footer: {text: `Role ID: ${role.id}`},
+                fields: [],
+                description: ""
+                
+            }
+        };
+        if(oldRole.name && role.name !== oldRole.name){
+            data.embed.description += `**Old Name:** ${oldRole.name}\n**New Name:** ${role.name}\n\n`;
+        }
+
+        if(oldRole.color && role.color !== oldRole.color){
+            data.embed.description += `**Old Color:** ${oldRole.color.toString(16)}\n**New Color:** ${role.color.toString(16)}\n\n`;
+        }
+        if(oldRole.hoist !== undefined && role.name !== oldRole.name){
+            data.embed.description += `**Old Hoist Status:** ${oldRole.hoist ? "Yes" : "No"}\n**New Hoist Status:** ${role.hoist ? "Yes" : "No"}\n\n`;
+        }
+        if(oldRole.mentionable !== undefined && role.mentionable !== oldRole.mentionable){
+            data.embed.description += `**Old Mentionable Status:** ${oldRole.mentionable ? "Yes" : "No"}\n**New Mentionable Status:** ${role.mentionable ? "Yes" : "No"}\n`;
+        }
+        if(oldRole.permissions !== undefined && oldRole.permissions.allow !== role.permissions.allow){
+            const old = this.permsToName(oldRole.permissions.allow);
+            const newPerms = this.permsToName(role.permissions.allow);
+            data.embed.fields?.push({name: "Old Permissions", value: old.join(", ")});
+            data.embed.fields?.push({name: "New Permissions", value: newPerms.join(", ")});
+            const added = [];
+            const removed = [];
+            for(const perm of old){
+                if(!newPerms.includes(perm)){removed.push(perm);}
+            }
+            for(const perm of newPerms){
+                if(!old.includes(perm)){added.push(perm);}
+            }
+            if(added.length > 0){
+                data.embed.fields?.push({name: "Permissions Added", value: added.join(", ")});
+            }
+            if(removed.length > 0){
+                data.embed.fields?.push({name: "Permissions Removed", value: removed.join(", ")});
+            }
+        }
+
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: guild.iconURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for role add, ${err}`, "Logging");
+        }
     }
-
-
 
     //CHANNEL
-    async channelCreate(Hyperion: IHyperion, guild: Guild, channel: GuildChannel){
+    async channelCreate(Hyperion: IHyperion, guild: Guild, channel: GuildChannel): Promise<void | undefined>{
+        if(!await this.preCheck(Hyperion, guild, "channelAdd")){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "channelAdd");
+        if(!channelObj){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
 
+        const data: EmbedResponse = {
+            embed: {
+                color: Hyperion.colors.green,
+                timestamp: new Date,
+                title: `${cNameType[channel.type] ?? "Unknwon"} Created`,
+                description: `**Name:** ${channel.name}\n**Position:** ${channel.position}\n`,
+                footer: {text: `Channel ID: ${channel.id}`}
+            }
+        };
+        if(!(channel.type === 4 || channel.type === 2)){data.embed.description += `**Mention:** ${channel.mention}\n`;}
+        if(channel.type !== 4){
+            if(channel.parentID){
+                data.embed.description += `**Category:** ${guild.channels.get(channel.parentID)?.name ?? "Unknown"}\n`;
+            }else{
+                data.embed.description += "**Category:** None\n";
+            }
+        }
+        if(channel.type === 0 || channel.type === 5){
+            if((channel as TextChannel).topic){
+                data.embed.fields = [{name: "Channel Topic", value: (channel as TextChannel).topic!}];
+                if((channel as TextChannel).rateLimitPerUser){data.embed.description += `**Slowmode:** ${(channel as TextChannel).rateLimitPerUser} seconds\n`;}
+            }
+        }
+        if(channel.type === 2){
+            const nchannel = channel as VoiceChannel;
+            if(nchannel.userLimit !== undefined){
+                data.embed.description += `**User Limit:** ${nchannel.userLimit || "Unlimited"} users\n`;
+            }
+            if(nchannel.bitrate !== undefined){
+                data.embed.description += `**Bitrate:** ${nchannel.bitrate/1000}kbps\n`;
+            }
+        }
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: guild.iconURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for channel add, ${err}`, "Logging");
+        }
     }
 
-    async channelDelete(Hyperion: IHyperion, guild: Guild, channel: GuildChannel){
-        
+    async channelDelete(Hyperion: IHyperion, guild: Guild, channel: GuildChannel): Promise<void | undefined>{
+        if(!await this.preCheck(Hyperion, guild, "channelDelete")){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "channelDelete");
+        if(!channelObj){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        const data: EmbedResponse = {
+            embed: {
+                color: Hyperion.colors.red,
+                timestamp: new Date,
+                title: `${cNameType[channel.type] ?? "Unknwon"} Deleted`,
+                description: `**Name:** ${channel.name}\n**Position:** ${channel.position}\n`,
+                footer: {text: `Channel ID: ${channel.id}`}
+            }
+        };
+        if(channel.type !== 4){
+            if(channel.parentID){
+                data.embed.description += `**Category:** ${guild.channels.get(channel.parentID)?.name ?? "Unknown"}\n`;
+            }else{
+                data.embed.description += "**Category:** None\n";
+            }
+        }
+        if(channel.type === 0 || channel.type === 5){
+            if((channel as TextChannel).topic){
+                data.embed.fields = [{name: "Channel Topic", value: (channel as TextChannel).topic!}];
+                if((channel as TextChannel).rateLimitPerUser){data.embed.description += `**Slowmode:** ${(channel as TextChannel).rateLimitPerUser} seconds\n`;}
+            }
+        }
+
+        if(channel.type === 2){
+            const nchannel = channel as VoiceChannel;
+            if(nchannel.userLimit !== undefined){
+                data.embed.description += `**User Limit:** ${nchannel.userLimit || "Unlimited"} users\n`;
+            }
+            if(nchannel.bitrate !== undefined){
+                data.embed.description += `**Bitrate:** ${nchannel.bitrate/1000}kbps\n`;
+            }
+        }
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: guild.iconURL};
+        }
+
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for channel delete, ${err}`, "Logging");
+        }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async channelUpdate(Hyperion: IHyperion, guild: Guild, channel: GuildChannel, oldChannel: any){
-        
+    async channelUpdate(Hyperion: IHyperion, guild: Guild, channel: GuildChannel, oldChannel: any): Promise<void | undefined>{
+        if(!await this.preCheck(Hyperion, guild, "roleUpdate")){return;}
+        const channelObj = await this.testChannel(Hyperion, guild, "roleUpdate");
+        if(!channelObj){return;}
+        const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+
+        let changes = false;
+        let permUpdate = false;
+        for(const key of Object.keys(oldChannel)){
+            if(key === "position"){continue;}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-ignore
+            if(oldChannel[key] && channel[key] && oldChannel[key] !== channel[key]){
+                changes = true;
+                if(key === "permissions"){
+                    permUpdate = true;
+                }else{
+                    changes = true;
+                }
+            }
+        }
+        if(!changes && !permUpdate){return;}
+        if(!changes && permUpdate){return;}//will be perm update later
+
+        const data: EmbedResponse = {
+            embed: {
+                color: Hyperion.colors.blue,
+                timestamp: new Date,
+                title: "Channel Updated",
+                description: "",
+                footer: {text: `Channel ID: ${channel.id}`}
+            }
+        };
+
+        if(oldChannel.parentID && oldChannel.parentID !== channel.parentID){
+            data.embed.description += `**Old Category:** ${oldChannel.parentID !== null ? guild.channels.get(oldChannel.parentID)?.name ?? "Unknown" : "No Category"}\n**New Category:** ${channel.parentID !== null ? guild.channels.get(channel.parentID!)?.name ?? "Unknown" : "No Category"}\n\n`;
+        }
+        if(oldChannel.name !== channel.name){
+            data.embed.description += `**Old Name:** ${oldChannel.name}\n**New Name:** ${channel.name}\n\n`;
+        }else{
+            if(channel.type !== 2 && channel.type !== 4){data.embed.description = `**Channel Mention:** ${channel.mention}\n` + (data.embed.description ?? "");}else{data.embed.description = `**Channel Name:** ${channel.name}\n` + (data.embed.description ?? "");}
+        }
+        if(oldChannel.type === channel.type){
+            if(channel.type === 5 || channel.type === 0){
+                if(oldChannel.topic !== (channel as TextChannel).topic){data.embed.description += `**Old Topic:** ${oldChannel.topic ?? "None"}\n**New Topic:** ${(channel as TextChannel).topic ?? "None"}\n\n`;}
+                if(oldChannel.rateLimitPerUser !== (channel as TextChannel).rateLimitPerUser){data.embed.description += `**Old Slowmode:** ${oldChannel.rateLimitPerUser ?? "0"} seconds\n**New Slowmode:** ${(channel as TextChannel).rateLimitPerUser ?? "0"} seconds\n\n`;}
+            }
+            if(channel.type === 2){
+                if((channel as VoiceChannel).bitrate !== oldChannel?.bitrate){
+                    data.embed.description += `**Old Bitrate:** ${oldChannel.bitrate ? `${oldChannel.bitrate/1000}kbps` : "Unknown"}\n**New Bitrate:** ${(channel as VoiceChannel).bitrate ? `${(channel as VoiceChannel).bitrate!/1000}kbps` : "Unknown"}\n\n`;
+                }
+                if((channel as VoiceChannel).userLimit !== oldChannel?.userLimit){
+                    data.embed.description += `**Old User Limit:** ${oldChannel.userLimit ?? "Unlimited"} users\n**New User Limit:** ${(channel as VoiceChannel).userLimit ?? "Unlimited"} users\n\n`;
+                }
+            }
+        }else{
+            data.embed.description += `**Old Channel Type:** ${cNameType[oldChannel.type] ?? "Unknown"}\n**New Channel Type:** ${cNameType[channel.type] ?? "Unknown"}`;
+        }
+        if(config.showAvatar){
+            data.embed.thumbnail = {url: guild.iconURL};
+        }
+
+        try{
+            await channelObj.createMessage(data);
+        }catch(err){
+            Hyperion.logger.warn("Hyperion", `Failed to post log for channel update, ${err}`, "Logging");
+        }
+
     }
 
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async channelPermsUpdate(guild: Guild, channel: GuildChannel, oldChannel: any): Promise<void | undefined>{
+        
+    }
 
     //MISC
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async webhooksUpdate(Hyperion: IHyperion, data: any, channelID: string, guildID: string){
+    async webhooksUpdate(Hyperion: IHyperion, data: any, channelID: string, guildID: string): Promise<void | undefined>{
 
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async guildUpdate(Hyperion: IHyperion, guild: Guild, oldGuild: any){
+    async guildUpdate(Hyperion: IHyperion, guild: Guild, oldGuild: any): Promise<void | undefined>{
 
     }
-
-
-
-
     //REACTIONS
-    async messageReactionAdd(Hyperion: IHyperion, msg: Message, emote: Emoji, userID: string){
+    async messageReactionAdd(Hyperion: IHyperion, msg: Message, emote: Emoji, userID: string): Promise<void | undefined>{
         if(!(msg.channel.type === 5 || msg.channel.type === 0)){return;}
         const guild = msg.channel.guild;
-        if(!await this.checkGuildEnabled(this.Hyperion, guild.id)){return;}
+        if(!await this.checkGuildEnabled(guild.id)){return;}
         const config = await this.getLoggingConfig(this.Hyperion, guild.id);
         if(!config.ghostReact.enabled){return;}
         this.Hyperion.redis.set(`Ghost:${guild.id}:${msg.id}:${userID}:${emote.id}:name`, emote.name, "EX", config.ghostReactTime);
@@ -514,10 +913,10 @@ class Logging extends Module{
         }
     }
 
-    async messageReactionRemove(Hyperion: IHyperion, msg: Message, emote: Emoji, userID: string){
+    async messageReactionRemove(Hyperion: IHyperion, msg: Message, emote: Emoji, userID: string): Promise<void | undefined>{
         if(!(msg.channel.type === 5 || msg.channel.type === 0)){return;}
         const guild = msg.channel.guild;
-        if(!await this.checkGuildEnabled(this.Hyperion, guild.id)){return;}
+        if(!await this.checkGuildEnabled(guild.id)){return;}
         const config = await this.getLoggingConfig(this.Hyperion, guild.id);
         if(!config.ghostReact.enabled){return;}
         if(await this.Hyperion.redis.exists(`Ghost:${guild.id}:${msg.id}:${userID}:${emote.id}:name`)){
@@ -530,26 +929,23 @@ class Logging extends Module{
         }
     }
 
-    async messageReactionRemoveAll(Hyperion: IHyperion, msg: Message){
+    async messageReactionRemoveAll(Hyperion: IHyperion, msg: Message): Promise<void | undefined>{
         
     }
 
-
-
     //CUSTOM
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async system(Hyperion: IHyperion, message: any){
+    async system(Hyperion: IHyperion, message: any): Promise<void | undefined>{
 
     }
 
-    async ghostReact(guild: Guild, msg: Message, userID: string, emote: {name: string; id: string; animated: boolean; time: number}){
+    async ghostReact(guild: Guild, msg: Message, userID: string, emote: {name: string; id: string; animated: boolean; time: number}): Promise<void | undefined>{
         const member = guild.members.get(userID) ?? (await guild.fetchMembers({query: userID}).then(m => m[0]), () => {}) as unknown as Member;
         if(!member){return;}
         if(!await this.preCheck(this.Hyperion, guild, "ghostReact", member.roles, msg.channel.id)){return;}
         const channelObj = await this.testChannel(this.Hyperion, guild, "ghostReact");
         if(!channelObj){return;}
 
-        const config: LoggingConfig = await this.getLoggingConfig(this.Hyperion, guild.id);
         const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Ghost React",
@@ -580,7 +976,7 @@ class Logging extends Module{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async guildMemberRolesUpdate(Hyperion: IHyperion, guild: Guild, member: Member, oldMember: any){
+    async guildMemberRolesUpdate(Hyperion: IHyperion, guild: Guild, member: Member, oldMember: any): Promise<void | undefined>{
         const addedRoles: Array<string> = [];
         const removedRoles: Array<string> = [];
         member.roles.forEach(r => {
@@ -594,7 +990,7 @@ class Logging extends Module{
         if(addedRoles.length === 0 && removedRoles.length !== 0){return this.memberRoleRemove(Hyperion, guild, member, removedRoles);}
     }
     
-    async memberRoleAdd(Hyperion: IHyperion, guild: Guild, member: Member, roles: Array<string>): Promise<void>{
+    async memberRoleAdd(Hyperion: IHyperion, guild: Guild, member: Member, roles: Array<string>): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "memberRoleAdd", roles, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberRoleAdd");
         if(!channelObj){return;}
@@ -624,7 +1020,7 @@ class Logging extends Module{
         }
     }
 
-    async memberRoleRemove(Hyperion: IHyperion, guild: Guild, member: Member, roles: Array<string>): Promise<void>{
+    async memberRoleRemove(Hyperion: IHyperion, guild: Guild, member: Member, roles: Array<string>): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "memberRoleRemove", roles, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberRoleRemove");
         if(!channelObj){return;}
@@ -654,7 +1050,7 @@ class Logging extends Module{
         }
     }
 
-    async memberRoleUpdate(Hyperion: IHyperion, guild: Guild, member: Member, rolesAdded: Array<string>, rolesRemoved: Array<string>): Promise<void>{
+    async memberRoleUpdate(Hyperion: IHyperion, guild: Guild, member: Member, rolesAdded: Array<string>, rolesRemoved: Array<string>): Promise<void | undefined>{
         if(!await this.preCheck(Hyperion, guild, "memberRoleUpdate", rolesAdded, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberRoleUpdate");
         if(!channelObj){return;}
@@ -699,7 +1095,7 @@ class Logging extends Module{
         const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Member Nickname update",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 footer: {
                     text: `ID: ${member.id}`
                 },

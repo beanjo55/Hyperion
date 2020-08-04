@@ -14,7 +14,8 @@ class Clean extends Command{
             helpDetail: "Cleans up responses from Hyperion, limit 100 messages back",
             helpUsage: "{prefix}clean [optional number of messages to clean]",
             noExample: true,
-            selfResponse: true
+            selfResponse: true,
+            botperms: ["manageMessages", "readMessageHistory"]
         });
     }
 

@@ -55,8 +55,8 @@ export interface ILogger{
 }
 
 export interface IUtils{
-    hoistResolver(msg: Message, search: string, members: Collection<Member>): Member | undefined;
-    resolveUser(msg: Message, search: string, members: Collection<Member>): Member | undefined;
+    hoistResolver(search: string, guild: Guild, members: Collection<Member>): Promise<Member | undefined>;
+    resolveUser(search: string, guild: Guild, members: Collection<Member>): Promise<Member | undefined>;
     getColor(roles: Collection<Role>, guildRoles: Collection<Role>): number;
     sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>): Array<Role>;
     resolveTextChannel(guild: Guild, msg: Message, search: string): GuildTextableChannel | undefined;
@@ -70,6 +70,7 @@ export interface IUtils{
     parseMessageLink(input: string): null | {guild: string; channel: string; message: string};
     hasUnicodeEmote(input: string): boolean;
     sanitizeQuotes(input: string): string;
+    op8(search: string, guild: Guild): Promise<Member | undefined>;
 }
 
 

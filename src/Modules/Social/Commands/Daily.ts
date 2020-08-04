@@ -1,6 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
 import {IHyperion, ICommandContext} from "../../../types";
-import {Member} from "eris";
 import {default as msc} from "pretty-ms";
 const day = 86400000;
 import {randomInt} from "mathjs";
@@ -20,9 +19,9 @@ class Daily extends Command{
     }
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
-        const payout: number = randomInt(lower, upper);
-        const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
-        const time: number = await Hyperion.managers.user.getDailyTime(ctx.user.id);
+        const payout = randomInt(lower, upper);
+        const target = await Hyperion.utils.op8(ctx.args[0], ctx.guild);
+        const time = await Hyperion.managers.user.getDailyTime(ctx.user.id);
         const acks = await Hyperion.managers.user.getAcks(ctx.user.id);
         const period = acks.pro ? day/2 : day;
         if(ctx.args[0] && ctx.args[0].toLowerCase() === "check"){

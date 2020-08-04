@@ -23,7 +23,7 @@ class Jumbo extends Command{
         const link =  `https://cdn.discordapp.com/emojis/${result[3]}${result[1] ? ".gif" : ".png"}?v=1`;
         const data: EmbedResponse = {
             embed: {
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date,
                 title: `Jumbo ${result[2]}!`,
                 image: {

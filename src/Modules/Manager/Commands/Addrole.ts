@@ -9,6 +9,7 @@ class Addrole extends Command{
             module: "manager",
             userperms: ["manager"],
             cooldownTime: 6000,
+            botperms: ["manageRoles"],
 
             helpDetail: "Makes a new role.",
             helpUsage: "{prefix}addrole rolename, [optional color], [optional hoist]",

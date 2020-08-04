@@ -37,7 +37,7 @@ class Modhistory extends Command{
                 embed: {
                     title: "User Mod History",
                     timestamp: new Date,
-                    color: Hyperion.defaultColor,
+                    color: Hyperion.colors.default,
                     fields: fieldarr
                 }
             };
@@ -64,7 +64,7 @@ class Modhistory extends Command{
                 embed: {
                     title: "User Mod History",
                     timestamp: new Date,
-                    color: Hyperion.defaultColor,
+                    color: Hyperion.colors.default,
                     fields: fieldarr
                 }
             };
@@ -88,7 +88,7 @@ class Modhistory extends Command{
         user = user as User;
         const data: Field = {
             name: `Case ${ctx.case}`,
-            value: `**Action:** ${Hyperion.modules.get("mod")!.actions[ctx.moderationType].friendlyName}\n**Date:** ${new Date(ctx.time).toDateString()}\n**User:** ${user.username}#${user.discriminator}\n**Reason:** ${ctx.reason}`,
+            value: `**Action:** ${Hyperion.modules.get("mod")!.actions[ctx.moderationType]?.friendlyName || "Unknown"}\n**Date:** ${new Date(ctx.time).toDateString()}\n**User:** ${user.username}#${user.discriminator}\n**Reason:** ${ctx.reason}`,
             inline: false
         };
         if(ctx.stringLength){

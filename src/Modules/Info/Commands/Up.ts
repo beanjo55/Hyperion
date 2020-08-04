@@ -22,7 +22,7 @@ class Up extends Command{
         const data = {
             embed: {
                 title: "Hyperion Uptime",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date(),
                 footer: {
                     text: `Hyperion | ${Hyperion.build} | ${Hyperion.version} | PID ${process.pid} | Cluster ${Hyperion.clusterID} | Shard ${ctx.guild.shard.id}`

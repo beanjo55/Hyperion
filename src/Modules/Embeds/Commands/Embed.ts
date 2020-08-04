@@ -27,7 +27,7 @@ class Embeds extends Command{
             const data: EmbedResponse = {
                 embed: {
                     title: "Server Embeds",
-                    color: Hyperion.defaultColor,
+                    color: Hyperion.colors.default,
                     description: "This server has no embeds",
                     timestamp: new Date,
                     footer: {text: `You can create up to ${limit} embeds on this server`}
@@ -38,7 +38,7 @@ class Embeds extends Command{
         const data: EmbedResponse = {
             embed: {
                 title: "Server Embeds",
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 description: names.join("\n"),
                 timestamp: new Date,
                 footer: {text: `You can create up to ${limit} embeds on this server`}

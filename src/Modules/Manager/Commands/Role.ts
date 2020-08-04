@@ -9,6 +9,7 @@ class Role extends Command{
             module: "manager",
             userperms: ["manager"],
             cooldownTime: 5000,
+            botperms: ["manageRoles"],
             helpDetail: "Adds or removes a role from a user.",
             helpUsage: "{prefix}role [user] [role]\n{prefix}role [user] +[role]\n{prefix}role [user] -[role]",
             helpUsageExample: "{prefix}role bean Admin\n{prefix}role bean +Admin\n{prefix}role bean -Admin"

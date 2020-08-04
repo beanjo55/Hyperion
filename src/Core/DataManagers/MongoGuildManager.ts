@@ -154,6 +154,7 @@ export class LoggingConfig{
     guildUpdate: LogEvent;
     webhookUpdate: LogEvent;
     ghostReact: LogEvent;
+    channelPermsUpdate: LogEvent
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any
     constructor(data: Partial<LoggingConfig>){
@@ -188,6 +189,7 @@ export class LoggingConfig{
         this.guildUpdate = data.guildUpdate ?? defaultLog;
         this.webhookUpdate = data.webhookUpdate ?? defaultLog;
         this.ghostReact = data.ghostReact ?? defaultLog;
+        this.channelPermsUpdate = data.channelPermsUpdate ?? defaultLog;
     }
 }
 

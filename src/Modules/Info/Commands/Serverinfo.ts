@@ -23,7 +23,7 @@ class Serverinfo extends Command{
         const data: EmbedResponse = {
             embed: {
                 timestamp: new Date,
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 title: `${ctx.guild.name} - Server Info`,
                 thumbnail: {
                     url: ctx.guild.iconURL

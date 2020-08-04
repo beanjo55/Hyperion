@@ -17,7 +17,7 @@ async function createPost(Hyperion: IHyperion, starred: Message, conf: GuildConf
     const Starpost: MessageContent = {
         content: `${count}⭐`,
         embed: {
-            color: Hyperion.defaultColor,
+            color: Hyperion.colors.default,
             timestamp: new Date,
             description: `**[Original Message](${msglink})**\n${starred.channel.mention}\n${starred.cleanContent}`,
             author: {

@@ -61,7 +61,7 @@ class Sally extends Command{
                 image: {
                     url: sallys[randomInt]
                 },
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date(),
                 footer: {
                     text: "Sally uwu"

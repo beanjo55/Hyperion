@@ -1,6 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
 import {IHyperion, ICommandContext} from "../../../types";
-import {Member} from "eris";
 import {default as msc} from "pretty-ms";
 const day = 86400000;
 import {randomInt} from "mathjs";
@@ -17,7 +16,7 @@ class Rep extends Command{
 
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         if(ctx.args[0] && ctx.args[1] && (ctx.args[0].toLowerCase() === "void" || (ctx.args[0].toLowerCase() === "the" && ctx.args[1].toLowerCase() === "void"))){
-            const time: number = await Hyperion.managers.user.getRepTime(ctx.user.id);
+            const time = await Hyperion.managers.user.getRepTime(ctx.user.id);
             const acks = await Hyperion.managers.user.getAcks(ctx.user.id);
             const period = acks.pro ? day/2 : day;
             if(ctx.args.length === 0){
@@ -36,8 +35,8 @@ class Rep extends Command{
             return `You threw your rep to the void. ${voidCount} reps have been discarded there so far`;
         }
         const lucky = randomInt(0, 100) === 69;
-        const target: Member | undefined = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
-        const time: number = await Hyperion.managers.user.getRepTime(ctx.user.id);
+        const target = await Hyperion.utils.op8(ctx.args[0], ctx.guild);
+        const time = await Hyperion.managers.user.getRepTime(ctx.user.id);
         const acks = await Hyperion.managers.user.getAcks(ctx.user.id);
         const period = acks.pro ? day/2 : day;
         if(ctx.args.length === 0){

@@ -11,7 +11,8 @@ class Unban extends Command{
             cooldownTime: 5000,
             helpDetail: "Unbans a user with an optional reason.",
             helpUsage: "{prefix}unban [userID] [optional reason]",
-            helpUsageExample: "{prefix}unban 253233185800847361 appealed"
+            helpUsageExample: "{prefix}unban 253233185800847361 appealed",
+            botperms: ["banMembers"]
         });
     }
 

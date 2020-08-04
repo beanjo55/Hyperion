@@ -44,7 +44,7 @@ class Module extends Command{
             const data = {
                 embed: {
                     title: "Hyperion toggleable modules",
-                    color: Hyperion.defaultColor,
+                    color: Hyperion.colors.default,
                     timestamp: new Date,
                     description: `The modules that you can toggle are listed below\n\`\`\`${outlist.join("\n").replace(rx1, "Enabled").replace(rx2, "Disabled")}\`\`\``
                 }

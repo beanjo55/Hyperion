@@ -37,7 +37,7 @@ class Warn extends Command{
             const dmChannel = await target.user.getDMChannel();
             let reason = ctx.args.slice(1).join(" ");
             if(reason.length > 1900){reason = reason.substring(0, 1900);}
-            await dmChannel.createMessage(`You were warned in ${ctx.guild.name} for: ${reason}`);
+            if(!target.bot){await dmChannel.createMessage(`You were warned in ${ctx.guild.name} for: ${reason}`);}
             this.modDeleteAfter(ctx, Hyperion);
             return `Sucessfully warned ${target.username}#${target.discriminator}`;
         }catch{

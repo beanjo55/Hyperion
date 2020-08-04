@@ -18,7 +18,7 @@ class Avatar extends Command{
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
         let target: Member | undefined;
         if(ctx.args[0]){
-            target = Hyperion.utils.hoistResolver(ctx.msg, ctx.args[0], ctx.guild.members);
+            target = await Hyperion.utils.op8(ctx.args[0], ctx.guild);
         }else{
             target = ctx.member;
         }
@@ -28,10 +28,9 @@ class Avatar extends Command{
         const data = {
             embed: {
                 timestamp: new Date(),
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 author: {
                     name: `Avatar for ${target.username}#${target.discriminator}`,
-                    // eslint-disable-next-line @typescript-eslint/camelcase
                     icon_url: target.avatarURL
                 },
                 image: {

@@ -27,7 +27,7 @@ class Command extends CommandConstructor{
             const data = {
                 embed: {
                     title: `Command Settings for ${command.name}`,
-                    color: Hyperion.defaultColor,
+                    color: Hyperion.colors.default,
                     description: `Enabled: ${commandStatus.enabled}\nAllowed Roles: ${commandStatus.allowedRoles.map(r => `<@&${r}>`).join(", ") || "None"}\nDisabled Roles: ${commandStatus.disabledRoles.map(r => `<@&${r}>`).join(", ") || "None"}\nAllowed Channels: ${commandStatus.allowedChannels.map(r => `<#${r}>`).join(", ") || "None"}\nDisabled Channels: ${commandStatus.disabledChannels.map(r => `<#${r}>`).join(", ") || "None"}`,
                     timestamp: new Date
                 }

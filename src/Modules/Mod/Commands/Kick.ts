@@ -15,7 +15,8 @@ class Kick extends Command{
             cooldownTime: 5000,
             helpDetail: "Kicks a user.",
             helpUsage: "{prefix}kick [user] [reason]",
-            helpUsageExample: "{prefix}kick boss trolling"
+            helpUsageExample: "{prefix}kick boss trolling",
+            botperms: ["kickMembers"]
         });
     }
 

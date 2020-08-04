@@ -30,7 +30,7 @@ class Hug extends Command{
         const data = {
             embed: {
                 description: `${ctx.user.mention} hugged ${ctx.args.join(" ")}!`,
-                color: Hyperion.defaultColor,
+                color: Hyperion.colors.default,
                 timestamp: new Date(),
                 image: {
                     url: gifs[randomInt]

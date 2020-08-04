@@ -10,7 +10,7 @@ class Nick extends Command{
             aliases: ["nickname"],
             userperms: ["manager"],
             cooldownTime: 10000,
-
+            botperms: ["changeNickname"],
             helpDetail: "Changes the bot nickname in the server.",
             helpUsage: "{prefix}nick [new nickname]",
             helpUsageExample: "{prefix}nick Harbringer"

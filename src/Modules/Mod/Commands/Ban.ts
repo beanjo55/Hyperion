@@ -19,7 +19,8 @@ class Ban extends Command{
             helpDetail: "Bans a user.",
             helpUsage: "{prefix}ban [user] [reason]",
             helpSubcommands: "{prefix}ban save - Bans a user, but does not delete their recent messages",
-            helpUsageExample: "{prefix}ban boss trolling\n{prefix}ban save wuper trolling"
+            helpUsageExample: "{prefix}ban boss trolling\n{prefix}ban save wuper trolling",
+            botperms: ["banMembers"]
         });
         this.banDays = 7;
         this.argShift = 0;
@@ -58,12 +59,10 @@ class Ban extends Command{
         const config = await Hyperion.managers.guild.getModuleConfig<ModConfig>(ctx.guild.id, "mod");
         if(config.dmOnBan){await ctx.module.banDM(user, ctx.guild.name, reason);}
         try{
-            console.log("trying to ban");
             await ctx.guild.banMember(user.id, this.banDays, auditReason);
         }catch{
             return "Something went wrong!";
         }
-        console.log("making log");
         ctx.module.makeLog({
             user: user.id,
             moderator: ctx.member.id,
@@ -76,9 +75,7 @@ class Ban extends Command{
             moderationEnd: false,
             autoEnd: false
         }, user);
-        console.log("check delete");
         this.modDeleteAfter(ctx, Hyperion);
-        console.log("final return");
         return `Banned ${user.username}#${user.discriminator}!`;
     }
 }
