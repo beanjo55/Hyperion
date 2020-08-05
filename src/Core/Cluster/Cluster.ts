@@ -30,10 +30,10 @@ export class Cluster {
 	loaded = false;
 
 	constructor() {
-	    console.log = (str: unknown) => {if (process.send) process.send({op: "log", msg: str, source: "Cluster " + this.clusterID});};
-	    console.debug = (str: unknown) => {if (process.send) process.send({op: "debug", msg: str, source: "Cluster " + this.clusterID});};
-	    console.error = (str: unknown) => {if (process.send) process.send({op: "error", msg: str, source: "Cluster " + this.clusterID});};
-	    console.warn = (str: unknown) => {if (process.send) process.send({op: "warn", msg: str, source: "Cluster " + this.clusterID});};
+	    console.log = (str: unknown) => {if (process.send) process.send({op: "log", msg: inspect(str, {depth: 0}), source: "Cluster " + this.clusterID});};
+	    console.debug = (str: unknown) => {if (process.send) process.send({op: "debug", msg: inspect(str, {depth: 0}), source: "Cluster " + this.clusterID});};
+	    console.error = (str: unknown) => {if (process.send) process.send({op: "error", msg: inspect(str, {depth: 0}), source: "Cluster " + this.clusterID});};
+	    console.warn = (str: unknown) => {if (process.send) process.send({op: "warn", msg: inspect(str, {depth: 0}), source: "Cluster " + this.clusterID});};
 		/*
 	    //Spawns
 	    process.on("uncaughtException", (err: Error) => {

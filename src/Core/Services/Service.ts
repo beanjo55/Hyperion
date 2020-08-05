@@ -126,8 +126,8 @@ export class Service {
 	        if (this.whatToLog.includes("service_ready")) console.log(`Service ${this.serviceName} is ready!`);
 	        if (process.send) process.send({op: "connected"});
 	        ready = true;
-	    }).catch((err: unknown) => {
-	        console.error(`Service ${this.serviceName} had an error starting: ${inspect(err)}`);
+	    }).catch((err: Error) => {
+	        console.error(`Service ${this.serviceName} had an error starting: ${inspect(err.message)}`);
 	        process.kill(0);
 	    });
 
