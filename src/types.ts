@@ -8,7 +8,7 @@ import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
 import {manager as MMLM} from "./Core/DataManagers/MongoModLogManager";
 import {IGuild} from "./MongoDB/Guild";
 import HyperionC from "./main";
-
+import {IGlobal} from "./MongoDB/Global";
 
 
 export interface HyperionGuild extends Guild{
@@ -212,17 +212,7 @@ export interface ConfigKey{
     validate?(input: string): boolean;
 }
 
-export interface GlobalConfig{
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sallyGameConsts: any;
-    gDisabledMods: Array<string>;
-    gDisabledCommands: Array<string>;
-    blacklist: Array<string>;
-    globalCooldown: number;
-    globalDisabledLogEvents: Array<string>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any;
-}
+export type GlobalConfig = IGlobal;
 
 export interface IMongoUpdateResult{
     n: number;

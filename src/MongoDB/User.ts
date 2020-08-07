@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-/* eslint-disable @typescript-eslint/interface-name-prefix */
 import {Schema, model, Model, Document} from "mongoose";
 import { AckInterface } from "../types";
 
@@ -118,7 +117,7 @@ export interface IUser{
     friends: Array<string>;
     partner?: string;
     bio: string;
-    data: {};
+    data: Record<string, unknown>;
     acks: AckInterface;
 }
 

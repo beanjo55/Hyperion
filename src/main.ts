@@ -11,12 +11,12 @@ import {default as Redis} from "ioredis";
 import {default as axios} from "axios";
 import {default as mongoose} from "mongoose";
 import {inspect} from "util";
-import {CoreOptions, IManagers, GlobalConfig, IUtils, ILogger, IColors} from "./types";
+import {CoreOptions, IManagers, IUtils, ILogger, IColors} from "./types";
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
 import {default as guilduser} from "./MongoDB/Guilduser";
 import {default as modlog} from "./MongoDB/Modlog";
-import {default as global} from "./MongoDB/Global";
+import {default as global, IGlobal} from "./MongoDB/Global";
 import {default as starModel} from "./MongoDB/Starred";
 import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
 import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
@@ -122,7 +122,7 @@ export default class HyperionC extends BaseClusterWorker{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     readonly models: {[key: string]: mongoose.Model<any>};
     db: mongoose.Connection;
-    global!: GlobalConfig;
+    global!: IGlobal;
     logLevel: number
     managers: IManagers;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -180,7 +180,7 @@ export default class HyperionC extends BaseClusterWorker{
         });
         this.loadMods();
         this.loadEvents();
-        const global = await this.models.global.findOne({}).lean<GlobalConfig>().exec() as GlobalConfig | null;
+        const global = await this.models.global.findOne({}).lean<IGlobal>().exec() as IGlobal | null;
         if(global === null){throw new Error("Unable to get global config");}
         this.global = global;
         
@@ -202,7 +202,7 @@ export default class HyperionC extends BaseClusterWorker{
     }
 
     async reloadGlobal(): Promise<void>{
-        const newGlobal = await this.models.global.findOne({}).lean<GlobalConfig>().exec() as GlobalConfig | null;
+        const newGlobal = await this.models.global.findOne({}).lean<IGlobal>().exec() as IGlobal | null;
         if(!newGlobal){
             throw new Error("Could not find new global, aborting!");
         }

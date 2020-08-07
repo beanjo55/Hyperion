@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /*stores an object, guild, and user
 
@@ -27,6 +28,14 @@ const guilduserdata = new Schema({
     highlights: {
         type: Array,
         default: []
+    },
+    level: {
+        type: Number,
+        default: 0
+    },
+    exp: {
+        type: Number,
+        default: 0
     }
 },{
     autoIndex: true,
@@ -37,6 +46,8 @@ export interface IGuildUser{
     guild: string;
     user: string;
     highlights: Array<string>;
+    exp: number;
+    level: number;
 }
 export interface IGuildUserDoc extends IGuildUser, Document{}
 export interface IGuildUserModel extends Model<IGuildUserDoc>{}

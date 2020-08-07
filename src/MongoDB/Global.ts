@@ -1,4 +1,4 @@
-import {Schema, model} from "mongoose";
+import {Schema, model, Document, Model} from "mongoose";
 
 const globalconf = new Schema({
 
@@ -32,6 +32,18 @@ const globalconf = new Schema({
         default: []
     },
 
+    exp: {
+        type: Object,
+        default: {
+            cooldown: 2000,
+            coeff: .17,
+            offset: 69.3,
+            div: 2,
+            min: 10,
+            max: 20
+        }
+    },
+
     data: {
         type: Object,
         default: {}
@@ -41,4 +53,25 @@ const globalconf = new Schema({
     strict: false
 });
 
-export default model("global", globalconf);
+export interface IGlobal{
+    sallyGameConsts: Record<string, unknown>;
+    gDisabledMods: Array<string>;
+    gDisabledCommands: Array<string>;
+    globalDisabledLogevents: Array<string>;
+    globalCooldown: number;
+    blacklist: Array<string>,
+    exp: {
+        cooldown: number;
+        coeff: number;
+        offset: number;
+        div: number;
+        min: number;
+        max: number
+    },
+    data: Record<string, unknown>
+}
+
+export interface IGlobalDoc extends IGlobal, Document{}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IGlobalModel extends Model<IGlobalDoc>{}
+export default model<IGlobalDoc>("global", globalconf);
