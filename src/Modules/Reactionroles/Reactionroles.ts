@@ -1,7 +1,7 @@
 import { Emoji, GuildTextableChannel, Message } from "eris";
 import {Module} from "../../Core/Structures/Module";
 import { IHyperion } from "../../types";
-import {RRConfig, ReactionRole} from "../../Core/DataManagers/MongoGuildManager";
+import {RRConfig, ReactionRole} from "../../Core/Managers/MongoGuildManager";
 
 class Reactionroles extends Module{
     constructor(Hyperion: IHyperion){

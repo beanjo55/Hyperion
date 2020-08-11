@@ -318,10 +318,19 @@ export class Quote{
 }
 export class SocialConfig{
     ignoredChannels: Array<string>;
-    levelupChannel: string;
     constructor(data: Partial<SocialConfig>){
         this.ignoredChannels = data.ignoredChannels ?? [];
-        this.levelupChannel = data.levelupChannel ?? "";
+    }
+}
+export class LevelsConfig{
+    expRoles: {[key: string]: {role: string; global: boolean; exp: number}};
+    lvlRoles: {[key: number]: {role: string; global: boolean}; [key: string]: {role: string; global: boolean}};
+    lvlUpSetting: "none" | "current" | string;
+
+    constructor(data: Partial<LevelsConfig>){
+        this.expRoles = data.expRoles ?? {};
+        this.lvlRoles = data.lvlRoles ?? {};
+        this.lvlUpSetting = data.lvlUpSetting ?? "none";
     }
 }
 
@@ -340,7 +349,8 @@ const nameConfigMap: {[key: string]: any} = {
     social: SocialConfig,
     autorole: AutoroleConfig,
     goodbye: GoodbyeConfig,
-    quotes: QuoteConfig
+    quotes: QuoteConfig,
+    levels: LevelsConfig
 };
 
 class MongoGuildManager{

@@ -3,12 +3,15 @@
 import {Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, GuildChannel} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
-import {manager as MGM, QuoteConfig as qc, GoodbyeConfig as gc, LogEvent as le, WelcomeConfig as wc, AutoroleConfig as arc, SocialConfig as sc, RRConfig as rrc, RankConfig as rc, TagConfig as tc, LoggingConfig as lc, StarboardConfig as sbc, ModuleConfig as mc, ModConfig as modc, CommandConfig as cc} from "./Core/DataManagers/MongoGuildManager";
-import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
-import {manager as MMLM} from "./Core/DataManagers/MongoModLogManager";
+import {manager as MGM, QuoteConfig as qc, GoodbyeConfig as gc, LogEvent as le, WelcomeConfig as wc, AutoroleConfig as arc, SocialConfig as sc, RRConfig as rrc, RankConfig as rc, TagConfig as tc, LoggingConfig as lc, StarboardConfig as sbc, ModuleConfig as mc, ModConfig as modc, CommandConfig as cc} from "./Core/Managers/MongoGuildManager";
+import {manager as MUM} from "./Core/Managers/MongoUserManager";
+import {manager as MMLM} from "./Core/Managers/MongoModLogManager";
 import {IGuild} from "./MongoDB/Guild";
 import HyperionC from "./main";
 import {IGlobal} from "./MongoDB/Global";
+import { IGuildUser } from "./MongoDB/Guilduser";
+import { IUser } from "./MongoDB/User";
+import {default as MGUM} from "./Core/Managers/MongoGuildUserManager";
 
 
 export interface HyperionGuild extends Guild{
@@ -33,7 +36,8 @@ export interface CoreOptions{
 export interface IManagers{
     guild: MGM;
     user: MUM;
-    modlog: MMLM; 
+    modlog: MMLM;
+    guildUser: MGUM;
 }
 
 export interface IColors{
@@ -250,4 +254,5 @@ export type MixedResponse = string | EmbedResponse;
 export type CommandResponse = Promise<MixedResponse>;
 export type Field = {name: string; value: string; inline: boolean};
 export type FieldArray = Array<Field>;
+export type levelUpdateResult = {result: IMongoUpdateResult; data: IGuildUser | IUser; lvlUp: boolean}
 

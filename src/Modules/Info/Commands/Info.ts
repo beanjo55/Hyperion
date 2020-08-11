@@ -41,7 +41,7 @@ class Info extends Command{
                     },
                     {
                         name: "Developer",
-                        value: "bean#8888",
+                        value: "bean#8086",
                         inline: true
                     },
                     {

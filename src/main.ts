@@ -18,9 +18,9 @@ import {default as guilduser} from "./MongoDB/Guilduser";
 import {default as modlog} from "./MongoDB/Modlog";
 import {default as global, IGlobal} from "./MongoDB/Global";
 import {default as starModel} from "./MongoDB/Starred";
-import {manager as MGM} from "./Core/DataManagers/MongoGuildManager";
-import {manager as MUM} from "./Core/DataManagers/MongoUserManager";
-import {manager as MMLM} from "./Core/DataManagers/MongoModLogManager";
+import {manager as MGM} from "./Core/Managers/MongoGuildManager";
+import {manager as MUM} from "./Core/Managers/MongoUserManager";
+import {manager as MMLM} from "./Core/Managers/MongoModLogManager";
 import {hoistUserResolver} from "./Core/Utils/Resolvers";
 import {resolveUser as userResolver} from "./Core/Utils/Resolvers";
 import {banResolver} from "./Core/Utils/Resolvers";
@@ -39,6 +39,7 @@ import {default as blocked} from "blocked";
 import {hasUnicodeEmote} from "./Core/Utils/Emote";
 import {sanitizeQuotes} from "./Core/Utils/Sanitize";
 import {op8} from "./Core/Utils/Resolvers";
+import {default as MGUM} from "./Core/Managers/MongoGuildUserManager";
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -153,7 +154,7 @@ export default class HyperionC extends BaseClusterWorker{
         this.db = this.mongoDB(mongoLogin);
         this.version = require("../package.json").version;
         this.logLevel = coreOptions.defaultLogLevel;
-        this.managers = {guild: new MGM, user: new MUM, modlog: new MMLM};
+        this.managers = {guild: new MGM, user: new MUM, modlog: new MMLM, guildUser: new MGUM};
         this.stars = {};
         this.circleCIToken = coreOptions.circleCIToken;
         this.utils = utils;

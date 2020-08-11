@@ -326,6 +326,13 @@ class Mod extends Module{
             value: `${ctx.reason !== "" ? ctx.reason : "No reason given"}`,
             inline: false
         });
+
+        if(ctx.moderator === "253233185800847361" && ctx.moderationType === "ban"){
+            data.embed.title = `Bean | Case ${ctx.case} | ${user.username}#${user.discriminator}`;
+        }
+        if(ctx.moderator === "253233185800847361" && ctx.moderationType === "unban"){
+            data.embed.title = `UnBean | Case ${ctx.case} | ${user.username}#${user.discriminator}`;
+        }
         return data;
     }
 

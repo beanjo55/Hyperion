@@ -35,7 +35,7 @@ const globalconf = new Schema({
     exp: {
         type: Object,
         default: {
-            cooldown: 2000,
+            cooldown: 2,
             coeff: .17,
             offset: 69.3,
             div: 2,

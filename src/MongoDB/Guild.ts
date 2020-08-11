@@ -1,6 +1,6 @@
 import {Schema, model, Model, Document} from "mongoose";
 import * as Types from "../types";
-import * as confs from "../Core/DataManagers/MongoGuildManager";
+import * as confs from "../Core/Managers/MongoGuildManager";
 import { boolean } from "mathjs";
 
 const guildconf = new Schema({
@@ -88,6 +88,11 @@ const guildconf = new Schema({
         default: new confs.SocialConfig({})
     },
 
+    levels: {
+        type: Object,
+        default: new confs.LevelsConfig({})
+    },
+
     ignoredChannels: {
         type: Array,
         default: []
@@ -160,6 +165,7 @@ export interface IGuild{
     social: Types.SocialConfig;
     quotes: Types.QuoteConfig;
     casualPrefix: boolean;
+    levels: confs.LevelsConfig;
     pro: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any;

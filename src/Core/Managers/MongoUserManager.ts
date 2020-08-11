@@ -35,9 +35,10 @@ class MongoUserManager{
         return this.model.create({user: user});
     }
 
-    async getUserConfig(user: string): Promise<IUser | null>{
+    async getUserConfig(user: string): Promise<IUser>{
         if(await this.model.exists({user: user})){
-            return await this.model.findOne({user: user}).lean<IUser>().exec();
+            const data = await this.model.findOne({user: user}).lean<IUser>().exec();
+            return data!;
         }else{
             return await this.createConfig(user);
         }
@@ -151,6 +152,18 @@ class MongoUserManager{
     async setBio(user: string, bio: string): Promise<Types.IMongoUpdateResult>{
         await this.ensureExists(user);
         return await this.model.updateOne({user: user}, {bio: bio});
+    }
+    async addExp(user: string, exp: number, levelFunc: (exp: number)=> number): Promise<{result: Types.IMongoUpdateResult; data: IUser; lvlUp: boolean}>{
+        let lvlUp = false;
+        const data = await this.getUserConfig(user);
+        const totalExp = data!.exp + exp;
+        const update: {exp: number; level?: number} = {exp: totalExp};
+        const level = levelFunc(totalExp);
+        if(level > data.level){update.level = level; lvlUp = true;}
+        data.exp = totalExp;
+        data.level = level;
+        return {result: await this.model.updateOne({user: user}, update).exec(), data: data, lvlUp};
+
     }
 
     merge(oldData: {[key: string]: unknown}, newData: {[key: string]: unknown}): {[key: string]: unknown}{

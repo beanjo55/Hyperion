@@ -3,7 +3,7 @@ import {Command} from "../../../Core/Structures/Command";
 import {ICommandContext, IHyperion} from "../../../types";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { GuildChannel, Embed } from "eris";
-import { LoggingConfig } from "../../../Core/DataManagers/MongoGuildManager";
+import { LoggingConfig } from "../../../Core/Managers/MongoGuildManager";
 import {default as LoggingModule} from "../Logging";
 
 const eventNames: Array<string> = [

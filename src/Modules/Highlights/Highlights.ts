@@ -159,7 +159,9 @@ class Highlights extends Module{
     async getUserHighlights(user: string, guild: string): Promise<Array<string>>{
         if(!await this.model.exists({guild: guild, user: user})){return ["No highlights set"];}
         const data = await this.model.findOne({guild: guild, user: user}).exec();
-        return data?.highlights ?? ["No highlights set"];
+        let out = data?.highlights ?? ["No highlights set"];
+        if(out.length === 0){out = ["No highlights set"];}
+        return out;
     }
 
 }

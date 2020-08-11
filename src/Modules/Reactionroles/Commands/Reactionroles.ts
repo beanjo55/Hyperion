@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 import {IHyperion, ICommandContext} from "../../../types";
-import {ReactionRole, RRConfig} from "../../../Core/DataManagers/MongoGuildManager";
+import {ReactionRole, RRConfig} from "../../../Core/Managers/MongoGuildManager";
 
 class Reactionroles extends Command{
     constructor(){

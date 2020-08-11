@@ -5,7 +5,7 @@ import {Module} from "../../Core/Structures/Module";
 import {IHyperion, GuildConfig, EmbedResponse} from "../../types";
 // eslint-disable-next-line no-unused-vars
 import { Guild, Member, User, Message, VoiceChannel, Role, GuildChannel, Emoji, TextChannel, Embed, NewsChannel, StoreChannel, CategoryChannel, Channel } from "eris";
-import {LoggingConfig, LogEvent} from "../../Core/DataManagers/MongoGuildManager";
+import {LoggingConfig, LogEvent} from "../../Core/Managers/MongoGuildManager";
 import {default as msc} from "pretty-ms";
 import { IGuild } from "../../MongoDB/Guild";
 import HyperionC from "../../main";
@@ -677,7 +677,7 @@ class Logging extends Module{
         if(oldRole.color && role.color !== oldRole.color){
             data.embed.description += `**Old Color:** ${oldRole.color.toString(16)}\n**New Color:** ${role.color.toString(16)}\n\n`;
         }
-        if(oldRole.hoist !== undefined && role.name !== oldRole.name){
+        if(oldRole.hoist !== undefined && role.hoist !== oldRole.hoist){
             data.embed.description += `**Old Hoist Status:** ${oldRole.hoist ? "Yes" : "No"}\n**New Hoist Status:** ${role.hoist ? "Yes" : "No"}\n\n`;
         }
         if(oldRole.mentionable !== undefined && role.mentionable !== oldRole.mentionable){

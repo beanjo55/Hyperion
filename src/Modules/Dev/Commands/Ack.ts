@@ -34,7 +34,7 @@ class Ack extends Command{
             await Hyperion.managers.user.setAcks(user, update);
             return "Success";
         }catch(err){
-            return err.messahe;
+            return err.message;
         }
     }
 }

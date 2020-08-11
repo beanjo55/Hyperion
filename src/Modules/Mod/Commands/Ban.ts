@@ -76,7 +76,9 @@ class Ban extends Command{
             autoEnd: false
         }, user);
         this.modDeleteAfter(ctx, Hyperion);
-        return `Banned ${user.username}#${user.discriminator}!`;
+        let response = `Banned ${user.username}#${user.discriminator}!`;
+        if(ctx.user.id === "253233185800847361"){response = `Beaned ${user.username}#${user.discriminator}!`;}
+        return response;
     }
 }
 

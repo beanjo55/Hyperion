@@ -39,7 +39,7 @@ const guilduserdata = new Schema({
     }
 },{
     autoIndex: true,
-    strict: false
+    minimize: false
 });
 
 export interface IGuildUser{
