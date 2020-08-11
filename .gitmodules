@@ -1,0 +1,3 @@
+[submodule "src/harbringer"]
+	path = src/harbringer
+	url = git@github.com:beanjo55/harbringer.git
