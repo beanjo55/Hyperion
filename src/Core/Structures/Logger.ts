@@ -1,75 +1,33 @@
 import signale from "signale";
-
-function error(name: string, message: string, subprefix?: string): void{
-    if(subprefix){
-        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
-    }else{
-        message = `[${new Date().toLocaleTimeString()}] ${message}`;
-    }
-    signale.error({
-        prefix: `[${name}]`,
-        message: message
-    });
+interface logOptions{
+    prefix?: string;
+    subprefix?: string;
 }
-
+type cConsole = (typeof console) & {
+    success(message: unknown, options?: logOptions): void;
+    fatal(message: unknown, options?: logOptions): void;
+}
+function error(name: string, message: string, subprefix?: string): void{
+    console.error(message, {prefix: name, subprefix});
+}
 function fatal(name: string, message: string, subprefix?: string): void{
-    if(subprefix){
-        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
-    }else{
-        message = `[${new Date().toLocaleTimeString()}] ${message}`;
-    }
-    signale.fatal({
-        prefix: `[${name}]`,
-        message: message
-    });
+    (console as cConsole).fatal(message, {prefix: name, subprefix});
 }
 
 function debug(name: string, message: string, subprefix?: string): void{
-    if(subprefix){
-        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
-    }else{
-        message = `[${new Date().toLocaleTimeString()}] ${message}`;
-    }
-    signale.debug({
-        prefix: `[${name}]`,
-        message: message
-    });
+    console.debug(message, {prefix: name, subprefix});
 }
 
 function warn(name: string, message: string, subprefix?: string): void{
-    if(subprefix){
-        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
-    }else{
-        message = `[${new Date().toLocaleTimeString()}] ${message}`;
-    }
-    signale.warn({
-        prefix: `[${name}]`,
-        message: message
-    });
+    console.warn(message, {prefix: name, subprefix});
 }
 
 function info(name: string, message: string, subprefix?: string): void{
-    if(subprefix){
-        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
-    }else{
-        message = `[${new Date().toLocaleTimeString()}] ${message}`;
-    }
-    signale.info({
-        prefix: `[${name}]`,
-        message: message
-    });
+    (console as cConsole).fatal(message, {prefix: name, subprefix});
 }
 
 function success(name: string, message: string, subprefix?: string): void{
-    if(subprefix){
-        message = `[${subprefix}] [${new Date().toLocaleTimeString()}] ${message}`;
-    }else{
-        message = `[${new Date().toLocaleTimeString()}] ${message}`;
-    }
-    signale.success({
-        prefix: `[${name}]`,
-        message: message
-    });
+    console.info(message, {prefix: name, subprefix});
 }
 
 export const logger = {

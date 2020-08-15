@@ -3,7 +3,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable no-unused-vars */
 import {default as fs} from "fs";
-import {Collection} from "eris";
+import {Client, Collection} from "eris";
 import {Module} from "./Core/Structures/Module.js";
 import {Command} from "./Core/Structures/Command.js";
 import {logger} from "./Core/Structures/Logger";
@@ -31,7 +31,6 @@ import {resolveRole} from "./Core/Utils/Roles";
 import {resolveTextChannel} from "./Core/Utils/Channels";
 import {resolveVoiceChannel} from "./Core/Utils/Channels";
 import {resolveCategory} from "./Core/Utils/Channels";
-import {BaseClusterWorker, Setup} from "./Core/Cluster/BaseClusterWorker";
 import * as sentry from "@sentry/node";
 import {default as embedModel} from "./MongoDB/Embeds";
 import {resolveGuildChannel} from "./Core/Utils/Channels";
@@ -40,7 +39,9 @@ import {hasUnicodeEmote} from "./Core/Utils/Emote";
 import {sanitizeQuotes} from "./Core/Utils/Sanitize";
 import {op8} from "./Core/Utils/Resolvers";
 import {default as MGUM} from "./Core/Managers/MongoGuildUserManager";
-
+import {Base} from "./harbringer/structures/Base";
+import {IPC} from "./harbringer/structures/IPC";
+import {multiArg} from "./Core/Utils/Parse";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const config = require("../config.json");
@@ -95,7 +96,8 @@ const utils: IUtils = {
     parseMessageLink,
     hasUnicodeEmote,
     sanitizeQuotes,
-    op8
+    op8,
+    multiArg
 };
 
 const colors: IColors = {
@@ -106,9 +108,13 @@ const colors: IColors = {
     blue: 30719,
     default: config.coreOptions.defaultColor
 };
-
-
-export default class HyperionC extends BaseClusterWorker{
+interface setup {
+    client: Client;
+    clusterID: number;
+    ipc: IPC;
+}
+const coreOptions = config.coreOptions;
+export default class HyperionC extends Base{
     readonly build: string;
     modules: Collection<Module>;
     sentry: sentry.User;
@@ -134,7 +140,8 @@ export default class HyperionC extends BaseClusterWorker{
     colors: IColors;
     private listTokens: {[key: string]: string};
     fetch: boolean;
-    constructor(setup: Setup, coreOptions: CoreOptions, mongoLogin: string, mongoOptions: mongoose.ConnectionOptions,){
+    trueReady = false;
+    constructor(setup: setup){
         super(setup);
         this.build = coreOptions.build;
         this.modules = new Collection(Module);
@@ -150,8 +157,8 @@ export default class HyperionC extends BaseClusterWorker{
         this.models = models;
         this.devPrefix = coreOptions.devPrefix;
         this.adminPrefix = coreOptions.adminPrefix;
-        this.mongoOptions = mongoOptions;
-        this.db = this.mongoDB(mongoLogin);
+        this.mongoOptions = config.mongoOptions;
+        this.db = this.mongoDB(config.mongoLogin);
         this.version = require("../package.json").version;
         this.logLevel = coreOptions.defaultLogLevel;
         this.managers = {guild: new MGM, user: new MUM, modlog: new MMLM, guildUser: new MGUM};
@@ -184,8 +191,6 @@ export default class HyperionC extends BaseClusterWorker{
         const global = await this.models.global.findOne({}).lean<IGlobal>().exec() as IGlobal | null;
         if(global === null){throw new Error("Unable to get global config");}
         this.global = global;
-        
-        this.client.connect();
         blocked((time) => {
             this.logger.warn("Hyperion", `Process blocked for ${time}ms`, "Process Block");
             this.client.executeWebhook("731192845716947087", "700BnqlIyPgzfIcOhlvO773zjxr0pdxabLHQodXauJOam2HF30564xzZApDeoXLc78CD", {
@@ -200,6 +205,7 @@ export default class HyperionC extends BaseClusterWorker{
                 ]
             });
         }, {threshold: 10000});
+        this.trueReady = true;
     }
 
     async reloadGlobal(): Promise<void>{

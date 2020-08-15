@@ -75,6 +75,7 @@ export interface IUtils{
     hasUnicodeEmote(input: string): boolean;
     sanitizeQuotes(input: string): string;
     op8(search: string, guild: Guild): Promise<Member | undefined>;
+    multiArg(input: Array<string>, options: Array<string>): undefined | {match: string; offset: number};
 }
 
 

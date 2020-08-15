@@ -10,7 +10,7 @@ class MessageCreateHandler{
     }
 
     async handle(this: IHyperion, msg: Message): Promise<void>{
-        
+        if(!this.trueReady){return;}
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){
             return;
         }
