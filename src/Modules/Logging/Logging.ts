@@ -658,7 +658,7 @@ class Logging extends Module{
                 break;
             }
         }
-
+        if(!changes){return;}
         const data: EmbedResponse = {
             embed: {
                 color: Hyperion.colors.blue,
@@ -829,17 +829,16 @@ class Logging extends Module{
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
             if(oldChannel[key] && channel[key] && oldChannel[key] !== channel[key]){
-                changes = true;
-                if(key === "permissions"){
+                if(key === "permissionOverwrites"){
                     permUpdate = true;
                 }else{
                     changes = true;
                 }
             }
         }
-        if(!changes && !permUpdate){return;}
-        if(!changes && permUpdate){return;}//will be perm update later
 
+        //if(permUpdate){return;}//will be perm update later
+        if(!changes){return;}
         const data: EmbedResponse = {
             embed: {
                 color: Hyperion.colors.blue,

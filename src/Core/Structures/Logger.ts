@@ -1,4 +1,4 @@
-import signale from "signale";
+
 interface logOptions{
     prefix?: string;
     subprefix?: string;

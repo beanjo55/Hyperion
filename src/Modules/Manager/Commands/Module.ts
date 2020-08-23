@@ -1,8 +1,8 @@
 import {Command} from "../../../Core/Structures/Command";
 import {Module as module} from "../../../Core/Structures/Module";
 import {ICommandContext, IHyperion} from "../../../types";
-import {toggleableModules} from "../Module/ConfigHelper";
 import { Embed } from "eris";
+import {default as manager} from "../Manager";
 
 const rx1 = new RegExp("true", "gm");
 const rx2 = new RegExp("false", "gm");
@@ -21,9 +21,9 @@ class Module extends Command{
         });
     }
 
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
+    async execute(ctx: ICommandContext<manager>, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
 
-        const toggleable = toggleableModules(Hyperion.modules);
+        const toggleable = ctx.module.toggleableModules(Hyperion.modules);
         const list = toggleable.map((m: module) => m.name);
         let outlist: Array<string> = list;
         const fromconf: Array<string> = [];

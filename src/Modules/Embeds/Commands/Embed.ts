@@ -116,6 +116,9 @@ class EmbedColor extends Embeds{
         }
         if(!embed){return "This shouldnt be possible, no error but no embed";}
         let color = 0;
+        if(!isNaN(Number(ctx.args[2]))){
+            color = Number(ctx.args[2]);
+        }
         if(ctx.args[2].startsWith("#")){
             color = color = parseInt(ctx.args[2].slice(1), 16);
             if(isNaN(color)){color = 0;}

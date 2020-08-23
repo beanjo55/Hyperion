@@ -1,11 +1,10 @@
 import {Command} from "../../../Core/Structures/Command";
 import {IHyperion, ICommandContext} from "../../../types";
-import {configurableModules} from "../Module/ConfigHelper";
 import { Module, ConfigKey } from "../../../Core/Structures/Module";
 import {inspect} from "util";
 import { GuildChannel, Embed, Role } from "eris";
 import { IGuild } from "../../../MongoDB/Guild";
-
+import {default as manager} from "../Manager";
 
 
 const opmap = ["get", "set", "add", "remove", "clear"];
@@ -27,18 +26,18 @@ class Config extends Command{
         });
     }
 
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>} | undefined>{
+    async execute(ctx: ICommandContext<manager>, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>} | undefined>{
         if(!ctx.args[0]){
             return this.listModules(ctx, Hyperion);
         }
         if(ctx.args[0] && !ctx.args[1]){
-            const mod = this.validateModule(Hyperion, ctx.args[0]);
+            const mod = this.validateModule(Hyperion, ctx.args[0], ctx);
             if(typeof(mod) === "string"){return mod;}
             return this.listKeys(Hyperion, mod);
         }
 
         if((ctx.args[0] && ctx.args[1]) && !ctx.args[2]){
-            const mod = this.validateModule(Hyperion, ctx.args[0]);
+            const mod = this.validateModule(Hyperion, ctx.args[0], ctx);
             if(typeof(mod) === "string"){return mod;}
             const key = this.validateKey(mod, ctx.args[1]);
             if(typeof(key) === "string"){return key;}
@@ -46,7 +45,7 @@ class Config extends Command{
         }
 
         if((ctx.args[0] && ctx.args[1] && ctx.args[2]) && !ctx.args[3]){
-            const mod = this.validateModule(Hyperion, ctx.args[0]);
+            const mod = this.validateModule(Hyperion, ctx.args[0], ctx);
             if(typeof(mod) === "string"){return mod;}
             const key = this.validateKey(mod, ctx.args[1]);
             if(typeof(key) === "string"){return key;}
@@ -61,7 +60,7 @@ class Config extends Command{
             return this.listType(key);
         }
 
-        const mod = this.validateModule(Hyperion, ctx.args[0]);
+        const mod = this.validateModule(Hyperion, ctx.args[0], ctx);
         if(typeof(mod) === "string"){return mod;}
         const key = this.validateKey(mod, ctx.args[1]);
         if(typeof(key) === "string"){return key;}
@@ -71,7 +70,7 @@ class Config extends Command{
     }
 
     listModules(ctx: ICommandContext, Hyperion: IHyperion): {embed: Partial<Embed>}{
-        const confMods = configurableModules(Hyperion.modules).map((m: Module) => m.friendlyName);
+        const confMods = ctx.module.configurableModules(Hyperion.modules).map((m: Module) => m.friendlyName);
 
         const data = {
             embed: {
@@ -370,8 +369,8 @@ class Config extends Command{
 
 
 
-    validateModule(Hyperion: IHyperion, input: string): string | Module{
-        if(!configurableModules(Hyperion.modules).map((m: Module) => m.name).includes(input.toLowerCase())){
+    validateModule(Hyperion: IHyperion, input: string, ctx: ICommandContext<manager>): string | Module{
+        if(!ctx.module.configurableModules(Hyperion.modules).map((m: Module) => m.name).includes(input.toLowerCase())){
             return "A configurable module was not found by that name!";
         }
         const module: Module | undefined = Hyperion.modules.get(input.toLowerCase());
