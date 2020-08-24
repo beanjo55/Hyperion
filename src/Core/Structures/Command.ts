@@ -91,7 +91,7 @@ export class Command{
     }
 
     async modDeleteAfter(ctx: ICommandContext, Hyperion: IHyperion): Promise<void>{
-        if(ctx.guildConfig.mod?.deleteAfter){this.deleteAfterUse(ctx, Hyperion);}
+        if(ctx.guildConfig.mod?.deleteCommand){this.deleteAfterUse(ctx, Hyperion);}
     }
 
     async diagnose(Hyperion: IHyperion, guild: Guild): Promise<EmbedResponse | null>{
