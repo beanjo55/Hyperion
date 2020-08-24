@@ -643,8 +643,6 @@ class Logging extends Module{
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async roleUpdate(Hyperion: IHyperion, guild: Guild, role: Role, oldRole: any): Promise<void | undefined>{
-        console.log(role);
-        console.log(oldRole);
         if(!await this.preCheck(Hyperion, guild, "roleUpdate")){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "roleUpdate");
         if(!channelObj){return;}
@@ -659,13 +657,11 @@ class Logging extends Module{
                 if(key === "permissions"){
                     if(oldRole.permissions.allow === role.permissions.allow){continue;}
                 }
-                console.log(`${key} matched`);
                 changes = true;
                 break;
             }
         }
         if(!changes){return;}
-        console.log("passed filter");
         const data: EmbedResponse = {
             embed: {
                 color: Hyperion.colors.blue,
@@ -714,7 +710,6 @@ class Logging extends Module{
         if(config.showAvatar){
             data.embed.thumbnail = {url: guild.iconURL};
         }
-        console.log({egg: "dog"});
         try{
             await channelObj.createMessage(data);
         }catch(err){
