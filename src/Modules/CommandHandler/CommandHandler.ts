@@ -380,13 +380,18 @@ class CommandHandler extends Module{
         this.updateRedisCooldown(ctx.user.id, ctx.command, this.Hyperion.global.globalCooldown);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async commandSuccess(ctx: Types.ICommandContext, result: any): Promise<void | undefined>{
+    async commandSuccess(ctx: Types.ICommandContext, result: string | {embed: Partial<Embed>} | Types.emoteResponse): Promise<void | undefined>{
         this.updateRedisCooldown(ctx.user.id, ctx.command, this.Hyperion.global.globalCooldown);
         this.updateCommandStats(ctx.command);
         if(ctx.command.selfResponse){return;}
-
+        let out: Types.EmbedResponse | string;
+        if((result as Types.emoteResponse)?.status !== undefined){
+            out = this.Hyperion.emotes[(result as Types.emoteResponse).status] + " " + (result as Types.emoteResponse).response;
+        }else{
+            out = result as Types.EmbedResponse | string;
+        }
         try{
-            await ctx.channel.createMessage(result);
+            await ctx.channel.createMessage(out);
         }catch(err){
             if(!inspect(err).startsWith("Discord")){
                 ctx.channel.createMessage("An Error Occured").catch(() => {});
@@ -420,7 +425,8 @@ class CommandHandler extends Module{
                 title: "Hyperion Help",
                 color: this.Hyperion.colors.default,
                 timestamp: new Date(),
-                fields: fieldarr
+                fields: fieldarr,
+                description: "[Invite me here](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&scope=bot&permissions=2110123134)\n[Join the support server here](https://discord.gg/Vd8vmBD)\n[Read the docs here](https://docs.beanjo55.dev)"
             }
         };
         for(const cat of cats){

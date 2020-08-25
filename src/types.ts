@@ -78,6 +78,10 @@ export interface IUtils{
     multiArg(input: Array<string>, options: Array<string>): undefined | {match: string; offset: number};
 }
 
+export interface emoteResponse {
+    response: string;
+    status: "success" | "fancySuccess" | "error" | "info" | "neutral" | "error";
+}
 
 export type IHyperion = HyperionC;
 

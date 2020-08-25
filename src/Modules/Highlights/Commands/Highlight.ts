@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {CommandResponse, EmbedResponse, ICommandContext, IHyperion} from "../../../types";
+import {CommandResponse, EmbedResponse, emoteResponse, ICommandContext, IHyperion} from "../../../types";
 import {default as hl} from "../Highlights";
 
 class Highlights extends Command{
@@ -15,7 +15,7 @@ class Highlights extends Command{
         });
     }
 
-    async execute(ctx: ICommandContext<hl>, Hyperion: IHyperion): CommandResponse{
+    async execute(ctx: ICommandContext<hl>, Hyperion: IHyperion): Promise<string | emoteResponse | EmbedResponse>{
         if(!ctx.args[0]){
             const list = await ctx.module.getUserHighlights(ctx.user.id, ctx.guild.id);
             const data: EmbedResponse = {
@@ -33,7 +33,7 @@ class Highlights extends Command{
             if(ctx.args[1].length < 4){return "Highlights must be at least 4 letters";}
             try{
                 await ctx.module.addUserHighlight(ctx.user.id, ctx.guild.id, ctx.args[1].toLowerCase());
-                return "Successfully added highlight!";
+                return {status: "success", response: "Successfully added highlight!"};
             }catch(err){
                 return err.message;
             }
@@ -43,12 +43,12 @@ class Highlights extends Command{
             if(!ctx.args[1]){return "Please specify a word to remove";}
             try{
                 await ctx.module.removeUserHighlight(ctx.user.id, ctx.guild.id, ctx.args[1].toLowerCase());
-                return "Successfully removed highlight!";
+                return {status: "success", response: "Successfully removed highlight!"};
             }catch(err){
                 return err.message;
             }
         }
-        return "Im not sure what option that is, try `add` or `remove`";
+        return {status: "neutral", response: "Im not sure what option that is, try `add` or `remove`"};
     }
 }
 export default Highlights;

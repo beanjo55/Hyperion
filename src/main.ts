@@ -113,6 +113,13 @@ interface setup {
     clusterID: number;
     ipc: IPC;
 }
+const emotes = {
+    error: "<:error:732383200436813846>",
+    neutral: "<:Neutral:680442866354749444>",
+    success: "<:success:732383396432445470>",
+    fancySuccess: "<a:fancyCheck:746181287592722472>",
+    info: "<:info:747287441739612191>"
+};
 const coreOptions = config.coreOptions;
 export default class HyperionC extends Base{
     readonly build: string;
@@ -141,6 +148,7 @@ export default class HyperionC extends Base{
     private listTokens: {[key: string]: string};
     fetch: boolean;
     trueReady = false;
+    emotes = emotes;
     constructor(setup: setup){
         super(setup);
         this.build = coreOptions.build;

@@ -42,7 +42,6 @@ export class ModuleConfig{
 export class ModConfig{
     modRoles: Array<string>;
     protectedRoles: Array<string>;
-    deleteAfter: number;
     modLogChannel: string;
     requireReason: boolean;
     requireMuteTime: boolean;
@@ -64,7 +63,6 @@ export class ModConfig{
         this.protectedRoles = data.protectedRoles ?? [];
         this.protectWarns = data.protectWarns ?? false;
 
-        this.deleteAfter = data.deleteAfter ?? -1;
         this.modLogChannel = data.modLogChannel ?? "";
 
         this.requireReason = data.requireReason ?? false;

@@ -653,7 +653,7 @@ class Logging extends Module{
             if(key === "position"){continue;}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
-            if(oldRole[key] && role[key] && oldRole[key] !== role[key]){
+            if(oldRole[key] !== undefined && role[key] !== undefined && oldRole[key] !== role[key]){
                 if(key === "permissions"){
                     if(oldRole.permissions.allow === role.permissions.allow){continue;}
                 }
@@ -830,7 +830,7 @@ class Logging extends Module{
             if(key === "position"){continue;}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
-            if(oldChannel[key] && channel[key] && oldChannel[key] !== channel[key]){
+            if(oldChannel[key] !== undefined && channel[key] !== undefined && oldChannel[key] !== channel[key]){
                 if(key === "permissionOverwrites"){
                     permUpdate = true;
                 }else{
@@ -998,7 +998,6 @@ class Logging extends Module{
         const channelObj = await this.testChannel(Hyperion, guild, "memberRoleAdd");
         if(!channelObj){return;}
         const sorted = Hyperion.utils.sortRoles(roles, guild.roles).map(r => r.id);
-
         const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
         const data: {embed: Partial<Embed>} = {
             embed: {
@@ -1028,7 +1027,11 @@ class Logging extends Module{
         const channelObj = await this.testChannel(Hyperion, guild, "memberRoleRemove");
         if(!channelObj){return;}
         const sorted = Hyperion.utils.sortRoles(roles, guild.roles).map(r => r.id);
-
+        if(sorted.length !== roles.length){
+            for(const role of roles){
+                if(!sorted.includes(role)){sorted.push(role);}
+            }
+        }
         const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
         const data: {embed: Partial<Embed>} = {
             embed: {
