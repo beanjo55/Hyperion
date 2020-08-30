@@ -647,13 +647,14 @@ class Logging extends Module{
         const channelObj = await this.testChannel(Hyperion, guild, "roleUpdate");
         if(!channelObj){return;}
         const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
-
         let changes = false;
-        for(const key in Object.keys(oldRole)){
+        for(const key of Object.keys(oldRole)){
             if(key === "position"){continue;}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
+        
             if(oldRole[key] !== undefined && role[key] !== undefined && oldRole[key] !== role[key]){
+
                 if(key === "permissions"){
                     if(oldRole.permissions.allow === role.permissions.allow){continue;}
                 }
@@ -662,6 +663,7 @@ class Logging extends Module{
             }
         }
         if(!changes){return;}
+        console.log("benis")
         const data: EmbedResponse = {
             embed: {
                 color: Hyperion.colors.blue,
@@ -826,7 +828,7 @@ class Logging extends Module{
 
         let changes = false;
         let permUpdate = false;
-        for(const key of Object.keys(oldChannel)){
+        for(const key in Object.keys(oldChannel)){
             if(key === "position"){continue;}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
