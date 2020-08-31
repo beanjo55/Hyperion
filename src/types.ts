@@ -151,7 +151,7 @@ export interface AckInterface{
     admin: boolean;
     developer: boolean;
     owner: boolean;
-    custom: string;
+    custom?: string;
     pro: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any;

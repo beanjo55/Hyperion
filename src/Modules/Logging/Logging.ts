@@ -108,6 +108,7 @@ class Logging extends Module{
     }
 
     async preCheck(Hyperion: IHyperion, guild: Guild, eventName: string, roles?: Array<string>, channel?: string | Array<string>): Promise<boolean>{
+        if(!this.Hyperion.global || !this.Hyperion.db){return false;}
         if(!await this.checkGuildEnabled(guild.id)){return false;}
         const econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
         if(!econfig){return false;}
@@ -663,7 +664,6 @@ class Logging extends Module{
             }
         }
         if(!changes){return;}
-        console.log("benis")
         const data: EmbedResponse = {
             embed: {
                 color: Hyperion.colors.blue,
@@ -828,7 +828,7 @@ class Logging extends Module{
 
         let changes = false;
         let permUpdate = false;
-        for(const key in Object.keys(oldChannel)){
+        for(const key of Object.keys(oldChannel)){
             if(key === "position"){continue;}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
@@ -870,7 +870,7 @@ class Logging extends Module{
                 if((channel as VoiceChannel).bitrate !== oldChannel?.bitrate){
                     data.embed.description += `**Old Bitrate:** ${oldChannel.bitrate ? `${oldChannel.bitrate/1000}kbps` : "Unknown"}\n**New Bitrate:** ${(channel as VoiceChannel).bitrate ? `${(channel as VoiceChannel).bitrate!/1000}kbps` : "Unknown"}\n\n`;
                 }
-                if((channel as VoiceChannel).userLimit !== oldChannel?.userLimit){
+                if((channel as VoiceChannel).userLimit !== oldChannel?.userLimit && oldChannel.userLimit !== undefined){
                     data.embed.description += `**Old User Limit:** ${oldChannel.userLimit ?? "Unlimited"} users\n**New User Limit:** ${(channel as VoiceChannel).userLimit ?? "Unlimited"} users\n\n`;
                 }
             }

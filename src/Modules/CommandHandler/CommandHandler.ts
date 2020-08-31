@@ -97,6 +97,43 @@ class CommandHandler extends Module{
         return false;
     }
 
+    ackToBit(acks: Types.AckInterface): number{
+        let bit = 0;
+        if(acks.developer){bit = bit | (1 << 2);}
+        if(acks.admin){bit = bit | (1 << 3);}
+        if(acks.owner){bit = bit | (1 << 1);}
+        if(acks.staff){bit = bit | (1 << 4);}
+        if(acks.support){bit = bit | (1 << 5);}
+        if(acks.friend){bit = bit | (1 << 6);}
+        if(acks.pro){bit = bit | (1 << 7);}
+        if(acks.contrib){bit = bit | (1 << 8);}
+        return bit;
+    }
+
+    bitToAck(bit: number): Types.AckInterface{
+        return {
+            owner: (bit & (1 << 1)) ? true : false,
+            developer: (bit & (1 << 2)) ? true : false,
+            admin: (bit & (1 << 3)) ? true : false,
+            staff: (bit & (1 << 4)) ? true : false,
+            support: (bit & (1 << 5)) ? true : false,
+            friend: (bit & (1 << 6)) ? true : false,
+            pro: (bit & (1 << 7)) ? true : false,
+            contrib: (bit & (1 << 8)) ? true : false
+
+        };
+    }
+
+    async getAcks(user: string){
+        const out = await this.Hyperion.redis.get(`Acks:${user}`);
+        if(!out){return 0;}
+        return out;
+    }
+
+    async setAcks(user: string, acks: number){
+        await this.Hyperion.redis.set(`Acks:${user}`, acks);
+    }
+
     isManager(user: Member): boolean{
         if(user.permission.has("manageGuild")){return true;}
         return false;
@@ -475,6 +512,7 @@ class CommandHandler extends Module{
         return data;
     }
     async handler(msg: Message): Promise<undefined | void>{
+        if(!this.Hyperion.global || !this.Hyperion.db){return;}
         if(!msg){return;}
         if(!msg.member){return;}
         if(!msg.channel){return;}

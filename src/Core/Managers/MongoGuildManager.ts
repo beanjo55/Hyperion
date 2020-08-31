@@ -58,6 +58,7 @@ export class ModConfig{
     muteLogChannel: string;
     kickLogChannel: string;
     protectWarns: boolean;
+    manageMuteRole: boolean;
     constructor(data: Partial<ModConfig>){
         this.modRoles = data.modRoles ?? [];
         this.protectedRoles = data.protectedRoles ?? [];
@@ -81,6 +82,8 @@ export class ModConfig{
         this.kickLogChannel = data.kickLogChannel ?? "";
         this.muteLogChannel = data.muteLogChannel ?? "";
         this.warnLogChannel = data.warnLogChannel ?? "";
+
+        this.manageMuteRole = data.manageMuteRole ?? true;
     }
 }
 

@@ -11,7 +11,7 @@ import {default as Redis} from "ioredis";
 import {default as axios} from "axios";
 import {default as mongoose} from "mongoose";
 import {inspect} from "util";
-import {CoreOptions, IManagers, IUtils, ILogger, IColors} from "./types";
+import {IManagers, IUtils, ILogger, IColors} from "./types";
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
 import {default as guilduser} from "./MongoDB/Guilduser";
@@ -233,6 +233,7 @@ export default class HyperionC extends Base{
             this.logger.error("Hyperion", `Failed to load event ${eventfile}, error: ${err}`, "Event Loading");
         }
     }
+
 
     loadEvents(): void{
         const eventfiles = fs.readdirSync(__dirname + "/Events");
