@@ -108,7 +108,7 @@ class Logging extends Module{
     }
 
     async preCheck(Hyperion: IHyperion, guild: Guild, eventName: string, roles?: Array<string>, channel?: string | Array<string>): Promise<boolean>{
-        if(!this.Hyperion.global || !this.Hyperion.db){return false;}
+        if(this.Hyperion.global === undefined || this.Hyperion.db === undefined){return false;}
         if(!await this.checkGuildEnabled(guild.id)){return false;}
         const econfig = await this.getEventConfig(Hyperion, guild.id, eventName);
         if(!econfig){return false;}

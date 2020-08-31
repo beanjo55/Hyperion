@@ -512,7 +512,7 @@ class CommandHandler extends Module{
         return data;
     }
     async handler(msg: Message): Promise<undefined | void>{
-        if(!this.Hyperion.global || !this.Hyperion.db){return;}
+        if(this.Hyperion.global === undefined || this.Hyperion.db === undefined){return;}
         if(!msg){return;}
         if(!msg.member){return;}
         if(!msg.channel){return;}
