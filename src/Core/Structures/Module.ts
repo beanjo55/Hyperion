@@ -159,6 +159,7 @@ export class Module{
     }
 
     async checkGuildEnabled(guildID: string): Promise<boolean>{
+        if(this.Hyperion.global === undefined){return false;}
         if(this.Hyperion.global.gDisabledMods.includes(this.name)){return false;}
         const config: IGuild | null = await this.Hyperion.managers.guild.getConfig(guildID);
         if(!config){return this.defualtState;}
