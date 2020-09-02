@@ -23,11 +23,11 @@ function warn(name: string, message: string, subprefix?: string): void{
 }
 
 function info(name: string, message: string, subprefix?: string): void{
-    (console as cConsole).fatal(message, {prefix: name, subprefix});
+    console.info(message, {prefix: name, subprefix});
 }
 
 function success(name: string, message: string, subprefix?: string): void{
-    console.info(message, {prefix: name, subprefix});
+    (console as cConsole).success(message, {prefix: name, subprefix});
 }
 
 export const logger = {
