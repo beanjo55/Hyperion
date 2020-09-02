@@ -675,11 +675,13 @@ class Logging extends Module{
                 
             }
         };
-        if(oldRole.name && role.name !== oldRole.name){
+        if(oldRole.name !== undefined && role.name !== oldRole.name){
             data.embed.description += `**Old Name:** ${oldRole.name}\n**New Name:** ${role.name}\n\n`;
+        }else{
+            data.embed.description += `**Role Name:** ${role.name}\n`;
         }
 
-        if(oldRole.color && role.color !== oldRole.color){
+        if(oldRole.color !== undefined && role.color !== oldRole.color){
             data.embed.description += `**Old Color:** ${oldRole.color.toString(16)}\n**New Color:** ${role.color.toString(16)}\n\n`;
         }
         if(oldRole.hoist !== undefined && role.hoist !== oldRole.hoist){
