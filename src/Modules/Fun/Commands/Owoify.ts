@@ -66,7 +66,7 @@ class Owoify extends Command{
                 fields: [
                     {
                         name: "Input",
-                        value: `\`\`\`${output!.length > 1000 ? output!.substr(0, 1000) + "..." : output!}\`\`\``
+                        value: `\`\`\`${text!.length > 1000 ? text!.substr(0, 1000) + "..." : text!}\`\`\``
                     },
                     {
                         name: "Output",
