@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {IHyperion, ICommandContext} from "../../../types";
+import {IHyperion, ICommandContext, EmbedResponse} from "../../../types";
 const owoify = require("owoify-js").default;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const _clean = (text: any): string => {
@@ -30,7 +30,7 @@ class Owoify extends Command{
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<EmbedResponse>{
         let text = "";
         let output = "";
         const randomInt = Math.floor(Math.random() * options.length);
@@ -58,7 +58,24 @@ class Owoify extends Command{
         if(output.length === 0){
             output = "There was no output!";
         }
-        return output;
+        const data: EmbedResponse = {
+            embed: {
+                title: "Owoified Text",
+                color: Hyperion.colors.default,
+                footer: {text: `Requested by ${ctx.user.username}#${ctx.user.discriminator}`},
+                fields: [
+                    {
+                        name: "Input",
+                        value: `\`\`\`${output!.length > 1000 ? output!.substr(0, 1000) + "..." : output!}\`\`\``
+                    },
+                    {
+                        name: "Output",
+                        value: `\`\`\`${output.length > 1000 ? output.substr(0, 1000)+ "..." : output}\`\`\``
+                    }
+                ]
+            }
+        };
+        return data;
     }
 }
 export default Owoify;
