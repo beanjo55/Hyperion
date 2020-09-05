@@ -87,7 +87,7 @@ class Roleinfo extends Command{
         if(role.color !== 0){
             data.embed.fields.push({
                 name: "Color",
-                value: `${role.color}`,
+                value: `${role.color.toString(16)}`,
                 inline: true
             });
         }

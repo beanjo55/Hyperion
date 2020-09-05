@@ -390,10 +390,8 @@ class Logging extends Module{
         if(!(msg.channel.type === 0 || msg.channel.type === 5)){return;}
         if(msg.author && msg.author.bot){return;}
         const guild = msg.channel.guild;
-
-        if(oldMessage?.embeds){
-            if(!oldMessage.embeds[0] && msg.embeds[0]){return;}
-        }
+        if(!oldMessage?.content){return;}
+        if(msg.content === oldMessage?.content){return;}
         if(!await this.preCheck(Hyperion, guild, "messageEdit", msg?.member?.roles, msg.channel.id)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "messageEdit");
         if(!channelObj){return;}
@@ -445,7 +443,7 @@ class Logging extends Module{
                 inline: false
             });
         }
-        if(msg.content === undefined){
+        if(msg.content === undefined || msg.content === ""){
             data.embed.fields.push({
                 name: "New Message Content",
                 value: "The new message had no content",

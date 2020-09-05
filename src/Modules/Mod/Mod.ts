@@ -363,9 +363,22 @@ class Mod extends Module{
     async checkMuteRole(guild: Guild): Promise<Role | string>{
         const data = await this.Hyperion.managers.guild.getConfig(guild.id);
         const id = (data?.mod as ModConfig)?.muteRole;
-        if(!id){return "No mute role set!";}
+        if(!id){
+            if(data?.mod.manageMuteRole){
+                const newRole = await this.makeMuteRole(guild);
+                await this.Hyperion.managers.guild.updateModuleConfig(guild.id, this.name, {muteRole: newRole.id});
+                return newRole;
+            }else{return "No mute role set!";}
+        }
         const role = guild.roles.get(id);
-        if(!role){return "The set mute role was invalid, please set it again";}
+        if(!role){
+            if(data?.mod.manageMuteRole){
+                const newRole = await this.makeMuteRole(guild);
+                await this.Hyperion.managers.guild.updateModuleConfig(guild.id, this.name, {muteRole: newRole.id});
+                return newRole;
+            }else{return "The set mute role was invalid, please set it again";}
+        }
+        if(data?.mod.manageMuteRole){await this.updateMuteRole(guild, role.id);}
         return role;
     }
 
@@ -645,6 +658,21 @@ class Mod extends Module{
         return true;
     }
 
+    async makeMuteRole(guild: Guild): Promise<Role>{
+        const role = await guild.createRole({name: "Muted"}, "Hyperion manage mute role");
+        await this.updateMuteRole(guild, role.id);
+        return role;
+    }
+
+    async updateMuteRole(guild: Guild, roleID: string): Promise<void> {
+        const channels = guild.channels.filter(c => c.type === 0 || c.type === 5 || c.type === 2);
+        for(const channel of channels){
+            const channelPerms = channel.permissionOverwrites.get(roleID);
+            if(channelPerms && (channelPerms.deny & (1 << 11)) === (1 << 11)){continue;}
+            await channel.editPermission(roleID, 0, (1 << 11), "role", "Hyperion manage mute role").catch(() => undefined);
+        }
+    }
+
     loadKeys(): Collection<ConfigKey>{
         const col = new Collection(ConfigKey);
         col.add(new ConfigKey({
@@ -676,6 +704,16 @@ class Mod extends Module{
             dataType: "boolean",
             array: false,
             default: false
+        }));
+        col.add(new ConfigKey({
+            parent: this.name,
+            id: "manageMuteRole",
+            ops: [0, 1, 4],
+            description: "If Hyperion should create the muted role if it doesnt exist, and update the channel overrides for the muted role when a user is muted",
+            friendlyName: "Manage mute role",
+            dataType: "boolean",
+            array: false,
+            default: true
         }));
         col.add(new ConfigKey({
             parent: this.name,

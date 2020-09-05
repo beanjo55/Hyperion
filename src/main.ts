@@ -11,7 +11,7 @@ import {default as Redis} from "ioredis";
 import {default as axios} from "axios";
 import {default as mongoose} from "mongoose";
 import {inspect} from "util";
-import {IManagers, IUtils, ILogger, IColors} from "./types";
+import {IManagers, IUtils, ILogger, IColors, CoreOptions} from "./types";
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
 import {default as guilduser} from "./MongoDB/Guilduser";
@@ -57,7 +57,7 @@ const models: {[key: string]: mongoose.Model<any>} = {
     embed: embedModel
 };
 
-const listTokens = {
+const listTokens: {[key: string]: string} = {
     dbl: config.coreOptions?.dblToken,
     glenn: config.coreOptions?.glennToken,
     dboats: config.coreOptions?.dboatsToken,
@@ -120,68 +120,56 @@ const emotes = {
     fancySuccess: "<a:fancyCheck:746181287592722472>",
     info: "<:info:747287441739612191>"
 };
-const coreOptions = config.coreOptions;
+const coreOptions = config.coreOptions as CoreOptions;
 export default class HyperionC extends Base{
-    readonly build: string;
+    readonly build = coreOptions.build;
     modules: Collection<Module>;
     sentry: sentry.User;
     commands: Collection<Command>;
-    logger: ILogger;
+    logger = logger;
     bevents: {[key: string]: () => void};
-    readonly devPrefix: string;
-    readonly modlist: Array<string>;
+    readonly devPrefix = coreOptions.devPrefix;
+    readonly modlist = coreOptions.modlist;
     readonly version: string;
-    readonly adminPrefix: string;
-    readonly mongoOptions: mongoose.ConnectionOptions;
+    readonly adminPrefix = coreOptions.adminPrefix;
+    readonly mongoOptions = config.mongoOptions;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readonly models: {[key: string]: mongoose.Model<any>};
+    readonly models = models;
     db: mongoose.Connection;
+    mongoose: typeof mongoose;
     global!: IGlobal;
-    logLevel: number
+    logLevel = coreOptions.defaultLogLevel;
     managers: IManagers;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stars: any;
-    utils: IUtils;
-    readonly circleCIToken: string;
+    utils = utils;
+    readonly circleCIToken = coreOptions.circleCIToken;
     redis: Redis.Redis;
-    colors: IColors;
-    private listTokens: {[key: string]: string};
+    colors = colors;
+    private listTokens = listTokens;
     fetch: boolean;
     trueReady = false;
     emotes = emotes;
     constructor(setup: setup){
         super(setup);
-        this.build = coreOptions.build;
         this.modules = new Collection(Module);
         this.commands = new Collection(Command);
-        this.logger = logger;
         this.sentry = require("@sentry/node");
         this.sentry.init({
             dsn: coreOptions.sentryDSN,
             environment: coreOptions.build
         });
         this.bevents = {};
-        this.modlist = coreOptions.modlist;
-        this.models = models;
-        this.devPrefix = coreOptions.devPrefix;
-        this.adminPrefix = coreOptions.adminPrefix;
-        this.mongoOptions = config.mongoOptions;
         this.db = this.mongoDB(config.mongoLogin);
         this.version = require("../package.json").version;
-        this.logLevel = coreOptions.defaultLogLevel;
         this.managers = {guild: new MGM, user: new MUM, modlog: new MMLM, guildUser: new MGUM};
         this.stars = {};
-        this.circleCIToken = coreOptions.circleCIToken;
-        this.utils = utils;
         this.redis = new Redis({keyPrefix: `${this.build}:`});
-        this.listTokens = listTokens;
-        this.colors = colors;
         this.fetch = coreOptions.fetch ?? true;
+        this.mongoose = mongoose;
     }
 
     async launch(): Promise<void>{
-        //console.log(inspect(this));
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (process as NodeJS.EventEmitter).on("uncaughtException", (err: Error, origin: string) =>{
             this.logger.fatal("Hyperion", "An uncaught execption was encountered", "Uncaught Exception");
             this.logger.fatal("Hyperion", inspect(err.message.toString()), "Uncaught Exception Error");
