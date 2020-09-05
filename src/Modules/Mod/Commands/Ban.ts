@@ -60,8 +60,8 @@ class Ban extends Command{
         if(config.dmOnBan){await ctx.module.banDM(user, ctx.guild.name, reason);}
         try{
             await ctx.guild.banMember(user.id, this.banDays, auditReason);
-        }catch{
-            return "Something went wrong!";
+        }catch(err){
+            return err.message;
         }
         ctx.module.makeLog({
             user: user.id,
