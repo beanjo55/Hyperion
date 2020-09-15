@@ -23,8 +23,8 @@ class Module extends Command{
 
     async execute(ctx: ICommandContext<manager>, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
 
-        const toggleable = ctx.module.toggleableModules(Hyperion.modules);
-        const list = toggleable.map((m: module) => m.name);
+        const toggleable = ctx.module.toggleableModules(Hyperion.modules, ctx.guildConfig.pro);
+        const list = toggleable.map((m: module) => m.name.toLowerCase());
         let outlist: Array<string> = list;
         const fromconf: Array<string> = [];
         if(ctx.guildConfig && ctx.guildConfig.modules){

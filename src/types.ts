@@ -255,7 +255,7 @@ export interface IModerationContext{
 }
 
 export type EmbedResponse = {embed: Partial<Embed>};
-export type MixedResponse = string | EmbedResponse;
+export type MixedResponse = string | EmbedResponse | emoteResponse;
 export type CommandResponse = Promise<MixedResponse>;
 export type Field = {name: string; value: string; inline: boolean};
 export type FieldArray = Array<Field>;

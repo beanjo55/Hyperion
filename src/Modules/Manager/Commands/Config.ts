@@ -70,7 +70,7 @@ class Config extends Command{
     }
 
     listModules(ctx: ICommandContext, Hyperion: IHyperion): {embed: Partial<Embed>}{
-        const confMods = ctx.module.configurableModules(Hyperion.modules).map((m: Module) => m.friendlyName);
+        const confMods = ctx.module.configurableModules(Hyperion.modules, ctx.guildConfig.pro).map((m: Module) => m.friendlyName);
 
         const data = {
             embed: {
@@ -370,7 +370,7 @@ class Config extends Command{
 
 
     validateModule(Hyperion: IHyperion, input: string, ctx: ICommandContext<manager>): string | Module{
-        if(!ctx.module.configurableModules(Hyperion.modules).map((m: Module) => m.name).includes(input.toLowerCase())){
+        if(!ctx.module.configurableModules(Hyperion.modules, ctx.guildConfig.pro).map((m: Module) => m.name.toLowerCase()).includes(input.toLowerCase())){
             return "A configurable module was not found by that name!";
         }
         const module: Module | undefined = Hyperion.modules.get(input.toLowerCase());

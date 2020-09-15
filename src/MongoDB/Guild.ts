@@ -3,6 +3,7 @@ import * as Types from "../types";
 import * as confs from "../Core/Managers/MongoGuildManager";
 import { boolean } from "mathjs";
 
+
 const guildconf = new Schema({
 
     guild: {
@@ -132,6 +133,11 @@ const guildconf = new Schema({
     pro: {
         type: boolean,
         default: false
+    },
+
+    vtl: {
+        type: Object,
+        default: new confs.VTL({})
     }
 
 
@@ -167,6 +173,7 @@ export interface IGuild{
     casualPrefix: boolean;
     levels: confs.LevelsConfig;
     pro: boolean;
+    vtl: confs.VTL;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any;
 }

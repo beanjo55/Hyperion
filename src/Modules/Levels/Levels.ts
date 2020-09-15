@@ -57,7 +57,7 @@ class Levels extends Module{
 
     async updateGuildExp(user: User, guild: Guild, msg: Message, exp: number): Promise<void>{
         const result = await this.Hyperion.managers.guildUser.addExp(user.id, guild.id, exp, this.getLevel.bind(this));
-        //await this.setCooldown(user.id);
+        await this.setCooldown(user.id);
         if(result.lvlUp === true){
             await this.levelUp(guild, msg, result);
         }
@@ -72,14 +72,16 @@ class Levels extends Module{
         const config = await this.getLevelsConfig(guild.id);
         if(global){
             for(const prop of Object.keys(config.expRoles)){
-                if(config.expRoles[prop].global && config.expRoles[prop].exp >= data.exp){
-                    msg.member?.addRole(config.expRoles[prop].role).catch(() => undefined);
+                const numProp = Number(prop);
+                if(config.expRoles[numProp].global && config.expRoles[numProp].exp <= data.exp){
+                    msg.member?.addRole(config.expRoles[numProp].role).catch(() => undefined);
                 }
             }
         }else{
             for(const prop of Object.keys(config.expRoles)){
-                if(!config.expRoles[prop].global && config.expRoles[prop].exp >= data.exp){
-                    msg.member?.addRole(config.expRoles[prop].role).catch(() => undefined);
+                const numProp = Number(prop);
+                if(!config.expRoles[numProp].global && config.expRoles[numProp].exp <= data.exp){
+                    msg.member?.addRole(config.expRoles[numProp].role, "Hyperion levels").catch(() => undefined);
                 }
             }
         }

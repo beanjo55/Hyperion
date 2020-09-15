@@ -252,7 +252,7 @@ export class RankConfig{
 export class ReactionRole{
     channel: string;
     erMap: Map<string, string>;
-    name: string;
+    linkedMessages: Array<string>;
     constructor(data: Partial<ReactionRole>){
         this.channel = data.channel ?? "";
         if(data.erMap){
@@ -261,7 +261,7 @@ export class ReactionRole{
         }else{
             this.erMap = new Map<string, string>();
         }
-        this.name = data.name ?? "unnamed";
+        this.linkedMessages = data.linkedMessages ?? [];
     }
 }
 
@@ -271,6 +271,7 @@ export class RRConfig{
     rr: Map<string, ReactionRole>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rrGroups: any;
+    rrMessages: Map<string, string>
     constructor(data: Partial<RRConfig>){
         this.limitOne = data.limitOne ?? false;
         this.limitOnePerGroup = data.limitOnePerGroup ?? false;
@@ -280,6 +281,13 @@ export class RRConfig{
             this.rr = data.rr;
         }else{
             this.rr = new Map<string, ReactionRole>();
+        }
+
+        if(data.rrMessages){
+            if(!(data.rrMessages instanceof Map)){this.rrMessages = new Map<string, string>(Object.entries(data.rrMessages));}
+            this.rrMessages = data.rrMessages;
+        }else{
+            this.rrMessages = new Map<string, string>();
         }
         this.rrGroups = data.rrGroups ?? {};
     }
@@ -317,6 +325,17 @@ export class Quote{
         this.image = data.image;
     }
 }
+
+export class VTL{
+    joinAnnouncements: boolean;
+    leaveAnnouncements: boolean;
+    links: {[key: string]: string}
+    constructor(data: Partial<VTL>){
+        this.joinAnnouncements = data.joinAnnouncements ?? false;
+        this.leaveAnnouncements = data.leaveAnnouncements ?? false;
+        this.links = data.links ?? {};
+    }
+}
 export class SocialConfig{
     ignoredChannels: Array<string>;
     constructor(data: Partial<SocialConfig>){
@@ -324,7 +343,7 @@ export class SocialConfig{
     }
 }
 export class LevelsConfig{
-    expRoles: {[key: string]: {role: string; global: boolean; exp: number}};
+    expRoles: {[key: number]: {role: string; global: boolean; exp: number}};
     lvlRoles: {[key: number]: {role: string; global: boolean}; [key: string]: {role: string; global: boolean}};
     lvlUpSetting: "none" | "current" | string;
 
@@ -351,7 +370,8 @@ const nameConfigMap: {[key: string]: any} = {
     autorole: AutoroleConfig,
     goodbye: GoodbyeConfig,
     quotes: QuoteConfig,
-    levels: LevelsConfig
+    levels: LevelsConfig,
+    vtl: VTL
 };
 
 class MongoGuildManager{

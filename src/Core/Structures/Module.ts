@@ -21,6 +21,7 @@ export class Module{
     configKeys?: Collection<configkey>;
     noToggle: boolean;
     Hyperion: IHyperion;
+    pro: boolean;
 
     //legacy module system
     needsLoad: boolean;
@@ -54,6 +55,7 @@ export class Module{
         }
 
         this.Hyperion = Hyperion;
+        this.pro = data.pro ?? false;
 
         
     }
@@ -159,14 +161,16 @@ export class Module{
     }
 
     async checkGuildEnabled(guildID: string): Promise<boolean>{
+        if(this.alwaysEnabled){return true;}
         if(this.Hyperion.global === undefined){return false;}
         if(this.Hyperion.global.gDisabledMods.includes(this.name)){return false;}
         const config: IGuild | null = await this.Hyperion.managers.guild.getConfig(guildID);
-        if(!config){return this.defualtState;}
-        if(!config.modules){return this.defualtState;}
-        if(!config.modules[this.name]){return this.defaultState;}
+        if(!config){return this.defaultStatus;}
+        //if(!config.pro && this.pro){return false;}
+        if(!config.modules){return this.defaultStatus;}
+        if(!config.modules[this.name]){return this.defaultStatus;}
         if(config.modules[this.name].enabled !== undefined){return config.modules[this.name].enabled;}
-        return this.defaultState;
+        return this.defaultStatus;
     }
 
     async diagnose(guild: Guild): Promise<EmbedResponse | null>{

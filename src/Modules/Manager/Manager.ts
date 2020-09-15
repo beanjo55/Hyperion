@@ -17,12 +17,12 @@ class Manager extends Module{
         }, Hyperion);
     }
 
-    configurableModules(modules: Collection<Module>): Array<Module>{
-        return modules.filter((m: Module) => !m.private && m.hasCfg);
+    configurableModules(modules: Collection<Module>, pro = false): Array<Module>{
+        return modules.filter((m: Module) => !m.private && m.hasCfg && (m.pro ? pro : true));
     }
 
-    toggleableModules(modules: Collection<Module>): Array<Module> {
-        return modules.filter((m: Module) => !m.private && !m.alwaysEnabled && !m.noToggle);
+    toggleableModules(modules: Collection<Module>, pro = false): Array<Module> {
+        return modules.filter((m: Module) => !m.private && !m.alwaysEnabled && !m.noToggle && (m.pro ? pro : true));
     }
 }
 export default Manager;

@@ -9,9 +9,8 @@ export default class MongoGuildUserManager{
 
     async addExp(user: string, guild: string, exp: number, levelFunc: (exp: number)=> number): Promise<levelUpdateResult>{
         let lvlUp = false;
-        const data = await this.getUserConfig(user, guild);
-        if(data.level === null){data.level = 0;}
-        if(data.exp === null){data.exp = 0;}
+        let data = await this.getUserConfig(user, guild);
+        if(data === null){data = {level: 0, exp: 0, guild, user, highlights: []};}
         const totalExp = data!.exp + exp;
         const update: {exp: number; level?: number} = {exp: totalExp};
         const level = levelFunc(totalExp);
@@ -27,7 +26,7 @@ export default class MongoGuildUserManager{
     }
 
     async getUserConfig(user: string, guild: string): Promise<IGuildUser>{
-        if(await this.model.exists({user: user})){
+        if(await this.model.exists({user: user, guild: guild})){
             const data = await this.model.findOne({user: user, guild: guild}).lean<IGuildUser>().exec();
             return data!;
         }else{

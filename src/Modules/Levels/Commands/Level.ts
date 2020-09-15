@@ -24,13 +24,14 @@ class Level extends Command{
             if(!temptarget){return "I couldnt find that user.";}
             target = temptarget;
         }
-        const global = await Hyperion.managers.user.getUserConfig(ctx.user.id);
-        const server = await Hyperion.managers.guildUser.getUserConfig(ctx.user.id, ctx.guild.id);
+        const global = await Hyperion.managers.user.getUserConfig(target.id);
+        const server = await Hyperion.managers.guildUser.getUserConfig(target.id, ctx.guild.id);
 
         const data: EmbedResponse = {
             embed: {
                 color: Hyperion.colors.blue,
                 title: `Level data for ${target.username}#${target.discriminator}`,
+                thumbnail: {url: target.avatarURL},
                 fields: [
                     {name: "Global Level", value: global?.level.toString(), inline: true},
                     {name: "Global Exp", value: global?.exp.toString(), inline: true},
