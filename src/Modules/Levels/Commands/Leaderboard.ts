@@ -26,7 +26,12 @@ class Leaderboard extends Command{
         if(!list || list.length === 0){return {status: "error", response: "That page doesnt exist"};}
         const users = [];
         let maxLength = 0;
-        for(const user of list){if(user.exp.toString().length > maxLength){maxLength = user.exp.toString().length;}}
+        for(const user of list){
+            if(user.exp === undefined){continue;}
+            if(user.exp.toString().length > maxLength){
+                maxLength = user.exp.toString().length;
+            }
+        }
         for(const user of list){
             const userObjA = Hyperion.client.users.get(user.user);
             let userObj;
