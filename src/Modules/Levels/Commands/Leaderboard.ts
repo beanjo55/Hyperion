@@ -37,6 +37,7 @@ class Leaderboard extends Command{
                 userObj = userObjA;
             }
             const name = userObj ? `${userObj.username}#${userObj.discriminator}` : `${user.user} (User left the server)`;
+            if(user.exp === undefined){continue;}
             let EXP = "EXP: " + user.exp.toString();
             const length = user.exp.toString().length;
             if(length < maxLength){
