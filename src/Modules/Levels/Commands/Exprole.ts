@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {IHyperion, ICommandContext, MixedResponse, CommandResponse} from "../../../types";
+import {IHyperion, ICommandContext, CommandResponse} from "../../../types";
 import {default as levels} from "../Levels";
 
 class Exprole extends Command{
@@ -21,7 +21,7 @@ class Exprole extends Command{
             const names = Object.getOwnPropertyNames(config.expRoles);
             const arr: Array<{exp: number; role: string}> = [];
             names.forEach(name => {
-                arr.push({exp: Number(name), role: ctx.guild.roles.get(config.expRoles[name].role)?.name ?? "Deleted Role"});
+                arr.push({exp: Number(name), role: ctx.guild.roles.get(config.expRoles[Number(name)].role)?.name ?? "Deleted Role"});
             });
             arr.sort((a, b) => a.exp - b.exp);
             const newArr = arr.map(ele => `${ele.exp} - ${ele.role}`);

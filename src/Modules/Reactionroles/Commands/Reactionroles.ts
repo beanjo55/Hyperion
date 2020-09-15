@@ -30,7 +30,7 @@ class Reactionroles extends Command{
         const erMap = new Map<string, string>();
         erMap.set(emoteName, role.id);
         const rr = new ReactionRole({
-            name,
+            
             erMap,
             channel: channel.id
         });

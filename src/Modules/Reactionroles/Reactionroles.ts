@@ -27,7 +27,9 @@ class Reactionroles extends Module{
         const config = await this.Hyperion.managers.guild.getModuleConfig<RRConfig>(guild.id, this.name);
         if(!(config.rr instanceof Map)){config.rr = new Map<string, ReactionRole>(Object.entries(config.rr ?? {}));}
         if(config.rr.size === 0){return;}
-        const rr = config.rr.get(msg.id);
+        const rrName = config.rrMessages.get(msg.id);
+        if(!rrName){return;}
+        const rr = config.rr.get(rrName);
         if(!rr){return;}
         if(!(rr.erMap instanceof Map)){rr.erMap = new Map<string, string>(Object.entries(rr.erMap ?? {}));}
         const roleID = rr.erMap.get(emote.name);
@@ -49,7 +51,9 @@ class Reactionroles extends Module{
         const config = await this.Hyperion.managers.guild.getModuleConfig<RRConfig>(guild.id, this.name);
         if(!(config.rr instanceof Map)){config.rr = new Map<string, ReactionRole>(Object.entries(config.rr ?? {}));}
         if(config.rr.size === 0){return;}
-        const rr = config.rr.get(msg.id);
+        const rrName = config.rrMessages.get(msg.id);
+        if(!rrName){return;}
+        const rr = config.rr.get(rrName);
         if(!rr){return;}
         if(!(rr.erMap instanceof Map)){rr.erMap = new Map<string, string>(Object.entries(rr.erMap ?? {}));}
         const roleID = rr.erMap.get(emote.name);
