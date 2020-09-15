@@ -27,7 +27,7 @@ class Leaderboard extends Command{
         const users = [];
         let maxLength = 0;
         for(const user of list){
-            if(user.exp === undefined){continue;}
+            if(user.exp === undefined || user.exp === 0){continue;}
             if(user.exp.toString().length > maxLength){
                 maxLength = user.exp.toString().length;
             }
@@ -42,7 +42,7 @@ class Leaderboard extends Command{
                 userObj = userObjA;
             }
             const name = userObj ? `${userObj.username}#${userObj.discriminator}` : `${user.user} (User left the server)`;
-            if(user.exp === undefined){continue;}
+            if(user.exp === undefined || user.exp === 0){continue;}
             let EXP = "EXP: " + user.exp.toString();
             const length = user.exp.toString().length;
             if(length < maxLength){
@@ -62,6 +62,7 @@ class Leaderboard extends Command{
                 description: `\`\`\`xl\n${users.join("\n")}\`\`\``
             }
         };
+        if(users.length === 0){embed.embed.description = "There is no ranking data for this server";}
         return embed;
 
     }
