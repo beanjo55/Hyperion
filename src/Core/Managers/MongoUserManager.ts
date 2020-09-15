@@ -36,7 +36,8 @@ class MongoUserManager{
     }
 
     async getUserConfig(user: string): Promise<IUser>{
-        if(await this.model.exists({user: user})){
+        const exists = await this.model.exists({user: user});
+        if(exists){
             const data = await this.model.findOne({user: user}).lean<IUser>().exec();
             return data!;
         }else{
@@ -44,7 +45,7 @@ class MongoUserManager{
         }
     }
     async ensureExists(user: string): Promise<void>{
-        if(!await this.model.exists({user: user})){
+        if(!(await this.model.exists({user: user}))){
             await this.createConfig(user);
         }
     }
