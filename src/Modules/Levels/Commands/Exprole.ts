@@ -11,7 +11,8 @@ class Exprole extends Command{
 
             helpDetail: "Manages exp roles in the server",
             helpUsage: "{prefix}exprole add [exp amount] [role]\n{prefix}exprole remove [exp amount]",
-            noExample: true
+            noExample: true,
+            listUnder: "manager"
         });
     }
 
