@@ -12,7 +12,7 @@ class Embeds extends Command{
             userperms: ["manager"],
             aliases: ["embeds"],
             helpDetail: "Create, manage, and post fully custom embeds.",
-            helpUsage: "[See the command usage on the docs](https://docs.beanjo55.dev/embeds/embedsmain)",
+            helpUsage: "[See the command usage on the docs](https://docs.hyperionbot.xyz/embeds/embedsmain)",
             noExample: true,
             hasSub: true,
             noSubList: true,

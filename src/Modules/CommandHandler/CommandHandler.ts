@@ -312,6 +312,7 @@ class CommandHandler extends Module{
         return false;
     }
 
+    // eslint-disable-next-line complexity
     authorized(guildConfig: IGuild, ctx: Partial<Types.ICommandContext>): boolean{
         if(!ctx?.member?.roles){return false;}
         if(!ctx?.command){return false;}
@@ -463,7 +464,7 @@ class CommandHandler extends Module{
                 color: this.Hyperion.colors.default,
                 timestamp: new Date(),
                 fields: fieldarr,
-                description: "[Invite me here](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&scope=bot&permissions=2110123134)\n[Join the support server here](https://discord.gg/Vd8vmBD)\n[Read the docs here](https://docs.beanjo55.dev)"
+                description: "[Invite me here](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&scope=bot&permissions=2110123134)\n[Join the support server here](https://discord.gg/Vd8vmBD)\n[Read the docs here](https://docs.hyperionbot.xyz)"
             }
         };
         for(const cat of cats){
@@ -511,6 +512,7 @@ class CommandHandler extends Module{
         this.updateRedisCooldown(ctx.user.id, ({name: "help", cooldownTime: 1000} as Command), this.Hyperion.global.globalCooldown);
         return data;
     }
+    // eslint-disable-next-line complexity
     async handler(msg: Message): Promise<undefined | void>{
         if(this.Hyperion.global === undefined || this.Hyperion.db === undefined){return;}
         if(!msg){return;}
