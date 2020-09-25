@@ -59,6 +59,7 @@ class Ban extends Command{
         const config = await Hyperion.managers.guild.getModuleConfig<ModConfig>(ctx.guild.id, "mod");
         if(config.dmOnBan){await ctx.module.banDM(user, ctx.guild.name, reason);}
         try{
+            auditReason = encodeURIComponent(auditReason);
             await ctx.guild.banMember(user.id, this.banDays, auditReason);
         }catch(err){
             return err.message;
