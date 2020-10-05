@@ -1,6 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 // eslint-disable-next-line no-unused-vars
-import {ICommandContext, IHyperion} from "../../../types";
+import {emoteResponse, ICommandContext, IHyperion} from "../../../types";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { GuildChannel, Embed } from "eris";
 import { LoggingConfig } from "../../../Core/Managers/MongoGuildManager";
@@ -29,7 +29,7 @@ const eventNames: Array<string> = [
     "channelDelete",
     "channelUpdate"
 ];
-const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar", "ghostreacttime", "ignoredroles", "enableall", "disableall", "newaccountage"];
+const settingNamesL: Array<string> = ["logchannel", "ignoredchannels", "showavatar", "ghostreacttime", "ignoredroles", "enableall", "disableall", "newaccountage", "showpreviouscases", "alwaysshowage"];
 
 
 class Logging extends Command{
@@ -41,12 +41,13 @@ class Logging extends Command{
             listUnder: "manager",
             
             helpDetail: "Configures the logging settings for the server, running the command with no inputs shows current settings",
-            helpUsage: "{prefix}logging\n{prefix}logging [setting] [value]\n{prefix}logging enable [event name]\n{prefix}logging disable [event name]",
-            helpUsageExample: "{prefix}logging logChannel #logs\n{prefix}logging enable messagedelete\n{prefix}logging disable messagedelete\n{prefix}logging newaccountage 3"
+            helpUsage: "{prefix}logging\n{prefix}logging [setting] [value]\n{prefix}logging [event name] enable\n{prefix}logging [event name] disable",
+            helpUsageExample: "{prefix}logging logChannel #logs\n{prefix}logging messagedelete enable\n{prefix}logging messagedelete disable\n{prefix}logging newaccountage 3"
         });
     }
 
-    async execute(ctx: ICommandContext<LoggingModule>, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string>{
+    // eslint-disable-next-line complexity
+    async execute(ctx: ICommandContext<LoggingModule>, Hyperion: IHyperion): Promise<{embed: Partial<Embed>} | string | emoteResponse>{
         if(!ctx.args[0]){
             return await this.showOverallSettings(ctx, Hyperion);
         }
@@ -135,6 +136,32 @@ class Logging extends Command{
                 }
             }
             return "Enabled all events.";
+        }
+
+        if(ctx.args[0].toLowerCase() === "alwaysshowage"){
+            if(!ctx.args[1]){return {status: "neutral", response: "Please specify yes or no"};}
+            const result = Hyperion.utils.input2boolean(ctx.args[1]);
+            if(result === undefined){return {status: "error", response: "Please specify a valid setting , try yes or no"};}
+            try{
+                await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {alwaysShowAge: result});
+            }catch(err){
+                Hyperion.logger.warn("Hyperion", "Logging Config", `Failed to update always show age on ${ctx.guild.id}, error: ${err}`);
+                return {status: "error", response: "Something went wrong: " + err.message};
+            }
+            return {status: "success", response: "Updated Always Show Age Setting"};
+        }
+
+        if(ctx.args[0].toLowerCase() === "showpreviouscases"){
+            if(!ctx.args[1]){return {status: "neutral", response: "Please specify yes or no"};}
+            const result = Hyperion.utils.input2boolean(ctx.args[1]);
+            if(result === undefined){return {status: "error", response: "Please specify a valid setting , try yes or no"};}
+            try{
+                await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "logging", {prevCasesOnJoin: result});
+            }catch(err){
+                Hyperion.logger.warn("Hyperion", "Logging Config", `Failed to update prev cases on ${ctx.guild.id}, error: ${err}`);
+                return {status: "error", response: "Something went wrong: " + err.message};
+            }
+            return {status: "success", response: "Updated Show Previous Cases Setting"};
         }
 
         if(ctx.args[0].toLowerCase() === "disableall"){
@@ -330,13 +357,7 @@ class Logging extends Command{
                 title: "Logging Configuration",
                 color: Hyperion.colors.default,
                 timestamp: new Date,
-                description: `The current logging settings for the server are:
-                **Default Log Channel:** ${channelName}
-                **Ignored Channels:** ${ignoredChannels}
-                **Show Avatar:** ${showAv}
-                **Ghost React Time:** ${config.ghostReactTime} seconds
-                **New Account Age:** ${config.newAccountAge/86400000} days
-                `,
+                description: `The current logging settings for the server are:\n**Default Log Channel:** ${channelName}\n**Ignored Channels:** ${ignoredChannels}\n**Show Avatar:** ${showAv}\n**Ghost React Time:** ${config.ghostReactTime} seconds\n**New Account Age:** ${config.newAccountAge/86400000} days\n**Always Show Account Age:** ${config.alwaysShowAge ? "Yes" : "No"}\n**Show Previous Cases:** ${config.prevCasesOnJoin ? "Yes" : "No"}`,
                 fields: [
                     {
                         name: "Enabled Events",
