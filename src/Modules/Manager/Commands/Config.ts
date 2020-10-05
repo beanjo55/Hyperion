@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import {Command} from "../../../Core/Structures/Command";
 import {IHyperion, ICommandContext} from "../../../types";
 import { Module, ConfigKey } from "../../../Core/Structures/Module";
