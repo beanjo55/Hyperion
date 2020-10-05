@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {Command} from "../../../Core/Structures/Command";
 import {IHyperion, ICommandContext, CommandResponse} from "../../../types";
 import {ReactionRole, RRConfig} from "../../../Core/Managers/MongoGuildManager";
@@ -302,7 +303,7 @@ class Attach extends Reactionroles{
             message = channel.messages.get(ctx.args[3]) ?? await channel.getMessage(ctx.args[3]).catch(() => undefined);
             if(!message){return {status: "neutral", response: "Could not find that message in that channel"};}
         }
-        if(!ctx.module.checkAddPerms(channel)){return {status: "error", response: "I dont have permissions to read message history and/or add reactions in that channel"};}
+        if(!ctx.module.checkAddPerms(channel as GuildTextableChannel)){return {status: "error", response: "I dont have permissions to read message history and/or add reactions in that channel"};}
         try{
             const result = await ctx.module.addReactions([...rr.erMap.keys()], message);
             if(result.failed.length === 0){

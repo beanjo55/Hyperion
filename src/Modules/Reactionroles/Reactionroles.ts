@@ -1,6 +1,6 @@
 import { Emoji, GuildTextableChannel, Message } from "eris";
 import {Module} from "../../Core/Structures/Module";
-import { EmbedResponse, IHyperion } from "../../types";
+import {IHyperion } from "../../types";
 import {RRConfig, ReactionRole} from "../../Core/Managers/MongoGuildManager";
 
 class Reactionroles extends Module{
