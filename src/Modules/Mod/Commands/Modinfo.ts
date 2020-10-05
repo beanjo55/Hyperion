@@ -47,7 +47,7 @@ class Modinfo extends Command{
             if(user.roles.length === 0){
                 data.embed.fields!.push({name: "Roles [0]", value: "None", inline: false});
             }else{
-                const roles = Hyperion.utils.sortRoles(user.roles, ctx.guild.roles);
+                const roles = Hyperion.utils.sortRoles(user.roles ?? [], ctx.guild.roles);
                 data.embed.fields!.push({
                     name: `Roles [${roles.length}]`,
                     value: roles.map(r => r.mention).join(" "),
@@ -111,7 +111,7 @@ class Modinfo extends Command{
         moderator = moderator as User;
         const data: Field = {
             name: `Case ${ctx.case}`,
-            value: `**Action:** ${Hyperion.modules.get("mod")!.actions[ctx.moderationType]?.friendlyName || "Unknown"}\n**Date:** ${new Date(ctx.time).toDateString()}\n**Moderator:** ${moderator.username}#${moderator.discriminator}\n**Reason:** ${ctx.reason}`,
+            value: `**Action:** ${Hyperion.modules.get("mod")!.actions[ctx.moderationType]?.friendlyName || "Unknown"}\n**Date:** ${new Date(ctx.time).toDateString()}\n**Moderator:** ${moderator !== undefined ? `${moderator.username}#${moderator.discriminator}` : "Unknown Moderator"}\n**Reason:** ${ctx.reason}`,
             inline: false
         };
         if(ctx.stringLength){
