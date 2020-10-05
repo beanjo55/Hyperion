@@ -28,7 +28,6 @@ class VTL extends Command{
             if(!textChannel){return {status: "neutral", response: "I couldnt find that text channel"};}
 
             const voiceChannel = Hyperion.utils.resolveVoiceChannel(ctx.guild, ctx.msg, ctx.args[2]);
-            console.log(ctx.args[2])
             if(!voiceChannel){return {status: "neutral", response: "I couldnt find that voice channel"};}
 
             const vtlConfig = await ctx.module.getConfig(ctx.guild.id);
@@ -57,7 +56,7 @@ class VTL extends Command{
             const vtlConfig = await ctx.module.getConfig(ctx.guild.id);
             if(vtlConfig.links[voiceChannel.id] === undefined){return {status: "neutral", response: "That voice channel doesnt have a link."};}
 
-            delete vtlConfig.links[voiceChannel.id]
+            delete vtlConfig.links[voiceChannel.id];
             try{
                 await Hyperion.managers.guild.updateModuleConfig(ctx.guild.id, "vtl", vtlConfig);
                 return {status: "success", response: "Unlinked Channels!"};
