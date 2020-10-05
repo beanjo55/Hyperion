@@ -17,7 +17,8 @@ class Reactionroles extends Command{
             userperms: ["manager"],
             helpDetail: "Manages reaction roles for the server",
             hasSub: true,
-            helpUsage: "{prefix}rr list\n{prefix}rr create [name]\n{prefix}rr delete [name]\n{prefix}rr add [name] [emote] [role]\n{prefix}rr remove [name] [emote]\n{prefix}rr show [name]\n{prefix}rr reset [name]\n{prefix}rr post [name] [channel]\n{prefix}rr attach [name] [channel or link] [message ID (required if not using link)]"
+            helpUsage: "{prefix}rr list\n{prefix}rr create [name]\n{prefix}rr delete [name]\n{prefix}rr add [name] [emote] [role]\n{prefix}rr remove [name] [emote]\n{prefix}rr show [name]\n{prefix}rr reset [name]\n{prefix}rr post [name] [channel]\n{prefix}rr attach [name] [channel or link] [message ID (required if not using link)]",
+            noExample: true
         });
     }
 
