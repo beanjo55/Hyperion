@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import {IGuild, IGuildDoc, IGuildModel, default as model} from "../../MongoDB/Guild";
 import * as Types from "../../types";
 import {Embed, Collection} from "eris";
@@ -132,6 +133,8 @@ export class LoggingConfig{
     specifyChannels: boolean;
     newAccountAge: number;
     showAvatar: boolean;
+    prevCasesOnJoin: boolean;
+    alwaysShowAge: boolean;
     banAdd: LogEvent;
     banRemove: LogEvent;
     memberAdd: LogEvent;
@@ -164,8 +167,10 @@ export class LoggingConfig{
         this.ignoredChannels = data.ignoredChannels ?? [];
         this.ignoredRoles = data.ignoredRoles ?? [];
         this.specifyChannels = data.specifyChannels ?? false;
-        this.newAccountAge = data.newAccountAge ?? 0;
+        this.newAccountAge = data.newAccountAge ?? 5;
         this.showAvatar = data.showAvatar ?? false;
+        this.prevCasesOnJoin = data.prevCasesOnJoin ?? true;
+        this.alwaysShowAge = data.alwaysShowAge ?? false;
 
         this.banAdd = data.banAdd ?? defaultLog;
         this.banRemove = data.banRemove ?? defaultLog;
@@ -256,10 +261,13 @@ export class ReactionRole{
     constructor(data: Partial<ReactionRole>){
         this.channel = data.channel ?? "";
         if(data.erMap){
-            if(!(data.erMap instanceof Map)){this.erMap = new Map<string, string>(Object.entries(data.erMap));}
-            this.erMap = data.erMap;
+            if(!(data.erMap instanceof Map)){
+                this.erMap = new Map(Object.entries(data.erMap));
+            }else{
+                this.erMap = data.erMap;
+            }
         }else{
-            this.erMap = new Map<string, string>();
+            this.erMap = new Map();
         }
         this.linkedMessages = data.linkedMessages ?? [];
     }
@@ -277,15 +285,21 @@ export class RRConfig{
         this.limitOnePerGroup = data.limitOnePerGroup ?? false;
 
         if(data.rr){
-            if(!(data.rr instanceof Map)){this.rr = new Map<string, ReactionRole>(Object.entries(data.rr));}
-            this.rr = data.rr;
+            if(!(data.rr instanceof Map)){
+                this.rr = new Map<string, ReactionRole>(Object.entries(data.rr).map(data => [data[0], new ReactionRole(data[1] as ReactionRole)]));
+            }else{
+                this.rr = data.rr;
+            }
         }else{
             this.rr = new Map<string, ReactionRole>();
         }
 
         if(data.rrMessages){
-            if(!(data.rrMessages instanceof Map)){this.rrMessages = new Map<string, string>(Object.entries(data.rrMessages));}
-            this.rrMessages = data.rrMessages;
+            if(!(data.rrMessages instanceof Map)){
+                this.rrMessages = new Map<string, string>(Object.entries(data.rrMessages));
+            }else{
+                this.rrMessages = data.rrMessages;
+            }
         }else{
             this.rrMessages = new Map<string, string>();
         }
