@@ -18,7 +18,8 @@ class Reactionroles extends Command{
             helpDetail: "Manages reaction roles for the server",
             hasSub: true,
             helpUsage: "{prefix}rr list\n{prefix}rr create [name]\n{prefix}rr delete [name]\n{prefix}rr add [name] [emote] [role]\n{prefix}rr remove [name] [emote]\n{prefix}rr show [name]\n{prefix}rr reset [name]\n{prefix}rr post [name] [channel]\n{prefix}rr attach [name] [channel or link] [message ID (required if not using link)]",
-            noExample: true
+            noExample: true,
+            helpSubcommands: "{prefix}rr list - shows server reaction roles\n{prefix}rr create - makes a new reaction role\n{prefix}rr delete - deletes a reaction role\n{prefix}rr add - adds a emote/role pair\n{prefix}rr remove - remove an emote/role pair\n{prefix}rr show - shows info about a reaction role\n{prefix}rr reset - resets linked messages\n{prefix}rr post - posts a message with a reaction role\n{prefix}rr attach - adds a reaction role to an existing message"
         });
     }
 
