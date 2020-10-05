@@ -1,5 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
-import {CommandResponse, EmbedResponse, emoteResponse, ICommandContext, IHyperion} from "../../../types";
+import {EmbedResponse, emoteResponse, ICommandContext, IHyperion} from "../../../types";
 import {default as hl} from "../Highlights";
 
 class Highlights extends Command{

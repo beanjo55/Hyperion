@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import {Collection, EmbedField, Guild} from "eris";
 import {IHyperion, ICommandContext, EmbedResponse} from "../../types";
 

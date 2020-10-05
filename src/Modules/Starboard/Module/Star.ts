@@ -37,6 +37,7 @@ async function createPost(Hyperion: IHyperion, starred: Message, conf: GuildConf
 }
 
 
+// eslint-disable-next-line complexity
 async function star(Hyperion: IHyperion, omsg: Message, emote: Emoji, userID: string, conf: GuildConfig, op: string): Promise<void | undefined>{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let msg: any;

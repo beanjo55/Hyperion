@@ -18,6 +18,7 @@ class Quotes extends Module{
         }, Hyperion);
     }
 
+    // eslint-disable-next-line complexity
     async messageCreate(Hyperion: IHyperion, msg: Message): Promise<void>{
         if(!(msg.channel.type === 5 || msg.channel.type === 0)){return;}
         const channel = msg.channel;

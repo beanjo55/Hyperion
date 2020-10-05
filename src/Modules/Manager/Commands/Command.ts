@@ -17,6 +17,7 @@ class Command extends CommandConstructor{
         });
     }
 
+    // eslint-disable-next-line complexity
     async execute(ctx: ICommandContext, Hyperion: IHyperion): CommandResponse{
         if(!ctx.args[0]){return "Please specify a command.";}
         const input = ctx.args[0].toLowerCase();

@@ -8,6 +8,7 @@ const config = require("../config.json");
 
 
 async function start(){
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const Harbringer = new Master(config.token, "/build/main.js", {
         clusters: 1,
         firstShardID: 0,

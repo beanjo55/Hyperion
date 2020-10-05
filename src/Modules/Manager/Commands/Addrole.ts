@@ -17,6 +17,7 @@ class Addrole extends Command{
         });
     }
 
+    // eslint-disable-next-line complexity
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         const bot = ctx.guild.members.get(Hyperion.client.user.id);
         if(!bot){return "A cache error occured!";}
