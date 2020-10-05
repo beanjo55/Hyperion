@@ -23,7 +23,7 @@ class Delrole extends Command{
         if(!bot.permission.has("manageRoles")){return "I need the `Manage Roles` permission to delete roles!";}
         if(bot.roles.length === 0){return "Due to discord permissions, I need to be above a role to manage it. I can't do that with no roles!";}
 
-        const botroles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
+        const botroles = Hyperion.utils.sortRoles(bot.roles ?? [], ctx.guild.roles);
 
         let target = ctx.guild.roles.get(ctx.args[0]);
         if(!target && ctx.msg.roleMentions && ctx.msg.roleMentions[0]){

@@ -32,8 +32,8 @@ class Kick extends Command{
         if(await ctx.module.isMod(toKick, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
         if(await ctx.module.isProtected(toKick, ctx.guild)){return "That user is protected from mod actions!";}
         if(bot.roles.length === 0){return "I need a role higher than the user's highest role to kick them, I can't do that with no roles!";}
-        const userRoles = Hyperion.utils.sortRoles(toKick.roles, ctx.guild.roles);
-        const botRoles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
+        const userRoles = Hyperion.utils.sortRoles(toKick.roles ?? [], ctx.guild.roles);
+        const botRoles = Hyperion.utils.sortRoles(bot.roles ?? [], ctx.guild.roles);
         if(userRoles[0] && userRoles[0].position >= botRoles[0].position){return "I can't kick someone with the same highest role or a higher role than me!";}
         return await this.doKick(ctx, Hyperion,  toKick.user, ctx.args.slice(1).join(" "));
     }

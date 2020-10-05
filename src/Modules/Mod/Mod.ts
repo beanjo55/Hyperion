@@ -148,6 +148,7 @@ class Mod extends Module{
         return mid.split(":")[1];
     }
 
+    // eslint-disable-next-line complexity
     parseTime(input: string): number{
         input = input.toLowerCase();
         if(!(timeends.some(end => input.endsWith(end)))){return 0;}
@@ -239,8 +240,8 @@ class Mod extends Module{
     }
 
     async canModerate(member: Member, botMember: Member, guild: Guild): Promise<boolean>{
-        const targetRoles = this.Hyperion.utils.sortRoles(member.roles, guild.roles);
-        const botRoles = this.Hyperion.utils.sortRoles(botMember.roles, guild.roles);
+        const targetRoles = this.Hyperion.utils.sortRoles(member.roles ?? [], guild.roles);
+        const botRoles = this.Hyperion.utils.sortRoles(botMember.roles ?? [], guild.roles);
         if(member.id === guild.ownerID){return false;}
         if(botRoles.length === 0){return false;}
         if(botRoles.length !== 0 && targetRoles.length === 0){return true;}
@@ -383,7 +384,7 @@ class Mod extends Module{
     }
 
     async canManageRole(guild: Guild, role: Role, bot: Member): Promise<boolean>{
-        const botRoles = this.Hyperion.utils.sortRoles(bot.roles, guild.roles);
+        const botRoles = this.Hyperion.utils.sortRoles(bot.roles ?? [], guild.roles);
         if(botRoles.length === 0){return false;}
         if(botRoles[0].position <= role.position){return false;}
         return true;

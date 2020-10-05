@@ -18,6 +18,7 @@ class Whois extends Command{
         });
     }
 
+    // eslint-disable-next-line complexity
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | {embed: Partial<Embed>}>{
         let target: Member | undefined;
         if(ctx.args[0]){
@@ -31,7 +32,7 @@ class Whois extends Command{
         const roleList: Array<string> = [];
         let color = Hyperion.colors.default;
         if(target.roles){
-            const roleObj = Hyperion.utils.sortRoles(target.roles, ctx.guild.roles);
+            const roleObj = Hyperion.utils.sortRoles(target.roles ?? [], ctx.guild.roles);
             const temp = new Collection(Role);
             roleObj.forEach((r: Role) => {temp.add(r);});
             const tColor = Hyperion.utils.getColor(temp, ctx.guild.roles);
@@ -62,42 +63,16 @@ class Whois extends Command{
                     name: `${target.username}#${target.discriminator}`,
                     icon_url: target.avatarURL
                 },
-                footer: {
-                    text: `User ID: ${target.id}`
-                },
+                footer: {text: `User ID: ${target.id}`},
                 color: color,
                 timestamp: new Date(),
                 fields: [
-                    {
-                        name: "Registered On",
-                        value: new Date(target.createdAt).toDateString(),
-                        inline: true
-                    },
-                    {
-                        name: "Joined On",
-                        value: new Date(target.joinedAt).toDateString(),
-                        inline: true
-                    },
-                    {
-                        name: Hyperion.fetch ? "Join Position" : "\u200b",
-                        value: Hyperion.fetch ? joinPos : "\u200b",
-                        inline: true
-                    },
-                    {
-                        name: "Rep Recieved",
-                        value: rep.toString(),
-                        inline: true
-                    },
-                    {
-                        name: "Rep Given",
-                        value: given.toString(),
-                        inline: true
-                    },
-                    {
-                        name: "Money",
-                        value: `$${money}`,
-                        inline: true
-                    }
+                    {name: "Registered On", value: new Date(target.createdAt).toDateString(), inline: true},
+                    {name: "Joined On", value: new Date(target.joinedAt).toDateString(), inline: true},
+                    {name: Hyperion.fetch ? "Join Position" : "\u200b", value: Hyperion.fetch ? joinPos : "\u200b", inline: true},
+                    {name: "Rep Recieved", value: rep.toString(), inline: true},
+                    {name: "Rep Given", value: given.toString(),inline: true},
+                    {name: "Money", value: `$${money}`, inline: true}
                 ]
             }
         };
@@ -113,18 +88,12 @@ class Whois extends Command{
             if(bio.length > 1024){
                 bio = bio.substring(0, 1020) + "...";
             }
-            data.embed.fields!.push({
-                name: "Bio",
-                value: bio
-            });
+            data.embed.fields!.push({name: "Bio", value: bio});
         }
 
         const roleString = roleList.join(" ");
         if(roleString.length > 0){
-            data.embed.fields!.push({
-                name: "Roles",
-                value: roleString
-            });
+            data.embed.fields!.push({name: "Roles", value: roleString});
         }
         
         

@@ -4,6 +4,7 @@ import {Role, Collection} from "eris";
 
 export function sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>): Array<Role>{
     const userRolesObject: Array<Role> = [];
+    if(userRoles === undefined){userRoles = [];}
     userRoles.forEach((uRole: string) => {
         const temp = guildRoles.get(uRole);
         if(temp !== undefined){userRolesObject.push(temp);}

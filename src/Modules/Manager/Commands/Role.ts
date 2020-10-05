@@ -16,6 +16,7 @@ class Role extends Command{
         });
     }
 
+    // eslint-disable-next-line complexity
     async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
         if(!ctx.args[0]){return "Please specify a user.";}
         if(!ctx.args[1]){return "Please specify a role.";}
@@ -31,7 +32,7 @@ class Role extends Command{
         if(!roleObj){return "I dont know what that role is, try a role ID.";}
         const user = Hyperion.utils.strictResolver(ctx.args[0], ctx.guild.members);
         if(!user){return "Invalid user provided! Try the user ID or name.";}
-        const botRoles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
+        const botRoles = Hyperion.utils.sortRoles(bot.roles ?? [], ctx.guild.roles);
         if(botRoles[0].position <= roleObj.position){return "I can't manage roles that are my highest role, or above my highest role.";}
         if(operation === "add"){
             if(user.roles.includes(roleObj.id)){return "No changes were made.";}

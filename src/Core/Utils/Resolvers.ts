@@ -23,7 +23,7 @@ export async function resolveUser(search: string, guild: Guild, members: Collect
 
     if (member === undefined){
         member = members.find(user => (user.username.toLowerCase() + "#" + user.discriminator === search.toLowerCase()) ||
-        (user.username.toLowerCase() === search.toLowerCase()) || (user.nick !== undefined && user.nick.toLowerCase() === search.toLowerCase()));
+        (user.username.toLowerCase() === search.toLowerCase()) || (user.nick?.toLowerCase() === search.toLowerCase()));
     }
 
     if (member === undefined){

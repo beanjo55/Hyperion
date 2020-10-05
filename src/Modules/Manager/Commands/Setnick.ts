@@ -25,8 +25,8 @@ class Setnick extends Command{
         const target = await Hyperion.utils.resolveUser(ctx.args[0], ctx.guild, ctx.guild.members);
         if(!target){return "Invalid user provided!";}
 
-        const botroles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
-        const userroles = Hyperion.utils.sortRoles(target.roles, ctx.guild.roles);
+        const botroles = Hyperion.utils.sortRoles(bot.roles ?? [], ctx.guild.roles);
+        const userroles = Hyperion.utils.sortRoles(target.roles ?? [], ctx.guild.roles);
 
         if(botroles[0].position === userroles[0].position){return "I can't manage nicknames of users with the same highest role as me";}
         if(botroles[0].position < userroles[0].position){return "I can't manage nicknames of users with a higher role than my highest role";}

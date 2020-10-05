@@ -42,8 +42,8 @@ class Ban extends Command{
             if(await ctx.module.isMod(toBan, ctx.guild)){return "That user is a mod and is protected from mod actions!";}
             if(await ctx.module.isProtected(toBan, ctx.guild)){return "That user is protected from mod actions!";}
             if(bot.roles.length === 0){return "I need a role higher than the user's highest role to ban them, I can't do that with no roles!";}
-            const userRoles = Hyperion.utils.sortRoles(toBan.roles, ctx.guild.roles);
-            const botRoles = Hyperion.utils.sortRoles(bot.roles, ctx.guild.roles);
+            const userRoles = Hyperion.utils.sortRoles(toBan.roles ?? [], ctx.guild.roles);
+            const botRoles = Hyperion.utils.sortRoles(bot.roles ?? [], ctx.guild.roles);
             if(userRoles[0] && userRoles[0].position >= botRoles[0].position){return "I can't ban someone with the same highest role or a higher role than me";}
             return await this.doBan(ctx, Hyperion, toBan.user, ctx.args.slice(this.argShift+1).join(" "));
         }
