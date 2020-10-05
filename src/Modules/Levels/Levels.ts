@@ -14,7 +14,7 @@ class Levels extends Module{
             hasCommands: true,
             hasCfg: false,
             dirname: __dirname,
-            defaultStatus: false,
+            defaultStatus: true,
             subscribedEvents: ["messageCreate"]
         }, Hyperion);
     }
