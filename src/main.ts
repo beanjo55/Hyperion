@@ -11,7 +11,7 @@ import {default as Redis} from "ioredis";
 import {default as axios} from "axios";
 import {default as mongoose} from "mongoose";
 import {inspect} from "util";
-import {IManagers, IUtils, ILogger, IColors, CoreOptions} from "./types";
+import {IManagers, IUtils, IColors, CoreOptions} from "./types";
 import {default as guild} from "./MongoDB/Guild";
 import {default as user} from "./MongoDB/User";
 import {default as guilduser} from "./MongoDB/Guilduser";
