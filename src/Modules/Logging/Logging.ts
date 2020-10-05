@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {Module} from "../../Core/Structures/Module";
@@ -7,9 +8,7 @@ import {IHyperion, GuildConfig, EmbedResponse} from "../../types";
 import { Guild, Member, User, Message, VoiceChannel, Role, GuildChannel, Emoji, TextChannel, Embed, NewsChannel, StoreChannel, CategoryChannel, Channel } from "eris";
 import {LoggingConfig, LogEvent} from "../../Core/Managers/MongoGuildManager";
 import {default as msc} from "pretty-ms";
-import { IGuild } from "../../MongoDB/Guild";
-import HyperionC from "../../main";
-import {inspect} from "util";
+import { IModLog } from "../../MongoDB/Modlog";
 
 const permMap: {[key: number]: string} = {
     0: "Create Invite",
@@ -58,7 +57,7 @@ class Logging extends Module{
             hasCommands: true,
             friendlyName: "Logging",
             dirname: __dirname,
-            defaultStatus: false,
+            defaultStatus: true,
             subscribedEvents: [
                 "messageDelete",
                 "messageUpdate", 
@@ -160,7 +159,8 @@ class Logging extends Module{
                     text: `ID: ${member.id}`
                 },
                 timestamp: new Date,
-                description: `${member.mention} - ${member.username}#${member.discriminator}`
+                description: `${member.mention} - ${member.username}#${member.discriminator}`,
+                fields: []
             }
         };
 
@@ -168,8 +168,17 @@ class Logging extends Module{
             data.embed.thumbnail = {url: member.avatarURL};
         }
 
-        if(config.newAccountAge > 0 && ((Date.now() - member.createdAt) < config.newAccountAge)){
-            data.embed.description += `\n\n**New Account: Created ${msc(Date.now() - member.createdAt)} ago**`;
+        if(!config.alwaysShowAge && config.newAccountAge > 0 && ((Date.now() - member.createdAt) < config.newAccountAge)){
+            data.embed.fields!.push({name: "__New Account__", value: `**Created ${msc(Date.now() - member.createdAt)} ago**`});
+        }
+        if(config.alwaysShowAge){
+            data.embed.fields!.push({name: "Account Age", value: `Account created ${msc(Date.now() - member.createdAt)} ago`});
+        }
+        if(config.prevCasesOnJoin){
+            const cases: null | Array<IModLog> = await this.Hyperion.models.modlog.find({guild: guild.id, user: member.id}).sort({caseNumber: -1}).limit(30).lean<IModLog>().exec();
+            if(cases && cases.length > 0){
+                data.embed.fields!.push({name: "Previous Cases", value: cases.map(c => c.caseNumber).join(", ")});
+            }
         }
 
         try{
@@ -999,8 +1008,9 @@ class Logging extends Module{
         if(!await this.preCheck(Hyperion, guild, "memberRoleAdd", roles, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberRoleAdd");
         if(!channelObj){return;}
-        const sorted = Hyperion.utils.sortRoles(roles, guild.roles).map(r => r.id);
+        let sorted = Hyperion.utils.sortRoles(roles ?? [], guild.roles).map(r => r.id);
         const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
+        sorted = sorted.map(r => `${guild.roles.get(r)?.name ?? "Unknown"} - <@&${r}>`);
         const data: {embed: Partial<Embed>} = {
             embed: {
                 title: "Member Role Add",
@@ -1009,7 +1019,7 @@ class Logging extends Module{
                     text: `ID: ${member.id}`
                 },
                 timestamp: new Date,
-                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Roles Added**\n${sorted.map(r => `<@&${r}>`).join("\n")}`
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Roles Added**\n${sorted.join("\n")}`
             }
         };
 
@@ -1028,12 +1038,13 @@ class Logging extends Module{
         if(!await this.preCheck(Hyperion, guild, "memberRoleRemove", roles, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberRoleRemove");
         if(!channelObj){return;}
-        const sorted = Hyperion.utils.sortRoles(roles, guild.roles).map(r => r.id);
+        let sorted = Hyperion.utils.sortRoles(roles ?? [], guild.roles).map(r => r.id);
         if(sorted.length !== roles.length){
             for(const role of roles){
                 if(!sorted.includes(role)){sorted.push(role);}
             }
         }
+        sorted = sorted.map(r => `${guild.roles.get(r)?.name ?? "Unknown"} - <@&${r}>`);
         const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
         const data: {embed: Partial<Embed>} = {
             embed: {
@@ -1043,7 +1054,7 @@ class Logging extends Module{
                     text: `ID: ${member.id}`
                 },
                 timestamp: new Date,
-                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Roles Removed**\n${sorted.map(r => `<@&${r}>`).join("\n")}`
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Roles Removed**\n${sorted.join("\n")}`
             }
         };
 
@@ -1062,9 +1073,10 @@ class Logging extends Module{
         if(!await this.preCheck(Hyperion, guild, "memberRoleUpdate", rolesAdded, undefined)){return;}
         const channelObj = await this.testChannel(Hyperion, guild, "memberRoleUpdate");
         if(!channelObj){return;}
-        const sortedAdd = Hyperion.utils.sortRoles(rolesAdded, guild.roles).map(r => r.id);
-        const sortedRemove = Hyperion.utils.sortRoles(rolesRemoved, guild.roles).map(r => r.id);
-
+        let sortedAdd = Hyperion.utils.sortRoles(rolesAdded ?? [], guild.roles).map(r => r.id);
+        let sortedRemove = Hyperion.utils.sortRoles(rolesRemoved ?? [], guild.roles).map(r => r.id);
+        sortedAdd = sortedAdd.map(r => `${guild.roles.get(r)?.name ?? "Unknown"} - <@&${r}>`);
+        sortedRemove = sortedRemove.map(r => `${guild.roles.get(r)?.name ?? "Unknown"} - <@&${r}>`);
         const config: LoggingConfig = await this.getLoggingConfig(Hyperion, guild.id);
         const data: {embed: Partial<Embed>} = {
             embed: {
@@ -1074,7 +1086,7 @@ class Logging extends Module{
                     text: `ID: ${member.id}`
                 },
                 timestamp: new Date,
-                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Roles Added**\n${sortedAdd.map(r => `<@&${r}>`).join("\n")}\n**Roles Removed**\n${sortedRemove.map(r => `<@&${r}>`).join("\n")}`
+                description: `**User:** ${member.mention} - ${member.username}#${member.discriminator}\n(${member.id})\n**Roles Added**\n${sortedAdd.join("\n")}\n**Roles Removed**\n${sortedRemove.join("\n")}`
             }
         };
 
