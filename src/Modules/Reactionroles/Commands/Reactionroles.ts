@@ -294,7 +294,7 @@ class Attach extends Reactionroles{
             channel = ctx.guild.channels.get(linkTest.channel);
             if(!channel){return {status: "neutral", response: "I couldnt find that channel in the server"};}
             if(!(channel.type === 0 || channel.type === 5)){return {status: "error", response: "Please link me to a text or announcement channel"};}
-            message = channel.messages.get(linkTest.message) ?? await channel.getMessage(linkTest.message).catch(() => undefined);
+            message = (channel as GuildTextableChannel).messages.get(linkTest.message) ?? await (channel as GuildTextableChannel).getMessage(linkTest.message).catch(() => undefined);
             if(!message){return {status: "neutral", response: "I couldnt find that message in that channel"};}
         }else{
             const temp = Hyperion.utils.resolveTextChannel(ctx.guild, ctx.msg, channelOrLink);
