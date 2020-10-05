@@ -1,4 +1,5 @@
 import {Command} from "../../../Core/Structures/Command";
+import { IGuildUser } from "../../../MongoDB/Guilduser";
 
 import {IHyperion, ICommandContext, MixedResponse, EmbedResponse} from "../../../types";
 
@@ -7,7 +8,7 @@ class Level extends Command{
         super({
             name: "level",
             module: "levels",
-            aliases: ["lvl"],
+            aliases: ["lvl", "rank"],
 
             helpDetail: "checks your level or someone elses",
             helpUsage: "{prefix}level\n{prefix}level [user]",
@@ -26,6 +27,14 @@ class Level extends Command{
         }
         const global = await Hyperion.managers.user.getUserConfig(target.id);
         const server = await Hyperion.managers.guildUser.getUserConfig(target.id, ctx.guild.id);
+        const userDataPre = await Hyperion.models.guilduser.findOne({guild: ctx.guild.id, user: target.id}).lean<IGuildUser>().exec();
+        let serverRankField = {name: "\u200b", value: "\u200b", inline: true};
+        if(userDataPre){
+            const userData = (userDataPre as Array<IGuildUser>).length !== undefined ? (userDataPre as Array<IGuildUser>)[0] : userDataPre as IGuildUser;
+            const list = await Hyperion.models.guilduser.find({guild: ctx.guild.id}).sort({exp: -1, user: 1}).gte("exp", userData.exp - 1).lean<IGuildUser>().exec();
+            const pos = list.map(us => us.user).indexOf(userData.user);
+            serverRankField = {name: "Server Rank", value: `#${pos+1}`, inline: true};
+        }
 
         const data: EmbedResponse = {
             embed: {
@@ -38,7 +47,7 @@ class Level extends Command{
                     {name: "\u200b", value: "\u200b", inline: true},
                     {name: "Server Level", value: server?.level.toString() ?? "error", inline: true},
                     {name: "Server Exp", value: server?.exp.toString() ?? "error", inline: true},
-                    {name: "\u200b", value: "\u200b", inline: true}
+                    serverRankField
                 ],
                 timestamp: new Date
             }
