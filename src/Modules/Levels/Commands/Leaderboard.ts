@@ -1,5 +1,6 @@
 import {Command} from "../../../Core/Structures/Command";
 import { IGuildUser } from "../../../MongoDB/Guilduser";
+import { IUser } from "../../../MongoDB/User";
 import {IHyperion, ICommandContext, CommandResponse, EmbedResponse} from "../../../types";
 
 class Leaderboard extends Command{
@@ -15,14 +16,21 @@ class Leaderboard extends Command{
         });
     }
 
+    // eslint-disable-next-line complexity
     async execute(ctx: ICommandContext, Hyperion: IHyperion): CommandResponse{
+        const global = ctx.content.toLowerCase().endsWith("-g");
         let pageNum = 0;
-        if(ctx.args[0]){
+        if(ctx.args[0] && ctx.args[0].toLowerCase() !== "-g"){
             const temp = Number(ctx.args[0]);
             if(isNaN(temp) || temp < 0){return {status: "neutral", response: "Invalid page provided"};}
             pageNum = temp;
         }
-        const list = await Hyperion.models.guilduser.find({guild: ctx.guild.id}).sort({exp: -1}).skip(20*pageNum).limit(20).lean<IGuildUser>().exec();
+        let list = [];
+        if(!global){
+            list = await Hyperion.models.guilduser.find({guild: ctx.guild.id}).sort({exp: -1, user: 1}).skip(20*pageNum).limit(20).lean<IGuildUser>().exec();
+        } else{
+            list = await Hyperion.models.user.find().sort({exp: -1, user: 1}).skip(20*pageNum).limit(20).lean<IUser>().exec();
+        }
         if(!list || list.length === 0){return {status: "error", response: "That page doesnt exist"};}
         const users = [];
         let maxLength = 0;
@@ -36,8 +44,13 @@ class Leaderboard extends Command{
             const userObjA = Hyperion.client.users.get(user.user);
             let userObj;
             if(!userObjA){
-                const temp = await ctx.guild.fetchMembers({userIDs: [user.user]});
-                if(temp && temp.length !== 0){userObj = temp[0];}
+                if(global){
+                    userObj = await Hyperion.client.getRESTUser(user.user).catch(() => undefined);
+                    if(userObj){Hyperion.client.users.add(userObj);}
+                }else{
+                    const temp = await ctx.guild.fetchMembers({userIDs: [user.user]});
+                    if(temp && temp.length !== 0){userObj = temp[0];}
+                }
             }else{
                 userObj = userObjA;
             }
@@ -52,11 +65,11 @@ class Leaderboard extends Command{
                     diff--;
                 }
             }
-            users.push(`#${(20*pageNum) + list.indexOf(user) + 1}: ${list.indexOf(user) < 9 ? " " : ""}${EXP} - ${name}\n`);
+            users.push(`#${(20*pageNum) + list.indexOf(user as any) + 1}: ${list.indexOf(user as any) < 9 ? " " : ""}${EXP} - ${name}\n`);
         }
         const embed: EmbedResponse = {
             embed: {
-                title: `Leaderboard for ${ctx.guild.name}`,
+                title: global ? "Global Leaderboard" : `Leaderboard for ${ctx.guild.name}`,
                 color: Hyperion.colors.blue,
                 timestamp: new Date,
                 description: `\`\`\`xl\n${users.join("\n")}\`\`\``
