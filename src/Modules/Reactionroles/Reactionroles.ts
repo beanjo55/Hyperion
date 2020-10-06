@@ -79,11 +79,8 @@ class Reactionroles extends Module{
     matchEmote(emotes: Array<string>, input: {id?: string; name: string}): string | undefined{
         const parsed = emotes.map(em => this.parseEmote(em)).filter(em => em !== undefined);
         for(const em of parsed){
-            if(typeof em === "string"){
-                if(input.name === em){return em;}
-            }else{
-                if(input.id && em?.id && em?.id === input?.id && em.name === input.name){return em.full;}
-            }
+            if(em?.id && input.id && input.id === em.id){return em.full;}
+            if(em?.name && input.name && input.name === em.name){return em.full;}
         }
     }
 
