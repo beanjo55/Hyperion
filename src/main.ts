@@ -118,7 +118,8 @@ const emotes = {
     neutral: "<:Neutral:680442866354749444>",
     success: "<:success:732383396432445470>",
     fancySuccess: "<a:fancyCheck:746181287592722472>",
-    info: "<:info:747287441739612191>"
+    info: "<:info:747287441739612191>",
+    happyKitty: "<a:happykitty:734450859026546699>"
 };
 const coreOptions = config.coreOptions as CoreOptions;
 export default class HyperionC extends Base{

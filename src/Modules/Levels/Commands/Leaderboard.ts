@@ -65,7 +65,7 @@ class Leaderboard extends Command{
                     diff--;
                 }
             }
-            users.push(`#${(20*pageNum) + list.indexOf(user as any) + 1}: ${list.indexOf(user as any) < 9 ? " " : ""}${EXP} - ${name}\n`);
+            users.push(`#${(20*pageNum) + list.indexOf(user as any) + 1}: ${pageNum === 0 && list.indexOf(user as any) < 9 ? " " : ""}${EXP} - ${name}\n`);
         }
         const embed: EmbedResponse = {
             embed: {

@@ -148,9 +148,9 @@ class Reactionroles extends Module{
         const rr = config.rr.get(rrName);
         if(!rr){throw new Error("That reaction role doesnt exist");}
         if(rr.erMap.has(emote)){throw new Error("That emote is already used in this reaction role");}
-        if(rr.erMap.size >= 15){throw new Error("Maximum amount of roles reach for this reaction role");}
         const isPro = await this.Hyperion.managers.guild.isPro(guild);
         if(!isPro && rr.erMap.size >= 6 ){throw new Error("Maximum amount of free roles reached.");}
+        if(rr.erMap.size >= 15){throw new Error("Maximum amount of roles reach for this reaction role");}
         rr.erMap.set(emote, role);
         config.rr.set(rrName, rr);
         await this.Hyperion.managers.guild.updateModuleConfig(guild, this.name, config);
