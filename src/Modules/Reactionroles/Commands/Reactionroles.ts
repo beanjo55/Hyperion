@@ -221,7 +221,7 @@ class Post extends Reactionroles{
         });
         const data = {
             embed: {
-                description: `React to the emotes to get these roles:\n${names.join(", ")}`,
+                description: `React to the emotes to get these roles:\n${names.join("\n")}`,
                 title,
                 timestamp: new Date,
                 color: Hyperion.colors.default
