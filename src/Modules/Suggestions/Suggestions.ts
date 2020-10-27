@@ -8,7 +8,7 @@ class Suggestions extends Module{
             name: "suggestions",
             friendlyName: "Suggestions",
             private: false,
-            alwaysEnabled: true,
+            alwaysEnabled: false,
             hasCommands: true,
             needsInit: false,
             needsLoad: false,
