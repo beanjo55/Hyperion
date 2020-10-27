@@ -51,6 +51,7 @@ class Embeds extends Command{
 class ListEmbeds extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "list";
         this.id = this.name;
         this.aliases = [];
@@ -60,6 +61,7 @@ class ListEmbeds extends Embeds{
 class CreateEmbed extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "create";
         this.id = this.name;
         this.aliases = ["new", "add"];
@@ -79,6 +81,7 @@ class CreateEmbed extends Embeds{
 class DeleteEmbed extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "delete";
         this.id = this.name;
         this.aliases = ["del", "delete"];
@@ -100,6 +103,7 @@ class DeleteEmbed extends Embeds{
 class EmbedColor extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "color";
         this.id = this.name;
         this.aliases = [];
@@ -144,6 +148,7 @@ class EmbedColor extends Embeds{
 class PostEmbed extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "post";
         this.id = this.name;
         this.aliases = ["send"];
@@ -173,6 +178,7 @@ class PostEmbed extends Embeds{
 class EmbedDescription extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "description";
         this.id = this.name;
         this.aliases = [];
@@ -206,6 +212,7 @@ class EmbedDescription extends Embeds{
 class EmbedTitle extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "title";
         this.id = this.name;
         this.aliases = [];
@@ -239,6 +246,7 @@ class EmbedTitle extends Embeds{
 class EmbedTimestamp extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "timestamp";
         this.id = this.name;
         this.aliases = ["time", "date"];
@@ -277,6 +285,7 @@ class EmbedTimestamp extends Embeds{
 class EmbedImage extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "image";
         this.id = this.name;
         this.aliases = [];
@@ -313,6 +322,7 @@ class EmbedImage extends Embeds{
 class EmbedThumbnail extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "thumbnail";
         this.id = this.name;
         this.aliases = ["thumb"];
@@ -349,6 +359,7 @@ class EmbedThumbnail extends Embeds{
 class EmbedFooterText extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "footertext";
         this.id = this.name;
         this.aliases = ["ft"];
@@ -382,6 +393,7 @@ class EmbedFooterText extends Embeds{
 class EmbedFooterIcon extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "footericon";
         this.id = this.name;
         this.aliases = ["fi"];
@@ -417,6 +429,7 @@ class EmbedFooterIcon extends Embeds{
 class EmbedAuthorText extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "authorname";
         this.id = this.name;
         this.aliases = ["at", "an", "authortext"];
@@ -450,6 +463,7 @@ class EmbedAuthorText extends Embeds{
 class EmbedAuthorIcon extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "authoricon";
         this.id = this.name;
         this.aliases = ["ai"];
@@ -485,6 +499,7 @@ class EmbedAuthorIcon extends Embeds{
 class EmbedAuthorURL extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "authorurl";
         this.id = this.name;
         this.aliases = ["aurl"];
@@ -519,6 +534,7 @@ class EmbedAuthorURL extends Embeds{
 class EmbedAddField extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "addfield";
         this.id = this.name;
         this.aliases = ["af", "createfield", "newfield"];
@@ -559,6 +575,7 @@ class EmbedAddField extends Embeds{
 class EmbedRemoveField extends Embeds{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "removefield";
         this.id = this.name;
         this.aliases = ["rf", "df", "delfield", "deletefield"];

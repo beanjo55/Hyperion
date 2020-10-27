@@ -74,6 +74,7 @@ class Eval extends Command{
 class AsyncEval extends Eval{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "async";
         this.id = this.name;
         this.aliases = ["a"];
