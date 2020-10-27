@@ -1,6 +1,6 @@
 
 /* eslint-disable no-unused-vars */
-import {Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, GuildChannel} from "eris";
+import {Collection, Guild, Message, TextChannel, Embed, Member, User, Role, GuildTextableChannel, VoiceChannel, CategoryChannel, GuildChannel, MessageContent} from "eris";
 import {Module} from "./Core/Structures/Module";
 import {Command} from "./Core/Structures/Command";
 import {manager as MGM, QuoteConfig as qc, GoodbyeConfig as gc, LogEvent as le, WelcomeConfig as wc, AutoroleConfig as arc, SocialConfig as sc, RRConfig as rrc, RankConfig as rc, TagConfig as tc, LoggingConfig as lc, StarboardConfig as sbc, ModuleConfig as mc, ModConfig as modc, CommandConfig as cc} from "./Core/Managers/MongoGuildManager";
@@ -175,6 +175,8 @@ export interface ICommandContext<T = Module>{
     respond?: string;
     silent?: boolean;
     delete?: boolean;
+    mod: boolean;
+    createMessage(input: MessageContent): void;
 }
 
 export interface UserConfig{

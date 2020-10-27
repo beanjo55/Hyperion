@@ -4,6 +4,7 @@ import * as Types from "../../types";
 import {Embed, Collection} from "eris";
 import {Command} from "../Structures/Command";
 import {Module} from "../Structures/Module";
+import Mod from "../../Modules/Mod/Mod";
 
 
 
@@ -368,6 +369,44 @@ export class LevelsConfig{
     }
 }
 
+export class SuggestionsConfig{
+    lastSuggestion: number;
+    suggestionChannel: string;
+    suggestions: {[key: number]: {
+        msg: string; 
+        status: "none" | "accepted" | "denied" | "considered" | "custom"; 
+        cStatus?: string; 
+        suggestor: string; 
+        description: string; 
+        reason?: string;
+        reviewer?: string;
+    }};
+    checkOtherSuggestions: boolean;
+    denyChannel: string;
+    approveChannel: string;
+    considerChannel: string;
+    anonReviews: boolean;
+    [key: string]: string | boolean | number | {[key: number]: {
+        msg: string; 
+        status: "none" | "accepted" | "denied" | "considered" | "custom"; 
+        cStatus?: string; 
+        suggestor: string; 
+        description: string; 
+        reason?: string;
+        reviewer?: string;
+    }}
+    constructor(data: Partial<SuggestionsConfig>){
+        this.lastSuggestion = data.lastSuggestion ?? 0;
+        this.suggestionChannel = data.suggestionChannel ?? "";
+        this.suggestions = data.suggestions ?? {};
+        this.checkOtherSuggestions = data.checkOtherSuggestions ?? true;
+        this.approveChannel = data.approveChannel ?? "";
+        this.denyChannel = data.denyChannel ?? "";
+        this.considerChannel = data.considerChannel ?? "";
+        this.anonReviews = data.anonReviews ?? false;
+    }
+}
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nameConfigMap: {[key: string]: any} = {
@@ -385,7 +424,8 @@ const nameConfigMap: {[key: string]: any} = {
     goodbye: GoodbyeConfig,
     quotes: QuoteConfig,
     levels: LevelsConfig,
-    vtl: VTL
+    vtl: VTL,
+    suggestions: SuggestionsConfig
 };
 
 class MongoGuildManager{
@@ -520,6 +560,39 @@ class MongoGuildManager{
             oldData[prop] = newData[prop];
         });
         return oldData;
+    }
+
+    fillConfig(guildConfig: IGuild): IGuild{
+        if(!guildConfig.guild){throw new Error("No guild ID!");}
+        return {
+            guild: guildConfig.guild,
+            prefix: guildConfig.prefix ?? "%",
+            casualPrefix: guildConfig.casualPrefix ?? false,
+            cantRunMessage: guildConfig.cantRunMessage ?? false,
+            updatedAt: guildConfig.updatedAt ?? 0,
+            modules: guildConfig.modules ?? {},
+            reactionRoles: new RRConfig(guildConfig.reactionRoles ?? {}),
+            tags: new TagConfig(guildConfig.tags ?? {}),
+            autorole: new AutoroleConfig(guildConfig.autorole ?? {}),
+            ranks: new RankConfig(guildConfig.ranks ?? {}),
+            starboard: new StarboardConfig(guildConfig.starboard ?? {}),
+            logging: new LoggingConfig(guildConfig.logging ?? {}),
+            welcome: new WelcomeConfig(guildConfig.welcome ?? {}),
+            goodbye: new GoodbyeConfig(guildConfig.goodbye ?? {}),
+            mod: new ModConfig(guildConfig.mod ?? {}),
+            quotes: new QuoteConfig(guildConfig.quotes ?? {}),
+            commands: guildConfig.commands ?? {},
+            social: new SocialConfig(guildConfig.social ?? {}),
+            levels: new LevelsConfig(guildConfig.levels ?? {}),
+            ignoredChannels: guildConfig.ignoredChannels ?? [],
+            ignoredRoles: guildConfig.ignoredRoles ?? [],
+            ignoredUsers: guildConfig.ignoredUsers ?? [],
+            botMissingPermsMessages: guildConfig.botMissingPermsMessages ?? false,
+            embedCommonResponses: guildConfig.embedCommonResponses ?? false,
+            pro: guildConfig.pro ?? false,
+            vtl: new VTL(guildConfig.vtl ?? {}),
+            suggestions: new SuggestionsConfig(guildConfig.suggestions ?? {})
+        };
     }
 }
 

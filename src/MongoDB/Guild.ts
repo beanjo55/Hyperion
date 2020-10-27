@@ -138,6 +138,11 @@ const guildconf = new Schema({
     vtl: {
         type: Object,
         default: new confs.VTL({})
+    },
+
+    suggestions: {
+        type: Object,
+        default: new confs.SuggestionsConfig({})
     }
 
 
@@ -174,6 +179,7 @@ export interface IGuild{
     levels: confs.LevelsConfig;
     pro: boolean;
     vtl: confs.VTL;
+    suggestions: confs.SuggestionsConfig;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [index: string]: any;
 }
