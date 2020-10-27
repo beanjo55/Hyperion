@@ -21,6 +21,7 @@ export function getColor(roles: Collection<Role>, guildRoles: Collection<Role>):
 }
 
 export function resolveRole(input: string, roles: Collection<Role>): Role | undefined{
+    if(!input){return;}
     input = input.toLowerCase();
     let role = roles.get(input);
     if(!role){
