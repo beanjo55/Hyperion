@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {Command} from "../../../Core/Structures/Command";
 import {IHyperion, ICommandContext, CommandResponse} from "../../../types";
-import {ReactionRole, RRConfig} from "../../../Core/Managers/MongoGuildManager";
 import {default as rrM} from "../Reactionroles";
-import HyperionC from "../../../main";
-import { convertCompilerOptionsFromJson } from "typescript";
 import { GuildTextableChannel, Message } from "eris";
 
 class Reactionroles extends Command{
@@ -65,6 +62,7 @@ class Reactionroles extends Command{
 class List extends Reactionroles{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "list";
         this.aliases = [];
         this.id = this.name;
@@ -78,6 +76,7 @@ class List extends Reactionroles{
 class Create extends Reactionroles{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "create";
         this.aliases = [];
         this.id = this.name;
@@ -98,6 +97,7 @@ class Create extends Reactionroles{
 class Delete extends Reactionroles{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "delete";
         this.aliases = [];
         this.id = this.name;
@@ -118,6 +118,7 @@ class Delete extends Reactionroles{
 class Add extends Reactionroles{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "add";
         this.aliases = [];
         this.id = this.name;
@@ -143,6 +144,7 @@ class Add extends Reactionroles{
 class Remove extends Reactionroles{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "remove";
         this.aliases = [];
         this.id = this.name;
@@ -164,6 +166,7 @@ class Remove extends Reactionroles{
 class Show extends Reactionroles{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "show";
         this.aliases = [];
         this.id = this.name;
@@ -197,6 +200,7 @@ class Show extends Reactionroles{
 class Post extends Reactionroles{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "post";
         this.id = this.name;
         this.aliases = [];
@@ -250,6 +254,7 @@ class Post extends Reactionroles{
 class Reset extends Reactionroles{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "reset";
         this.aliases = [];
         this.id = this.name;
@@ -277,6 +282,7 @@ class Reset extends Reactionroles{
 class Attach extends Reactionroles{
     constructor(){
         super();
+        this.parentName = this.name;
         this.name = "attach";
         this.aliases = [];
         this.id = this.name;
