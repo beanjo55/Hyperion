@@ -61,9 +61,7 @@ class Rep extends Command{
             out += "\nLooks like it's your lucky day! You have also gained a rep point! <a:happykitty:734450859026546699>";
         }
         const allowedMentions: {users: Array<string>} = {users: []};
-        if(ctx.msg.mentions[0] && ctx.msg.mentions[0].id !== target.id){
-            allowedMentions.users.push(target.id);
-        }else{
+        if(!ctx.msg.mentions[0] || ctx.msg.mentions[0].id !== target.id){
             allowedMentions.users.push(target.id);
         }
         return {content: out, allowedMentions};
