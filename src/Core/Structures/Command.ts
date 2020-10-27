@@ -30,6 +30,7 @@ export class Command{
     unlisted: boolean;
     noSubList = false;
     listUnder: string;
+    parentName?: string;
     diagnoseAddon?(Hyperion: IHyperion, guild: Guild): Promise<string | EmbedField>
 
     constructor(data: Partial<Command>){

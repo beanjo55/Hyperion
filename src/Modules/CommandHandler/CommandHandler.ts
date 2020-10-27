@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import {Module} from "../../Core/Structures/Module";
 import * as Types from "../../types";
-import {Message, Member, Embed, GuildChannel} from "eris";
+import {Message, Member, Embed, GuildChannel, MessageContent} from "eris";
 import {inspect} from "util";
 import {Command} from "../../Core/Structures/Command";
 import { IGuild } from "../../MongoDB/Guild";
@@ -31,6 +31,10 @@ interface Isolated{
     type: "dev" | "admin" | "normal";
     label: string;
     args: Array<string>;
+}
+
+function createMessage(this: Types.ICommandContext, input: MessageContent){
+    this.channel.createMessage(input);
 }
 
 class CommandHandler extends Module{
@@ -440,7 +444,11 @@ class CommandHandler extends Module{
 
     async updateCommandStats(command: Command): Promise<void>{
         this.Hyperion.redis.incr("lcr");
-        this.Hyperion.redis.incr(`CommandStats:${command.name}`);
+        if(command.parentName){
+            this.Hyperion.redis.incr(`CommandStats:${command.parentName}:${command.name}`);
+        }else{
+            this.Hyperion.redis.incr(`CommandStats:${command.name}`);
+        }
     }
 
     sendHelp(ctx: Partial<Types.ICommandContext>): string | Types.EmbedResponse | undefined{
@@ -630,7 +638,7 @@ class CommandHandler extends Module{
             msg: ctx.msg!,
             channel: ctx.channel!,
             guild: ctx.guild!,
-            guildConfig: ctx.guildConfig!,
+            guildConfig: this.Hyperion.managers.guild.fillConfig(ctx.guildConfig!),
             member: ctx.member!,
             user: ctx.user!,
             content: ctx.content!,
@@ -638,8 +646,11 @@ class CommandHandler extends Module{
             admin: ctx.admin!,
             command: ctx.command!,
             module: ctx.module!,
-            args: ctx.args!
+            args: ctx.args!,
+            createMessage,
+            mod: this.isMod(ctx.member!, ctx.guildConfig!)
         };
+        newCtx.createMessage = newCtx.createMessage.bind(newCtx);
         if(!ctx.admin && (ctx.command.contrib && !await this.isContrib(ctx.user!.id))){return;}
         if(!ctx.admin && (ctx.command.friend && !await this.isFriend(ctx.user!.id))){return;}
         if(this.ghost && !ctx.admin){return;}
