@@ -21,7 +21,8 @@ async function start(){
         clientOptions: config.erisOptions,
         name: "Hyperion",
         color: config.coreOptions.defaultColor,
-        envName: config.coreOptions.build
+        envName: config.coreOptions.build,
+        prometheus: true
 
     });
 }
