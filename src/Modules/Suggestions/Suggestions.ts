@@ -74,6 +74,16 @@ class Suggestions extends Module{
             array: false,
             default: ""
         }));
+        col.add(new ConfigKey({
+            parent: this.name,
+            id: "anonReviews",
+            ops: [0, 1, 4],
+            description: "If the responsible reviews is hidden",
+            friendlyName: "Anonymous Reviews",
+            dataType: "boolean",
+            array: false,
+            default: false
+        }));
         return col;
     }
 }
