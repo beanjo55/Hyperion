@@ -46,7 +46,7 @@ class Quotes extends Module{
         };
         if(targetMessage.attachments.length !== 0){
             const att = targetMessage.attachments[0];
-            if(att.url.endsWith(".png") || att.url.endsWith(".jpg") || att.url.endsWith(".gif")){data.embed!.image = {url: att.url};}
+            if(att.url.endsWith(".png") || att.url.endsWith(".jpg") || att.url.endsWith(".gif")){data.embed!.image = {url: att.url, height: (att as any).height, width: (att as any).width};}
         }
         if(!data.embed?.image && targetMessage.embeds.length !== 0){
             if(targetMessage.embeds[0].image){
