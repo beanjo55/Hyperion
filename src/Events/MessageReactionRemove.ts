@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import {IHyperion} from "../types";
 import {Module} from "../Core/Structures/Module";
-import {Message, Emoji} from "eris";
+import {Message, Emoji, Member} from "eris";
 import { IGuild } from "../MongoDB/Guild";
 const eventName = "messageReactionRemove";
 class MessageReactionRemoveHandler{
@@ -9,7 +9,8 @@ class MessageReactionRemoveHandler{
     constructor(){
         this.name = "messageReactionRemove";
     }
-    async handle(this: IHyperion, msg: Message, emote: Emoji, userID: string): Promise<void>{
+    async handle(this: IHyperion, msg: Message, emote: Emoji, nuser: Member | {id: string}): Promise<void>{
+        const userID = nuser.id;
         const subscribed = this.modules.filter(M => M.subscribedEvents.includes(eventName));
         subscribed.forEach(m => {
             m.messageReactionRemove(this, msg, emote, userID);

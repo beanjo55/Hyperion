@@ -612,7 +612,7 @@ class Logging extends Module{
             }
         };
         if(config.showAvatar){
-            data.embed.thumbnail = {url: guild.iconURL};
+            data.embed.thumbnail = {url: guild.iconURL!};
         }
 
         try{
@@ -639,7 +639,7 @@ class Logging extends Module{
             }
         };
         if(config.showAvatar){
-            data.embed.thumbnail = {url: guild.iconURL};
+            data.embed.thumbnail = {url: guild.iconURL!};
         }
 
         try{
@@ -719,7 +719,7 @@ class Logging extends Module{
         }
 
         if(config.showAvatar){
-            data.embed.thumbnail = {url: guild.iconURL};
+            data.embed.thumbnail = {url: guild.iconURL!};
         }
         try{
             await channelObj.createMessage(data);
@@ -768,7 +768,7 @@ class Logging extends Module{
             }
         }
         if(config.showAvatar){
-            data.embed.thumbnail = {url: guild.iconURL};
+            data.embed.thumbnail = {url: guild.iconURL!};
         }
 
         try{
@@ -817,7 +817,7 @@ class Logging extends Module{
             }
         }
         if(config.showAvatar){
-            data.embed.thumbnail = {url: guild.iconURL};
+            data.embed.thumbnail = {url: guild.iconURL!};
         }
 
 
@@ -887,7 +887,7 @@ class Logging extends Module{
             data.embed.description += `**Old Channel Type:** ${cNameType[oldChannel.type] ?? "Unknown"}\n**New Channel Type:** ${cNameType[channel.type] ?? "Unknown"}`;
         }
         if(config.showAvatar){
-            data.embed.thumbnail = {url: guild.iconURL};
+            data.embed.thumbnail = {url: guild.iconURL!};
         }
 
         try{

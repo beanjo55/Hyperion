@@ -26,7 +26,7 @@ class Serverinfo extends Command{
                 color: Hyperion.colors.default,
                 title: `${ctx.guild.name} - Server Info`,
                 thumbnail: {
-                    url: ctx.guild.iconURL
+                    url: ctx.guild.iconURL!
                 },
                 footer: {
                     text: `ID: ${ctx.guild.id}`
