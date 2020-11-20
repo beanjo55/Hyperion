@@ -2,16 +2,20 @@ import {Base} from "./harbringer/index";
 import {IPC} from "./harbringer/structures/IPC";
 import {Client} from "eris";
 import Module from "./Structures/Module";
-import Command from "./Structures/Commands";
+import Command from "./Structures/Command";
 import Utils from "./Structures/Utils";
 import {EventEmitter} from "events";
-import BaseManager from "./Structures/BaseManager";
+import BaseConfigManager from "./Structures/BaseConfigManager";
+import BaseDBManager from "./Structures/BaseDBManager";
 import {default as blocked} from "blocked";
 import * as sentry from "@sentry/node";
 import {default as IORedis} from "ioredis";
 import {default as mongoose} from "mongoose";
 import logger from "./Structures/Logger";
 import {inspect} from "util";
+import {default as fs} from "fs";
+import BaseDatabaseManager from "./Structures/BaseDBManager";
+import RegionalManager from "./Structures/RegionalManager";
 
 const config = require("../config.json");
 
@@ -25,10 +29,14 @@ class InternalEvents extends EventEmitter{
     }
 }
 
+export type roles = "guild" | "user" | "guilduser" | "embeds" | "tags" | "modlogs" | "moderations" | "stars"
+
 export default class hyperion extends Base{
     modules = new Map<string, Module<unknown>>();
     commands = new Map<string, Command>();
-    managers = new Map<string, BaseManager>();
+    configManagers = new Map<string, BaseConfigManager<unknown>>();
+    dbManagers = new Map<string, BaseDBManager>();
+    manager = new RegionalManager(this);
     utils: Utils;
     internalEvents: InternalEvents;
     devPrefix: string;
@@ -94,11 +102,13 @@ export default class hyperion extends Base{
                     }
                 ]
             });
-        });
+        }, {threshold: 1000});
         await this.initMongo();
         this.initRedis();
         this.loadMods(config.coreOptions.modlist);
         this.loadEvents(config.coreOptions.eventlist);
+        this.loadConfigManagers();
+        this.loadDBManagers();
         this.trueReady = true;
     }
 
@@ -173,16 +183,67 @@ export default class hyperion extends Base{
         this.db = mongoose.connection;
     }
 
-    loadManagers(list: Array<string>): void{
-
+    loadDBManagers(): void{
+        try{
+            const files = fs.readdirSync(`${__dirname}/Managers/DB`);
+            files.forEach(file => {
+                try{
+                    this.loadDBManager(`${__dirname}/Managers/DB/` + file);
+                }catch(err){
+                    //logger
+                }
+            });
+        }catch(err){
+            //logger
+        }
     }
 
-    loadManager(name: string): void{
-
+    loadDBManager(path: string): void{
+        try{
+            const manager = require(path).default;
+            if(!manager){throw new Error("Could not load a DB manager at " + path);}
+            const loaded: BaseDatabaseManager = new manager(this, path);
+            this.dbManagers.set(loaded.db, loaded);
+            loaded.onLoad();
+        }catch(err){
+            //logger
+        }
     }
 
-    reloadManager(path: string): void{
+    reloadDBManager(path: string): void{
+        delete require.cache[require.resolve(path)];
+        this.loadDBManager(path);
+    }
 
+    loadConfigManagers(): void{
+        try{
+            const files = fs.readdirSync(`${__dirname}/Managers/Config`);
+            files.forEach(file => {
+                try{
+                    this.loadConfigManager(`${__dirname}/Managers/Config` + file);
+                }catch(err){
+                    //logger
+                }
+            });
+        }catch(err){
+            //logger
+        }
+    }
+
+    loadConfigManager(path: string): void{
+        try{
+            const manager = require(path).default;
+            if(!manager){throw new Error("Could not load a config manager at " + path);}
+            const loaded: BaseConfigManager<unknown> = new manager(this, path);
+            this.configManagers.set(loaded.role, loaded);
+        }catch(err){
+            //logger
+        }
+    }
+
+    reloadConfigManager(path: string): void{
+        delete require.cache[require.resolve(path)];
+        this.loadConfigManager(path);
     }
 
     reloadUtils(): void{
@@ -194,3 +255,30 @@ export default class hyperion extends Base{
 }
 
 //hi wuper
+
+export interface GuildType {
+    guild: string;
+    prefix: string;
+    modules: {[key: string]: boolean},
+    commands: {[key: string]: {
+        enabled: boolean;
+        allowedRoles: [],
+        allowedChannels: [],
+        disabledRoles: [],
+        disabledChannels: [],
+        subcommands?: {[key: string]: {enabled: boolean}};
+    }};
+    pro: boolean;
+    deleted: boolean;
+    updatedAt: number;
+    deletedAt: number;
+    casulaPrefix: boolean;
+    cantRunMessage: boolean;
+    embedCommonResponses: boolean;
+    ignoredChannels: [];
+    ignoredRoles: [];
+    ignoredUsers: [];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+}

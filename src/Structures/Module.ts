@@ -3,7 +3,7 @@ import {default as fs} from "fs";
 import { Message } from "eris";
 
 
-export default class Module<T> {
+export default abstract class Module<T> {
     name: string;
     path: string;
     dir: string;
@@ -47,22 +47,19 @@ export default class Module<T> {
         throw new Error("Unimplemented onUnoad");
     }
 
-    loadCommands(): number {
-        let loaded = 0;
+    loadCommands(): void {
         try{
             const files = fs.readdirSync(this.commandDir);
             files.forEach(file => {
                 try{
                     this.loadCommand(this.commandDir + file);
-                    loaded++;
                 }catch(err){
-                    //logger
+                    this.Hyperion.logger.error("Hyperion", "failed to load command from " + file, "Command loading");
                 }
             });
         }catch(err){
-            //logger
+            this.Hyperion.logger.error("Hyperion", "failed to read commands for " + this.name, "Command loading");
         }
-        return loaded;
     }
 
     loadCommand(path: string): void {
@@ -72,7 +69,7 @@ export default class Module<T> {
             const loaded = new cmd(this.Hyperion);
             this.Hyperion.commands.set(loaded.name, loaded);
         }catch(err){
-            //logger
+            this.Hyperion.logger.error("Hyperion", "failed to load command from " + path, "Command loading");
         }
 
     }
