@@ -9,8 +9,7 @@ class MessageReactionRemoveHandler{
     constructor(){
         this.name = "messageReactionRemove";
     }
-    async handle(this: IHyperion, msg: Message, emote: Emoji, nuser: Member | {id: string}): Promise<void>{
-        const userID = nuser.id;
+    async handle(this: IHyperion, msg: Message, emote: Emoji, userID: string): Promise<void>{
         const subscribed = this.modules.filter(M => M.subscribedEvents.includes(eventName));
         subscribed.forEach(m => {
             m.messageReactionRemove(this, msg, emote, userID);
