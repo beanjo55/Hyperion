@@ -19,7 +19,9 @@ const guildBase: {[key: string]: {type: String | Object | Number | Boolean | Arr
     deletedAt: {type: Number},
     deleted: {type: Boolean},
     modules: {type: Object},
-    commands: {type: Object}
+    commands: {type: Object},
+    dev: {type: Boolean},
+    lang: {type: String, default: "en"}
 };
 
 const rolePKey = {
@@ -91,7 +93,14 @@ TagsType = never
         this.user = model<UserType & Document>("user", this.userSchema);
         this.guilduser = model<GuilduserType & Document>("guilduser", this.guilduserSchema);
         this.stars = model<StarsType & Document>("stars", this.starSchema);
+        this.modlogSchema.index({guild: 1, user: 1});
+        this.modlogSchema.index({guild: 1, moderator: 1});
+        this.modlogSchema.index({guild: 1, caseNum: 1});
+        this.modlogSchema.index({guild: 1, user: 1, moderationType: 1});
+        this.modlogSchema.index({guild: 1, user: 1, autoEnd: 1});
         this.modlogs = model<ModlogType & Document>("modlog", this.modlogSchema);
+        this.moderationsSchema.index({guild: 1, user: 1});
+        this.moderationsSchema.index({guild: 1, user: 1, moderationType: 1});
         this.moderations = model<ModerationsType & Document>("moderations", this.moderationsSchema);
         this.tags = model<TagsType & Document>("tags", this.tagSchema);
         this.embeds = model<EmbedsType & Document>("embeds", this.embedsSchema);
@@ -166,7 +175,8 @@ TagsType = never
         }
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return await this[role].updateOne(query as any, data as any).exec();
+        await this[role].updateOne(query as any, data as any).exec();
+        return await this.get<T>(role, pKey);
     }
 
     raw(role: roles){
@@ -233,7 +243,7 @@ const moderationsData = {
     moderationType: {type: String, required: true},
     duration: {type: Number, required: true},
     start: {type: Number},
-    end: {type: Number},
+    end: {type: Number, index: true},
     role: {type: String},
     roles: {type: Array},
 };

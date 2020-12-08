@@ -9,7 +9,7 @@ export default class GuildConfigManager extends BaseConfigManager<GuildType> {
     }
 
     format(data: Partial<GuildType>, update?: boolean): GuildType {
-        if(!data.guild){throw new Error("Guild id must be specified");}
+        if(!data?.guild){throw new Error("Guild id must be specified");}
         data.pro ??= false;
         data.deleted ??= false;
         data.deletedAt ??= 0;
@@ -38,6 +38,11 @@ export default class GuildConfigManager extends BaseConfigManager<GuildType> {
         }else{
             data.updatedAt ??= 0;
         }
+        data.lang ??= "en";
+
+        //hotfix so command handler will run until mod module is implemented
+        data.mod ??= {modRoles: []};
+
         return data as GuildType;
     }
 

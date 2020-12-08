@@ -1,21 +1,22 @@
 import {Base} from "./harbringer/index";
 import {IPC} from "./harbringer/structures/IPC";
-import {Client} from "eris";
+import {AdvancedMessageContent, Client, Guild, GuildTextableChannel, Member, Message} from "eris";
 import Module from "./Structures/Module";
 import Command from "./Structures/Command";
-import Utils from "./Structures/Utils";
+import Utils, { ack } from "./Structures/Utils";
 import {EventEmitter} from "events";
 import BaseConfigManager from "./Structures/BaseConfigManager";
 import BaseDBManager from "./Structures/BaseDBManager";
 import {default as blocked} from "blocked";
 import * as sentry from "@sentry/node";
 import {default as IORedis} from "ioredis";
-import {default as mongoose} from "mongoose";
+import {default as mongoose, Schema, Document, model, Model} from "mongoose";
 import logger from "./Structures/Logger";
 import {inspect} from "util";
 import {default as fs} from "fs";
 import BaseDatabaseManager from "./Structures/BaseDBManager";
 import RegionalManager from "./Structures/RegionalManager";
+import LangManager from "./Structures/LangManager";
 
 const config = require("../config.json");
 
@@ -42,7 +43,7 @@ export default class hyperion extends Base{
     devPrefix: string;
     adminPrefix: string;
     trueReady = false;
-    sentry: sentry.User;
+    sentry: typeof sentry;
     build: string;
     colors = {
         red: 15541248, 
@@ -63,6 +64,14 @@ export default class hyperion extends Base{
     logger = logger;
     redis!: IORedis.Redis;
     db!: mongoose.Connection;
+    lang = new LangManager(this);
+    metadataModels!: {
+        module: Model<Document & moduleMeta>;
+        command: Model<Document & commandMeta>;
+    }
+    globalModel!: Model<Document & GlobalType>;
+    global!: GlobalType;
+    name!: string;
     constructor(setup: {client: Client; ipc: IPC; clusterID: number}){
         super(setup);
         this.sentry = require("@sentry/node");
@@ -104,11 +113,14 @@ export default class hyperion extends Base{
             });
         }, {threshold: 1000});
         await this.initMongo();
+        await this.initGlobal();
+        this.metadataInit();
         this.initRedis();
         this.loadMods(config.coreOptions.modlist);
         this.loadEvents(config.coreOptions.eventlist);
         this.loadConfigManagers();
         this.loadDBManagers();
+        this.name = this.client.user.username;
         this.trueReady = true;
     }
 
@@ -120,6 +132,27 @@ export default class hyperion extends Base{
         this.modules.set(loaded.name, loaded);
         await loaded.onLoad();
         if(loaded.hasCommands){loaded.loadCommands();}
+        const exists = this.metadataModels.module.exists({name: loaded.name});
+        if(exists){
+            this.metadataModels.module.updateOne({name: loaded.name}, {
+                alwaysEnabled: loaded.alwaysEnabled,
+                defaultStatus: loaded.defaultState,
+                hasCommands: loaded.hasCommands,
+                pro: loaded.pro,
+                private: loaded.private,
+                friendlyName: loaded.friendlyName
+            });
+        }else{
+            this.metadataModels.module.create({
+                name: loaded.name,
+                alwaysEnabled: loaded.alwaysEnabled,
+                defaultStatus: loaded.defaultState,
+                hasCommands: loaded.hasCommands,
+                pro: loaded.pro,
+                private: loaded.private,
+                friendlyName: loaded.friendlyName
+            });
+        }
     }
 
     loadMods(list: Array<string>): void{
@@ -175,7 +208,7 @@ export default class hyperion extends Base{
 
     async initMongo(): Promise<void>{
         const mongoOptions = config.mongoOptions;
-        mongoOptions.dbName = this.build;
+        mongoOptions.dbName = this.build + "3";
         
         mongoose.connection.on("error", () => this.logger.error("MongoDB", "Failed to connect to MongoDB", "Connection"));
         mongoose.connection.on("open", () => this.logger.success("MongoDB", "Connected to MongoDB", "Connection"));
@@ -220,7 +253,7 @@ export default class hyperion extends Base{
             const files = fs.readdirSync(`${__dirname}/Managers/Config`);
             files.forEach(file => {
                 try{
-                    this.loadConfigManager(`${__dirname}/Managers/Config` + file);
+                    this.loadConfigManager(`${__dirname}/Managers/Config/` + file);
                 }catch(err){
                     //logger
                 }
@@ -252,9 +285,97 @@ export default class hyperion extends Base{
         if(!newUtils){throw new Error("Did not load new utils!");}
         this.utils = new newUtils(this) as Utils;
     }
+
+    metadataInit(): void {
+        this.metadataModels = {} as {module: Model<Document & moduleMeta>; command: Model<Document & commandMeta>};
+        this.metadataModels.module = model("moduleMetadata", moduleSchema);
+        this.metadataModels.command = model("commandMetadata", commandSchema);
+    }
+
+    async initGlobal(): Promise<void> {
+        this.globalModel = model("global", globalSchema);
+        await this.loadGlobal();
+    }
+
+    async loadGlobal(): Promise<void> {
+        const data = await this.globalModel.findOne({}).lean<GlobalType>().exec();
+        if(data){
+            this.global = data;
+        }else{
+            this.global = {
+                globalCooldown: 1,
+                disabledCommands: [],
+                disabledLogEvents: [],
+                disabledModules: [],
+                guildBlacklist: [],
+                userBlacklist: []
+            };
+        }
+    }
+
+    async reloadGlobal(): Promise<void> {
+        const data = await this.globalModel.findOne({}).lean<GlobalType>().exec();
+        if(!data){throw new Error("Could not load new global!");}
+        this.global = data;
+    }
+
+    updateGlobal(): void {
+        this.globalModel.updateOne({}, this.global).exec();
+    }
 }
 
 //hi wuper
+
+const globalSchema = new Schema({
+    userBlacklist: {type: Array, default: []},
+    guildBlacklist: {type: Array, default: []},
+    disabledCommands: {type: Array, default: []},
+    disabledModules: {type: Array, default: []},
+    disabledLogEvents: {type: Array, default: []},
+    globalCooldown: {type: Number, default: 1}
+}, {minimize: false, autoIndex: true});
+
+const moduleSchema = new Schema({
+    name: {type: String, required: true, unique: true},
+    alwaysEnabled: {type: Boolean, default: false},
+    defaultStatus: {type: Boolean, default: true},
+    hasCommands: {type: Boolean, default: false},
+    pro: {type: Boolean, default: false},
+    private: {type: Boolean, default: false},
+    friendlyName: {type: String}
+}, {minimize: false, autoIndex: true});
+
+const commandSchema = new Schema({
+    name: {type: String, required: true, unique: true},
+    alwaysEnabled: {type: Boolean, default: false},
+    aliases: {type: Array, default: []},
+    perms: {type: String, default: ""},
+    pro: {type: Boolean, default: false},
+    private: {type: Boolean, default: false},
+    help: {type: Object},
+    cooldown: {type: Number, default: 2}
+}, {minimize: false, autoIndex: true});
+
+interface commandMeta {
+    name: string;
+    alwaysEnabled: boolean;
+    aliases: Array<string>;
+    perms: string;
+    pro: boolean;
+    private: boolean;
+    help: {detail: string; usage: string; example?: string; subcommands?: string};
+    cooldown: number;
+}
+
+interface moduleMeta {
+    name: string;
+    alwaysEnabled: boolean;
+    defaultStatus: boolean;
+    hasCommands: boolean;
+    pro: boolean;
+    private: boolean;
+    friendlyName: string;
+}
 
 export interface GuildType {
     guild: string;
@@ -262,10 +383,10 @@ export interface GuildType {
     modules: {[key: string]: boolean},
     commands: {[key: string]: {
         enabled: boolean;
-        allowedRoles: [],
-        allowedChannels: [],
-        disabledRoles: [],
-        disabledChannels: [],
+        allowedRoles: Array<string>,
+        allowedChannels: Array<string>,
+        disabledRoles: Array<string>,
+        disabledChannels: Array<string>,
         subcommands?: {[key: string]: {enabled: boolean}};
     }};
     pro: boolean;
@@ -275,10 +396,51 @@ export interface GuildType {
     casulaPrefix: boolean;
     cantRunMessage: boolean;
     embedCommonResponses: boolean;
-    ignoredChannels: [];
-    ignoredRoles: [];
-    ignoredUsers: [];
-
+    ignoredChannels: Array<string>;
+    ignoredRoles: Array<string>;
+    ignoredUsers: Array<string>;
+    dev: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
+
+    mod: {
+        modRoles: Array<string>;
+    },
+    lang: string;
+}
+
+export interface CommandContext<T = Module<unknown>> {
+    msg: Message;
+    channel: GuildTextableChannel;
+    guild: Guild;
+    command: Command;
+    module: T;
+    content: string;
+    args: Array<string>;
+    member: Member;
+    dev: boolean;
+    admin: boolean;
+    acks: ack;
+    config: GuildType;
+    createMessage(input: AdvancedMessageContent): Promise<Message>;
+    t(key: string, replace?: Array<string>): string;
+}
+
+export interface CommandResponse {
+    status?: "success" | "error" | "info" | "fancySuccess"
+    literal?: true;
+    content: string | AdvancedMessageContent | null;
+    success: boolean;
+    showHelp?: true;
+    self?: true;
+    langMixins?: Array<string>;
+}
+
+export interface GlobalType {
+    userBlacklist: Array<string>;
+    guildBlacklist: Array<string>;
+    disabledCommands: Array<string>;
+    disabledModules: Array<string>;
+    disabledLogEvents: Array<string>;
+    globalCooldown: number;
 }

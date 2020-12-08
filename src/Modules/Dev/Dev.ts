@@ -1,15 +1,43 @@
-import Module from "../../Structures/Module";
+import Module, { configKey } from "../../Structures/Module";
 import hyperion from "../../main";
 import { Message } from "eris";
 import {inspect} from "util";
+interface devConfig {sally: number; friends: Array<string>}
 
-export default class Dev extends Module<Record<string, never>> {
+const keys: {[key: string]: configKey} = {
+    "sally": {
+        name: "sally",
+        array: false,
+        default: 3,
+        key: "sally",
+        langName: "sally"
+    },
+    "friends": {
+        name: "friends",
+        array: true,
+        default: [],
+        key: "friends",
+        langName: "friends"
+    }
+};
+
+export default class Dev extends Module<devConfig> {
     constructor(Hyperion: hyperion){
+        const configKeys = new Map<string, configKey>(Object.entries(keys));
+
         super({
             name: "dev",
             dir: __dirname,
             path: __dirname + "/Dev.js",
-            subscribedEvents: ["messageCreate"]
+            subscribedEvents: ["messageCreate"],
+            hasCommands: true,
+            config: (data: Partial<devConfig>): devConfig => {
+                const out: Partial<devConfig> = {};
+                out.friends = data.friends ?? [];
+                out.sally = data.sally ?? 3;
+                return out as devConfig;
+            },
+            configKeys
         }, Hyperion);
     }
 

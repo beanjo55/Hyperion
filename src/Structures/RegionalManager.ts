@@ -28,8 +28,14 @@ export default class RegionalManager {
     }
 
     doOps<T>(role: roles, id: string, user?: string){
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const blank: any = {};
+        blank[role] = id;
         const pKey = [id];
-        if(user){pKey.push(user);}
+        if(user){
+            pKey.push(user);
+            blank.user = user;
+        }
         return {
             exists: async () => {return await this.getPrimaryDb().exists(role, pKey);},
             create: async () => {return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format((await this.createToAll<T>(role, pKey)));},
@@ -37,11 +43,11 @@ export default class RegionalManager {
             get: async () => {return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));},
             update: async (data: Partial<T>) => {return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.updateToAll(role, pKey, data), true);},
             getOrCreate: async () => {
-                const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
+                const result = await this.getPrimaryDb().get<T>(role, pKey);
                 if(!result){
                     return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format((await this.createToAll<T>(role, pKey)));
                 }else{
-                    return result;
+                    return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(result);
                 }
             }
         };
