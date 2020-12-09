@@ -38,7 +38,7 @@ class Delrole extends Command{
         if(botroles[0].position === target.position){return "I can't manage roles that are my highest role!";}
 
         try{
-            await target.delete(`User: ${ctx.user.username}#${ctx.user.discriminator}`);
+            await target.delete();
         }catch(err){
             Hyperion.logger.warn("Hyperion", `Failed to delete role, command: ${ctx.msg.content}, error: ${err}`, "Delrole");
             return "Something went wrong trying to delete that role!";
