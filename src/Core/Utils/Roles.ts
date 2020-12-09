@@ -30,5 +30,8 @@ export function resolveRole(input: string, roles: Collection<Role>): Role | unde
     if(!role){
         role = roles.find(r => r.name.toLowerCase().startsWith(input));
     }
+    if(!role){
+        role = roles.find(r => r.mention === input);
+    }
     return role;
 }
