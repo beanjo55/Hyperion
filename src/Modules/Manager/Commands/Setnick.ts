@@ -35,7 +35,7 @@ class Setnick extends Command{
 
         if(!ctx.args[1]){
             try{
-                await target.edit({nick: target.username}, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
+                await target.edit({nick: target.username});
             }catch(err){
                 return "There was an error trying to reset their nickname!";
             }
