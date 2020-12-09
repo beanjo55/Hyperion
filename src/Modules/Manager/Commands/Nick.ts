@@ -23,14 +23,14 @@ class Nick extends Command{
         if(!bot.permission.has("changeNickname")){return "I don't have permissions to change my own nickname!";}
         if(!ctx.args[0]){
             try{
-                await Hyperion.client.editNickname(ctx.guild.id, Hyperion.client.user.username, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
+                await Hyperion.client.editNickname(ctx.guild.id, Hyperion.client.user.username);
             }catch(err){
                 return "There was an error trying to change my nickname!";
             }
             return "Successfully reset my nickname!";
         }
         try{
-            await Hyperion.client.editNickname(ctx.guild.id, ctx.args.join(" "), `User: ${ctx.user.username}#${ctx.user.discriminator}`);
+            await Hyperion.client.editNickname(ctx.guild.id, ctx.args.join(" "));
         }catch(err){
             return "There was an error trying to change my nickname!";
         }
