@@ -27,7 +27,7 @@ class Addrole extends Command{
             try{
                 await ctx.guild.createRole({
                     name: input
-                }, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
+                });
             }catch(err){
                 Hyperion.logger.warn("Hyperion", `Failed to create role, ${ctx.msg.content}, error: ${err}`, "Addrole");
                 return "There was an error creating the role.";
@@ -54,7 +54,7 @@ class Addrole extends Command{
                 await ctx.guild.createRole({
                     name: input.substring(0, first),
                     color: color
-                }, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
+                });
             }catch(err){
                 Hyperion.logger.warn("Hyperion", `Failed to create role, ${ctx.msg.content}, error: ${err}`, "Addrole");
                 return "There was an error creating the role!";
@@ -90,7 +90,7 @@ class Addrole extends Command{
                 name: input.substring(0, first),
                 color: color,
                 hoist: hoist
-            }, `User: ${ctx.user.username}#${ctx.user.discriminator}`);
+            });
         }catch(err){
             Hyperion.logger.warn("Hyperion", `Failed to create role, ${ctx.msg.content}, error: ${err}`, "Addrole");
             return "There was an error creating the role!";
