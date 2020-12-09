@@ -154,8 +154,10 @@ export interface configKey {
     array: boolean;
     default: unknown;
     validate?: (data: unknown, input: unknown) => boolean;
+    format?: (data: unknown) => string;
     key: string;
     needsBind?: boolean;
-    specialType?: "role" | "channel" | "user",
+    type: "role" | "channel" | "user" | "number" | "string",
     langName: string;
+    aliases?: Array<string>;
 }

@@ -10,14 +10,17 @@ const keys: {[key: string]: configKey} = {
         array: false,
         default: 3,
         key: "sally",
-        langName: "sally"
+        langName: "sally",
+        aliases: ["sal cute"],
+        type: "number"
     },
     "friends": {
         name: "friends",
         array: true,
         default: [],
         key: "friends",
-        langName: "friends"
+        langName: "friends",
+        type: "user"
     }
 };
 

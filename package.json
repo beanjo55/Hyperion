@@ -45,7 +45,7 @@
   },
   "scripts": {
     "build": "npm run-script compile && npm run-script copy",
-    "copy": "cp ./src/v2.txt ./build/v2.txt",
+    "copy": "cp ./src/v3.txt ./build/v3.txt",
     "compile": "npx tsc"
   },
   "author": "bean#8888",

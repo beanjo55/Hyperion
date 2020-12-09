@@ -107,6 +107,7 @@ export default class Utils {
 
     multiArg(input: Array<string>, options: Array<string>): undefined | {match: string; offset: number} {
         const matches: Array<string> = [];
+        const ogOptions = [...options.values()];
         options.map((option, index) => {
             options[index] = option.split(" ").join("");
         });
@@ -121,7 +122,7 @@ export default class Utils {
                 if(index !== 0){
                     if(match.toLowerCase().endsWith(value.toLowerCase())){
                         if(match.toLowerCase() === input.slice(0, index+1).join("").toLowerCase()){
-                            out = {match: match, offset: index};
+                            out = {match: ogOptions[options.indexOf(match)], offset: index};
                         }
                     }
                 }
@@ -129,6 +130,11 @@ export default class Utils {
             if(out !== undefined){return out;}
         }
         return undefined;
+    }
+
+    //to appease boss
+    toCap(input: string): string {
+        return input.charAt(0).toUpperCase() + input.substring(1);
     }
     
 }
