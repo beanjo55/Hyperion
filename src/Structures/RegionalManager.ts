@@ -31,7 +31,7 @@ export default class RegionalManager {
     }
 
     async createToAll<T>(role: roles, id: Array<string>, data?: Partial<T>){
-        const results = await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.create<T>(role, id)));
+        const results = await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.create<T>(role, id, data)));
         return (results[0] as PromiseFulfilledResult<T>)?.value ?? {} as T;
     }
 

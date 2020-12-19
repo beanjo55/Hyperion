@@ -124,7 +124,8 @@ export default class Mod extends Module<configType>{
             mod: mod.id,
             name: user.friendlyName,
             action: type,
-            autoEnd: auto
+            autoEnd: auto,
+            time: Date.now()
         };
         if(options.reason){
             newcase.reason = options.reason;
@@ -134,6 +135,10 @@ export default class Mod extends Module<configType>{
         }
 
         await this.Hyperion.manager.modlogs(newcase.mid!).create(newcase);
+    }
+
+    async createModeration(data: modLogType, options: banOpts | muteOpts | lockOpts | persistOpts): Promise<void> {
+        if(!["persist", "mute"].includes(data.action) && !options.duration){return;}
     }
 
 }
