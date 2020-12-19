@@ -30,7 +30,7 @@ class InternalEvents extends EventEmitter{
     }
 }
 
-export type roles = "guild" | "user" | "guilduser" | "embeds" | "tags" | "modlogs" | "moderations" | "stars"
+export type roles = "guild" | "user" | "guilduser" | "embeds" | "tags" | "modlogs" | "moderations" | "stars" | "notes"
 
 export default class hyperion extends Base{
     modules = new Map<string, Module<unknown>>();
@@ -352,7 +352,6 @@ const commandSchema = new Schema({
     perms: {type: String, default: ""},
     pro: {type: Boolean, default: false},
     private: {type: Boolean, default: false},
-    help: {type: Object},
     cooldown: {type: Number, default: 2}
 }, {minimize: false, autoIndex: true});
 
@@ -363,7 +362,6 @@ interface commandMeta {
     perms: string;
     pro: boolean;
     private: boolean;
-    help: {detail: string; usage: string; example?: string; subcommands?: string};
     cooldown: number;
 }
 
@@ -404,7 +402,24 @@ export interface GuildType {
     [key: string]: any;
 
     mod: {
+        caseNumber: number;
         modRoles: Array<string>;
+        protectedRoles: Array<string>;
+        muteRole: string;
+        manageMuteRole: boolean;
+        modLogChannel: string;
+        lockdownGroups: {[key: string]: Array<string>}
+        dmOnBan: boolean;
+        dmOnKick: boolean;
+        dmOnMute: boolean;
+        dmOnUmute: boolean;
+        banLogChannel?: string;
+        kickLogChannel?: string;
+        muteLogChannel?: string;
+        warnLogChannel?: string;
+        lockLogChannel?: string;
+        persistLogChannel?: string;
+        logPersists: boolean;
     },
     lang: string;
 }
@@ -443,4 +458,43 @@ export interface GlobalType {
     disabledModules: Array<string>;
     disabledLogEvents: Array<string>;
     globalCooldown: number;
+}
+
+export interface modLogType {
+    mid: string;
+    user: string;
+    guild: string;
+    mod: string;
+    caseNumber: number;
+    action: "ban" | "kick" | "softban" | "mute" | "unmute" | "unban" | "warn" | "persist" | "lock";
+    time: number;
+    length?: number;
+    logChannel?: string;
+    logPost?: string;
+    hidden?: boolean;
+    name: string;
+    autoEnd: boolean;
+    reason?: string;
+}
+
+export interface moderationType {
+    mid: string;
+    user: string;
+    guild: string;
+    action: "ban" | "kick" | "softban" | "mute" | "unmute" | "unban" | "warn" | "persist" | "lock";
+    roles?: Array<string>;
+    start: number;
+    end?: number;
+    duration?: number;
+    channels?: Array<string>;
+    failCount?: number;
+}
+
+export interface noteType {
+    guild: string;
+    user: string;
+    mod: string;
+    content: string;
+    time: number;
+    id: number;
 }

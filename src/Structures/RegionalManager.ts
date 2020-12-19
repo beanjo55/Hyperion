@@ -1,5 +1,17 @@
-import hyperion, {roles, GuildType} from "../main";
+import hyperion, {roles, GuildType, modLogType, moderationType, noteType} from "../main";
 import BaseConfigManager from "./BaseConfigManager";
+
+const rolePKey = {
+    guild: "guild",
+    modlogs: "mid",
+    moderations: "mid",
+    user: "user",
+    embeds: "guild",
+    tags: "guild",
+    stars: "guild",
+    notes: "guild",
+    guilduser: "guild"
+};
 
 export default class RegionalManager {
     Hyperion: hyperion;
@@ -15,12 +27,12 @@ export default class RegionalManager {
 
     async updateToAll<T>(role: roles, id: Array<string>, data: T){
         const results =  await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.update<T>(role, id, data)));
-        return (results[0] as PromiseFulfilledResult<T>)?.value ?? {};
+        return (results[0] as PromiseFulfilledResult<T>)?.value ?? {} as T;
     }
 
-    async createToAll<T>(role: roles, id: Array<string>){
+    async createToAll<T>(role: roles, id: Array<string>, data?: Partial<T>){
         const results = await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.create<T>(role, id)));
-        return (results[0] as PromiseFulfilledResult<T>)?.value ?? {};
+        return (results[0] as PromiseFulfilledResult<T>)?.value ?? {} as T;
     }
 
     async deleteToAll(role: roles, id: Array<string>){
@@ -30,7 +42,7 @@ export default class RegionalManager {
     doOps<T>(role: roles, id: string, user?: string){
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const blank: any = {};
-        blank[role] = id;
+        blank[rolePKey[role]] = id;
         const pKey = [id];
         if(user){
             pKey.push(user);
@@ -38,10 +50,16 @@ export default class RegionalManager {
         }
         return {
             exists: async () => {return await this.getPrimaryDb().exists(role, pKey);},
-            create: async () => {return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format((await this.createToAll<T>(role, pKey)));},
+            create: async (data?: Partial<T>): Promise<T> => {
+                return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format((await this.createToAll<T>(role, pKey, data)));
+            },
             delete: async () => {return await this.deleteToAll(role, pKey);},
             get: async () => {return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));},
-            update: async (data: Partial<T>) => {return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.updateToAll(role, pKey, data), true);},
+            update: async (data: Partial<T>) => {
+                const oldData = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
+                data = this.merge<T>(oldData, data);
+                return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.updateToAll(role, pKey, data), true);
+            },
             getOrCreate: async () => {
                 const result = await this.getPrimaryDb().get<T>(role, pKey);
                 if(!result){
@@ -73,11 +91,26 @@ export default class RegionalManager {
         return this.doOps<T>("tags", id);
     }
 
-    moderations<T>(id: string){
-        return this.doOps<T>("moderations", id);
+    moderations(id: string){
+        return this.doOps<moderationType>("moderations", id);
     }
 
-    modlogs<T>(id: string){
-        return this.doOps<T>("modlogs", id);
+    modlogs(id: string){
+        return this.doOps<modLogType>("modlogs", id);
+    }
+
+    notes(id: string){
+        return this.doOps<noteType>("notes", id);
+    }
+
+    stars<T>(id: string){
+        return this.doOps<T>("stars", id);
+    }
+
+    merge<T>(oldData: T, newData: Partial<T>): T {
+        for(const key of Object.keys(newData)){
+            oldData[key as keyof T] = newData[key as keyof T]!;
+        }
+        return oldData;
     }
 }

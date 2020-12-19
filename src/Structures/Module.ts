@@ -43,6 +43,11 @@ export default abstract class Module<T> {
         return this.config(data);
     }
 
+    updateConfig(newdata: Partial<T>, data: T): T{
+        if(!this.config){throw new Error("Module has no config");}
+        return this.config(this.Hyperion.utils.merge(data, newdata));
+    }
+
     get commandDir(): string {
         return this.dir + "/Commands";
     }
@@ -91,7 +96,6 @@ export default abstract class Module<T> {
                         perms: loaded.perms,
                         pro: loaded.pro,
                         private: loaded.private,
-                        help: loaded.help,
                         cooldown: loaded.cooldown
                     });
                 }else{
@@ -102,7 +106,6 @@ export default abstract class Module<T> {
                         perms: loaded.perms,
                         pro: loaded.pro,
                         private: loaded.private,
-                        help: loaded.help,
                         cooldown: loaded.cooldown
                     });
                 }

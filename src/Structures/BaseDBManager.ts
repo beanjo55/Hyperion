@@ -20,7 +20,7 @@ export default abstract class BaseDatabaseManager {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     onUnoad(): void {}
 
-    async create<T>(role: roles, pKey: Array<string>): Promise<T>{
+    async create<T>(role: roles, pKey: Array<string>, data?: Partial<T>): Promise<T>{
         throw new Error("Unimplemented create!");
     }
 

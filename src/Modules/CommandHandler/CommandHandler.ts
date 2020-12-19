@@ -3,7 +3,6 @@ import hyperion, {GuildType, CommandContext, CommandResponse} from "../../main";
 import {ack} from "../../Structures/Utils";
 import { AdvancedMessageContent, EmbedField, Guild, GuildTextableChannel, Member, Message } from "eris";
 import Command from "../../Structures/Command";
-import { scope } from "signale";
 
 interface prehandleResult {
     msg: Message;
@@ -205,10 +204,11 @@ export default class CommandHandler extends Module<Record<string, never>> {
 
     async help(data: partialIdentifyResult): Promise<void> {
         const onCooldown = await this.onCooldown({member: data.member, command: {cooldown: 2, name: "help"}} as identifyResult);
+        const t = this.Hyperion.lang.getLang(data.config.lang).format;
         if(onCooldown){
             if(this.sentCooldowns[data.member.id] === undefined){
                 this.sentCooldowns[data.member.id] = Date.now();
-                const coolmsg = await data.channel.createMessage(`Slow down ${data.member.mention}, you're doing that too fast!`).catch(() => undefined);
+                const coolmsg = await data.channel.createMessage(t("slowDown", [data.member.friendlyName])).catch(() => undefined);
                 if(coolmsg){
                     setTimeout(delCool.bind(coolmsg as Message<GuildTextableChannel>), 3000);
                 }
@@ -241,7 +241,7 @@ export default class CommandHandler extends Module<Record<string, never>> {
         }
         data.channel.createMessage({embed: {
             title: `${this.Hyperion.client.user.username} Help`,
-            description: "[Invite me here](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&scope=bot&permissions=2110123134)\n[Join the support server here](https://discord.gg/Vd8vmBD)\n[Read the docs here](https://docs.hyperionbot.xyz)",
+            description: "[" +  t("inviteHere", [this.Hyperion.client.user.username]) +"](https://discordapp.com/oauth2/authorize?client_id=633056645194317825&scope=bot&permissions=2110123134)\n[" + t("supportHere") +"](https://discord.gg/Vd8vmBD)\n[" + t("docsHere") + "](https://docs.hyperionbot.xyz)",
             color: this.Hyperion.colors.default,
             timestamp: new Date,
             fields
@@ -258,23 +258,23 @@ export default class CommandHandler extends Module<Record<string, never>> {
         const command = this.findCommand(data.args[0]);
         if(!command){return;}
         if(!(data.acks.support || data.acks.staff || data.acks.admin || data.acks.dev) && command.private){return;}
-        const rx = new RegExp("{prefix}", "gmi");
-        let info = `**Description:** ${command.help.detail}\n**Cooldown:** ${command.cooldown} seconds`;
+        const t = this.Hyperion.lang.getLang(data.config.lang).format;
+        let info = `**${this.Hyperion.utils.toCap(t("description"))}:** ${t(`${command.name}.detail`)}\n**${this.Hyperion.utils.toCap(t("cooldown"))}:** ${command.cooldown} ${t("seconds")}`;
         if(command.aliases.length !== 0){
-            info += `\n**Aliases:** ${command.aliases.join(", ")}`;
+            info += `\n**${this.Hyperion.utils.toCap(t("aliases"))}:** ${command.aliases.join(", ")}`;
         }
         if(command.perms){
-            info += `\n**Permission Level:** ${command.perms.replace("m", "M")}`;
+            info += `\n**${t("help.permissionlevel")}:** ${this.Hyperion.utils.toCap(t(command.perms))}`;
         }
         if(command.help.subcommands){
-            info += `\n**Subcommands: **\n${command.help.subcommands?.replace(rx, data.config.prefix)}`;
+            info += `\n**${this.Hyperion.utils.toCap(t("subcommands"))}: **\n${t(`${command.name}.subcommands`, [data.config.prefix])}`;
         }
-        info += `\n**Usage:** \n${command.help.usage.replace(rx, data.config.prefix)}`;
+        info += `\n**${this.Hyperion.utils.toCap(t("usage"))}:** \n${t(`${command.name}.usage`, [data.config.prefix])}`;
         if(command.help.example){
-            info += `\n**Examples:** ${command.help.example.replace(rx, data.config.prefix)}`;
+            info += `\n**${this.Hyperion.utils.toCap(t("examples"))}:** ${t(`${command.name}.example`, [data.config.prefix])}`;
         }
         data.channel.createMessage({embed: {
-            title: `Help for ${data.config.prefix}${command.name}`,
+            title: `${t("helpFor")} ${data.config.prefix}${command.name}`,
             color: this.Hyperion.colors.default,
             timestamp: new Date,
             description: info
@@ -300,7 +300,8 @@ export default class CommandHandler extends Module<Record<string, never>> {
         if(onCooldown){
             if(this.sentCooldowns[data.member.id] === undefined){
                 this.sentCooldowns[data.member.id] = Date.now();
-                const coolmsg = await data.channel.createMessage(`Slow down ${data.member.mention}, you're doing that too fast!`).catch(() => undefined);
+                const t = this.Hyperion.lang.getLang(data.config.lang).format;
+                const coolmsg = await data.channel.createMessage(t("slowDown", [data.member.friendlyName])).catch(() => undefined);
                 if(coolmsg){
                     setTimeout(delCool.bind(coolmsg as Message<GuildTextableChannel>), 3000);
                 }

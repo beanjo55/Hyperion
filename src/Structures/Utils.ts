@@ -136,5 +136,12 @@ export default class Utils {
     toCap(input: string): string {
         return input.charAt(0).toUpperCase() + input.substring(1);
     }
+
+    merge<T>(oldData: T, newData: Partial<T>): T {
+        for(const key of Object.keys(newData)){
+            oldData[key as keyof T] = newData[key as keyof T]!;
+        }
+        return oldData;
+    }
     
 }

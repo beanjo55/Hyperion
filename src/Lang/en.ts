@@ -7,6 +7,20 @@ export default {
     "listof": "list of",
     "sally": "how much sally you have",
     "friends": "the names of sally's friends",
+    "cooldown": "cooldown",
+    "seconds": "seconds",
+    "aliases": "aliases",
+    "help.permissionlevel": "Permission Level",
+    "manager": "manager",
+    "mod": "mod",
+    "subcommands": "subcommands",
+    "usage": "usage",
+    "examples": "examples",
+    "inviteHere": "Invite {1} here",
+    "supportHere": "Join the support server here",
+    "docsHere": "Read the docs here",
+    "helpFor": "Help for",
+    "slowdown": "Slow down {1}, you're doing that too fast!",
     
     
     //%config

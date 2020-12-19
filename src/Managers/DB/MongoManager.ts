@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import BaseDBManager from "../../Structures/BaseDBManager";
-import hyperion, {roles} from "../../main";
+import hyperion, {roles, GuildType as gt, moderationType as mt, modLogType as mlt, noteType as nt} from "../../main";
 import {Schema, model, Model, Document} from "mongoose";
 import { number } from "mathjs";
 
@@ -31,18 +32,20 @@ const rolePKey = {
     user: "user",
     embeds: "guild",
     tags: "guild",
-    stars: "guild"
+    stars: "guild",
+    notes: "guild"
 };
 
 export default class MongoManager<
-GuildType = never, // gonna give you up
+GuildType = gt, // gonna give you up
 UserType = never, // gonna let you down
-GuilduserType = never, // gonna run around and desert you
+GuilduserType = {guild: string; user: string}, // gonna run around and desert you
 StarsType = never, // gonna make you cry
-ModlogType = never, // gonna say goodbye 
-ModerationsType = never, // gonna tell a lie and hurt you
+ModlogType = mlt, // gonna say goodbye 
+ModerationsType = mt, // gonna tell a lie and hurt you
 EmbedsType = never,
-TagsType = never
+TagsType = never,
+NotesType = nt
 > extends BaseDBManager{
     guildSchema!: Schema;
     guild!: Model<GuildType & Document>;
@@ -67,6 +70,9 @@ TagsType = never
 
     embedsSchema = new Schema(embedsData, {autoIndex: true});
     embeds!: Model<EmbedsType & Document>;
+
+    notesSchema = new Schema(noteData, {autoIndex: true});
+    notes!: Model<NotesType & Document>;
     constructor(Hyperion: hyperion, path: string){
         super({
             db: "mongo",
@@ -94,25 +100,28 @@ TagsType = never
         this.guilduser = model<GuilduserType & Document>("guilduser", this.guilduserSchema);
         this.stars = model<StarsType & Document>("stars", this.starSchema);
         this.modlogSchema.index({guild: 1, user: 1});
-        this.modlogSchema.index({guild: 1, moderator: 1});
-        this.modlogSchema.index({guild: 1, caseNum: 1});
-        this.modlogSchema.index({guild: 1, user: 1, moderationType: 1});
+        this.modlogSchema.index({guild: 1, mod: 1});
+        this.modlogSchema.index({guild: 1, caseNumber: 1});
+        this.modlogSchema.index({guild: 1, user: 1, action: 1});
         this.modlogSchema.index({guild: 1, user: 1, autoEnd: 1});
         this.modlogs = model<ModlogType & Document>("modlog", this.modlogSchema);
         this.moderationsSchema.index({guild: 1, user: 1});
-        this.moderationsSchema.index({guild: 1, user: 1, moderationType: 1});
+        this.moderationsSchema.index({guild: 1, user: 1, action: 1});
         this.moderations = model<ModerationsType & Document>("moderations", this.moderationsSchema);
         this.tags = model<TagsType & Document>("tags", this.tagSchema);
         this.embeds = model<EmbedsType & Document>("embeds", this.embedsSchema);
+        this.notes = model<NotesType & Document>("notes", this.notesSchema);
     }
 
-    async create<T>(role: roles, pKey: Array<string>): Promise<T>{
-        const data : {[key: string]: string} = {};
-        if(role !== "guilduser"){
-            data[rolePKey[role]] = pKey[0];
-        }else{
-            data.guild = pKey[0],
-            data.user = pKey[1];
+    async create<T>(role: roles, pKey: Array<string>, data?: Partial<T>): Promise<T>{
+        if(!data){
+            data = {};
+            if(role !== "guilduser"){
+                (data as any)[rolePKey[role]] = pKey[0];
+            }else{
+                (data as any).guild = pKey[0],
+                (data as any).user = pKey[1];
+            }
         }
         try{
             const created = await this[role].create(data);
@@ -132,7 +141,6 @@ TagsType = never
         }
         try{
             // @ts-ignore
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const created = await this[role].findOne(data as any).lean<T>().exec();
             return created as unknown as T;
         }catch(err){
@@ -148,7 +156,6 @@ TagsType = never
             data.guild = pKey[0],
             data.user = pKey[1];
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return await this[role].exists(data as any);
     }
 
@@ -161,7 +168,6 @@ TagsType = never
             data.user = pKey[1];
         }
         // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return await this[role].deleteOne(data as any).exec();
     }
 
@@ -174,7 +180,6 @@ TagsType = never
             query.user = pKey[1];
         }
         // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await this[role].updateOne(query as any, data as any).exec();
         return await this.get<T>(role, pKey);
     }
@@ -223,27 +228,37 @@ const modlogData = {
     mid: {type: String, unique: true, required: true},
     user: {type: String, required: true},
     guild: {type: String, required: true},
-    caseNum: {type: Number, required: true},
-    moderator: {type: String, required: true},
-    moderationType: {type: String, required: true},
+    caseNumber: {type: Number, required: true},
+    mod: {type: String, required: true},
+    action: {type: String, required: true},
     hidden: {type: Boolean},
     reason: {type: String},
-    expired: {type: Boolean},
-    duration: {type: String},
-    role: {type: String},
+    length: {type: Number},
     autoEnd: {type: Boolean},
     logChannel: {type: String},
-    logPost: {type: String}
+    logPost: {type: String},
+    time: {type: Number, required: true},
+    name: {type: String, required: true}
 };
 
 const moderationsData = {
     mid: {type: String, unique: true, required: true},
     guild: {type: String, required: true},
     user: {type: String, required: true},
-    moderationType: {type: String, required: true},
+    action: {type: String, required: true},
     duration: {type: Number, required: true},
     start: {type: Number},
     end: {type: Number, index: true},
-    role: {type: String},
     roles: {type: Array},
+    channels: {type: Array},
+    failCount: {type: Number}
+};
+
+const noteData = {
+    guild: {type: String, required: true},
+    user: {type: String, required: true},
+    mod: {type: String, required: true},
+    content: {type: String, required: true},
+    time: {type: Number, required: true},
+    id: {type: number, required: true}
 };
