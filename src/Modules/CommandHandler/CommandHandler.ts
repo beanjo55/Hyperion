@@ -455,6 +455,7 @@ class CommandHandler extends Module{
         if(this.ghost && !ctx.admin){return;}
         if(!ctx?.user){return;}
         if(this.Hyperion.global.blacklist.includes(ctx.user.id)){return;}
+        if(ctx.guildConfig!.ignoredChannels.includes(ctx.channel!.id) && !this.isMod(ctx.member!, ctx.guildConfig!)){return;}
         if(ctx.args && ctx.args[0]){
             if(ctx.args[0] === "253233185800847361" || ctx.args[0] === "<@253233185800847361>" || ctx.args[0] === "<@!253233185800847361>"){
                 return "If you're reading this, you've been in a coma for almost 20 years now. We're trying a new technique. We don't know where this message will end up in your dream, but we hope it works. Please wake up, we miss you.";
