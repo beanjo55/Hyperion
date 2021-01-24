@@ -16,4 +16,8 @@ export default class ModerationConfigManager extends BaseConfigManager<moderatio
         data.failCount ??= 0;
         return data as moderationType;
     }
+
+    save(data: Partial<moderationType>): moderationType {
+        return this.format(data);
+    }
 }

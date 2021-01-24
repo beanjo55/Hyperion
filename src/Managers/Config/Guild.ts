@@ -41,7 +41,7 @@ export default class GuildConfigManager extends BaseConfigManager<GuildType> {
         data.lang ??= "en";
 
         //hotfix so command handler will run until mod module is implemented
-        data.mod ??= {modRoles: []};
+        //data.mod ??= {modRoles: []};
 
         return data as GuildType;
     }
@@ -68,6 +68,26 @@ export default class GuildConfigManager extends BaseConfigManager<GuildType> {
                 if(command.alwaysEnabled){throw new Error("Tried to specify a status for an always enabled command");}
             }
         }
+    }
+
+    save(data: Partial<GuildType>, update?: true): GuildType {
+        if(!data.guild){throw new Error("Guild id must be specified");}
+        const template = this.format({guild: "template"});
+        this.Hyperion.modules.forEach(m => {
+            if(m.config){
+                data[m.name] = m.onSave(data[m.name] ?? {});
+            }
+        });
+        for(const key of Object.keys(template) as Array<keyof GuildType>){
+            if(key === "guild"){continue;}
+            if(data[key] === template[key]){
+                delete data[key];
+            }
+        }
+        if(update){
+            data.updatedAt = Date.now();
+        }
+        return data as GuildType;
     }
     
 }

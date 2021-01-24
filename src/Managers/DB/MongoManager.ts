@@ -3,7 +3,6 @@
 import BaseDBManager from "../../Structures/BaseDBManager";
 import hyperion, {roles, GuildType as gt, moderationType as mt, modLogType as mlt, noteType as nt} from "../../main";
 import {Schema, model, Model, Document} from "mongoose";
-import { number } from "mathjs";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 const guildBase: {[key: string]: {type: String | Object | Number | Boolean | Array<never>; unique?: boolean; index?: boolean; default?: unknown}} = {
@@ -22,7 +21,17 @@ const guildBase: {[key: string]: {type: String | Object | Number | Boolean | Arr
     modules: {type: Object},
     commands: {type: Object},
     dev: {type: Boolean},
-    lang: {type: String, default: "en"}
+    lang: {type: String, default: "en"},
+    reactionRoles: {type: Object},
+    starboard: {type: Object},
+    logging: {type: Object},
+    welcome: {type: Object},
+    goodbye: {type: Object},
+    mod: {type: Object},
+    quotes: {type: Object},
+    levels: {type: Object},
+    vtl: {type: Object},
+    suggestions: {type: Object}
 };
 
 const rolePKey = {
@@ -107,6 +116,7 @@ NotesType = nt
         this.modlogs = model<ModlogType & Document>("modlog", this.modlogSchema);
         this.moderationsSchema.index({guild: 1, user: 1});
         this.moderationsSchema.index({guild: 1, user: 1, action: 1});
+        this.moderationsSchema.index({end: 1, untimed: 1});
         this.moderations = model<ModerationsType & Document>("moderations", this.moderationsSchema);
         this.tags = model<TagsType & Document>("tags", this.tagSchema);
         this.embeds = model<EmbedsType & Document>("embeds", this.embedsSchema);
@@ -124,6 +134,7 @@ NotesType = nt
             }
         }
         try{
+            //@ts-ignore
             const created = await this[role].create(data);
             return created as unknown as T;
         }catch(err){
@@ -184,8 +195,8 @@ NotesType = nt
         return await this.get<T>(role, pKey);
     }
 
-    raw(role: roles){
-        return this[role];
+    raw<T>(role: roles){
+        return this[role] as unknown as  Model<Document & T>;
     }
 }
 
@@ -196,7 +207,7 @@ const userData = {
     money: {type: Number, default: 0},
     level: {type: Number, default: 0},
     exp: {type: Number, default: 0},
-    lastRepTime: {type: number, default: 0},
+    lastRepTime: {type: Number, default: 0},
     lastDailyTime: {type: Number, default: 0},
     bio: {type: String}
 };
@@ -205,13 +216,14 @@ const guildUserData = {
     user: {type: String, required: true},
     guild: {type: String, required: true},
     highlights: {type: Array, default: []},
-    level: {type: number, default: 0},
+    level: {type: Number, default: 0},
     exp: {type: Number, default: 0}
 };
 
 const embedsData = {
     guild: {type: String, unique: true, required: true},
-    embeds: {type: Object}
+    embeds: {type: Object},
+    limit: {type: Number}
 };
 
 const tagsData = {
@@ -219,9 +231,17 @@ const tagsData = {
     tags: {type: Object}
 };
 
+/* new data model for v3 starbaord
 const starData = {
     guild: {type: String, required: true, unique: true},
     starMessageMap: {type: Object}
+};
+*/
+
+const starData = {
+    guild: {type: String, required: true},
+    message: {type: String, required: true, unique: true},
+    starpost: {type: String, required: true}
 };
 
 const modlogData = {
@@ -229,16 +249,22 @@ const modlogData = {
     user: {type: String, required: true},
     guild: {type: String, required: true},
     caseNumber: {type: Number, required: true},
-    mod: {type: String, required: true},
-    action: {type: String, required: true},
+    moderator: {type: String, required: true}, //v2 name, v3 name is mod
+    moderationType: {type: String, required: true}, //v2 name, v3 name is action
     hidden: {type: Boolean},
     reason: {type: String},
-    length: {type: Number},
+    duration: {type: Number}, //v2 name, v3 name is duration
     autoEnd: {type: Boolean},
     logChannel: {type: String},
     logPost: {type: String},
-    time: {type: Number, required: true},
-    name: {type: String, required: true}
+    timeGiven: {type: Number, required: true}, //v2 name, v3 name is time
+    name: {type: String, required: false}, //v2, required should be true
+    expired: {type: Boolean, default: false}, //v2
+    endTime: {type: Number}, //v2
+    stringLength: {type: String}, //v2
+    auto: {type: Boolean}, //v2
+    role: {type: String}, //v2
+    removedRoles: {type: Array} //v2
 };
 
 const moderationsData = {
@@ -251,7 +277,9 @@ const moderationsData = {
     end: {type: Number, index: true},
     roles: {type: Array},
     channels: {type: Array},
-    failCount: {type: Number}
+    failCount: {type: Number, default: 0},
+    caseNum: {type: Number, required: true}, //v2
+    untimed: {type: Boolean, required: true} //v2
 };
 
 const noteData = {
@@ -260,5 +288,5 @@ const noteData = {
     mod: {type: String, required: true},
     content: {type: String, required: true},
     time: {type: Number, required: true},
-    id: {type: number, required: true}
+    id: {type: Number, required: true}
 };

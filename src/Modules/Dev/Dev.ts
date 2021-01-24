@@ -23,7 +23,12 @@ const keys: {[key: string]: configKey} = {
         type: "user"
     }
 };
-
+const config = (data: Partial<devConfig>): devConfig => {
+    const out: Partial<devConfig> = {};
+    out.friends = data.friends ?? [];
+    out.sally = data.sally ?? 3;
+    return out as devConfig;
+};
 export default class Dev extends Module<devConfig> {
     constructor(Hyperion: hyperion){
         const configKeys = new Map<string, configKey>(Object.entries(keys));
@@ -34,13 +39,18 @@ export default class Dev extends Module<devConfig> {
             path: __dirname + "/Dev.js",
             subscribedEvents: ["messageCreate"],
             hasCommands: true,
-            config: (data: Partial<devConfig>): devConfig => {
-                const out: Partial<devConfig> = {};
-                out.friends = data.friends ?? [];
-                out.sally = data.sally ?? 3;
-                return out as devConfig;
+            config,
+            save: (data: Partial<devConfig>): devConfig => {
+                const template = config({});
+                for(const key of Object.keys(data) as Array<keyof devConfig>){
+                    if(data[key] === template[key]){
+                        delete data[key];
+                    }
+                }
+                return data as devConfig;
             },
-            configKeys
+            configKeys,
+            private: true
         }, Hyperion);
     }
 

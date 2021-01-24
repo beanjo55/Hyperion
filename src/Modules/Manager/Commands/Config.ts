@@ -3,6 +3,7 @@ import hyperion, {CommandContext, CommandResponse} from "../../../main";
 import { Embed } from "eris";
 import Module, { configKey } from "../../../Structures/Module";
 
+
 export default class Config extends Command {
     constructor(Hyperion: hyperion, path: string){
         super({
@@ -38,7 +39,7 @@ export default class Config extends Command {
             return this.keyInfo(ctx, resolved.mod, keyResolved.key);
         }
 
-        return {success: true, content: "sally", literal: true};
+        return {success: true, content: "sally", literal: true, status: "fancySuccess"};
     }
 
     listMods(ctx: CommandContext): CommandResponse {
@@ -96,6 +97,21 @@ export default class Config extends Command {
         return {success: true, content: data, literal: true};
     }
 
+    updateKey(ctx: CommandContext, mod: Module<unknown>, key: configKey): CommandResponse {
+        return {success: true, content: "sally", literal: true, status: "fancySuccess"}
+    }
+
+    runValidation(ctx: CommandContext, key: configKey, data: string | number | Array<string> | Array<number>, input: number | string): boolean {
+        if(!key.validate){throw new Error("Key does not have custom validator");}
+        if(key.array){
+            if(!Array.isArray(data)){throw new Error("Array key was passed non-array data");}
+            return key.validate(data, input);
+        }else{
+            if(Array.isArray(data)){throw new Error("Array data was passed to non-array key");}
+        }
+        return true;
+    }
+
     resolveModule(ctx: CommandContext): {newArgs: Array<string>; mod: Module<unknown>} | null {
         const resolved = this.Hyperion.utils.multiArg(ctx.args, this.filterModules(ctx).map(m => m.friendlyName));
         if(!resolved){return null;}
@@ -130,7 +146,7 @@ export default class Config extends Command {
         return {key, newArgs};
     }
 
-    defaultChannelFormatter(input: string): string {
+    defaultTextChannelFormatter(input: string): string {
         return `<#${input}>`;
     }
 
@@ -148,7 +164,7 @@ export default class Config extends Command {
             return this.defaultRoleFormatter(input as string);
         }
         case "channel": {
-            return this.defaultChannelFormatter(input as string);
+            return this.defaultTextChannelFormatter(input as string);
         }
         case "user": {
             return this.defaultUserFormatter(input as string);
@@ -170,7 +186,7 @@ export default class Config extends Command {
             return (input as Array<string>).map(ele => this.defaultRoleFormatter(ele)).join(", ");
         }
         case "channel": {
-            return (input as Array<string>).map(ele => this.defaultChannelFormatter(ele)).join(", ");
+            return (input as Array<string>).map(ele => this.defaultTextChannelFormatter(ele)).join(", ");
         }
         case "user": {
             return (input as Array<string>).map(ele => this.defaultUserFormatter(ele)).join(", ");

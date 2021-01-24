@@ -15,4 +15,8 @@ export default abstract class BaseConfigManager<T> {
     format(data: Partial<T>, update?: boolean): T {
         throw new Error("unimplemented format");
     }
+
+    save(data: Partial<T>, update?: true): T {
+        throw new Error("nimplemented save");
+    }
 }

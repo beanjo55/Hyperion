@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import Module from "../../Structures/Module";
 import hyperion, {GuildType, CommandContext, CommandResponse} from "../../main";
 import {ack} from "../../Structures/Utils";
@@ -59,7 +60,7 @@ export default class CommandHandler extends Module<Record<string, never>> {
         if(!identify){return;}
         if(identify.flow !== "normal"){
             if(identify.flow === "help"){
-                this.help(identify);
+                //this.help(identify);
                 return;
             }else{
                 const authed = this.diagnoseAuth(identify);
@@ -157,7 +158,7 @@ export default class CommandHandler extends Module<Record<string, never>> {
         let commandSettings = data.config.commands[data.parent ? data.parent.name : data.command.name];
         commandSettings ??= {enabled: true, allowedRoles: [], allowedChannels: [], disabledRoles: [], disabledChannels: []};
         const isManager = data.member.permissions.has("manageGuild");
-        const isMod = this.Hyperion.utils.arrayShared(data.member.roles, data.config.mod.modRoles);
+        const isMod = this.Hyperion.utils.arrayShared(data.member.roles, data.config.mod?.modRoles ?? []);
         const hasAllowedRole = this.Hyperion.utils.arrayShared(data.member.roles, commandSettings.allowedRoles);
         const hasDisabledRole = this.Hyperion.utils.arrayShared(data.member.roles, commandSettings.disabledRoles);
         const isDisabledChannel = commandSettings.disabledChannels.includes(data.channel.id);
@@ -384,7 +385,7 @@ export default class CommandHandler extends Module<Record<string, never>> {
     }
 
     isMod(member: Member, config: GuildType): boolean {
-        if(this.Hyperion.utils.arrayShared(config.mod.modRoles, member.roles)){return true;}
+        if(this.Hyperion.utils.arrayShared(config.mod?.modRoles ?? [], member.roles)){return true;}
         if(member.permissions.has("manageGuild")){return true;}
         return false;
     }

@@ -1,4 +1,4 @@
-import { Guild, Member, User } from "eris";
+import { Embed, Guild, Member, TextChannel, User } from "eris";
 import hyperion from "../main";
 
 export interface ack {
@@ -136,12 +136,70 @@ export default class Utils {
     toCap(input: string): string {
         return input.charAt(0).toUpperCase() + input.substring(1);
     }
-
+    
     merge<T>(oldData: T, newData: Partial<T>): T {
         for(const key of Object.keys(newData)){
             oldData[key as keyof T] = newData[key as keyof T]!;
         }
         return oldData;
+    }
+
+    async splitText(input: string, channel: TextChannel,  options?: {maxLength?: number; maxSplits?: number; header?: string; footer?: string; codeBlock?: true}): Promise<void> {
+        if(!options){options = {};}
+        const maxLength = options.maxLength ?? 1990;
+        const maxSplits = options.maxSplits ?? 10;
+        if(options.header){input = options.header + " " + input;}
+        if(options.footer){input = input + " " + options.footer;}
+        for(let i = 1; i <= maxSplits; i++){
+            let toPost = input.substring(0, maxLength);
+            if(options.codeBlock){toPost = "```\n" + toPost + "\n```";}
+            input = input.substring(maxLength);
+            await channel.createMessage(toPost).catch(() => undefined);
+            if(input.length === 0){break;}
+        }
+    }
+
+    splitEmbed(template: Partial<Embed>, input: string, options?: {maxLength?: number; maxEmbeds?: number, codeBlock?: true}): Array<Partial<Embed>> {
+        const output: Array<Partial<Embed>> = [];
+        if(!options){options = {};}
+        const maxLength = options.maxEmbeds ?? 1990;
+        const maxEmbeds = options.maxEmbeds ?? 5;
+        if(input.length <= maxLength){
+            template.description = options.codeBlock ? "```\n" + input + "\n```" : input;
+            return [template];
+        }
+        const header: Partial<Embed> = Object.fromEntries(Object.entries(template));
+        const footer: Partial<Embed> = Object.fromEntries(Object.entries(template));
+        delete header.footer;
+        delete header.timestamp;
+        delete header.image;
+        delete footer.title;
+        delete footer.thumbnail;
+        delete template.title;
+        delete template.footer;
+        delete template.timestamp;
+        delete template.thumbnail;
+        delete template.image;
+
+        for(let i = 1; i <= maxEmbeds; i++){
+            let toPost = input.substring(0, maxLength);
+            if(options.codeBlock){toPost = "```\n" + toPost + "\n```";}
+            input = input.substring(maxLength);
+            if(i === 1){
+                header.description = toPost;
+                output.push(header);
+                continue;
+            }
+            if(i === maxEmbeds || input.length === 0){
+                footer.description = toPost;
+                output.push(footer);
+                break;
+            }
+            template.description = toPost;
+            output.push(template);
+        }
+
+        return output;
     }
     
 }

@@ -40,7 +40,7 @@ export default abstract class BaseDatabaseManager {
         throw new Error("Unimplemented get!");
     }
 
-    raw(role: roles): unknown {
+    raw<T>(role: roles): unknown {
         throw new Error("unimplemented raw");
     }
 }

@@ -1,6 +1,6 @@
 import {Base} from "./harbringer/index";
 import {IPC} from "./harbringer/structures/IPC";
-import {AdvancedMessageContent, Client, Guild, GuildTextableChannel, Member, Message} from "eris";
+import {AdvancedMessageContent, Client, Guild, GuildTextableChannel, Member, Message, Collection, Embed} from "eris";
 import Module from "./Structures/Module";
 import Command from "./Structures/Command";
 import Utils, { ack } from "./Structures/Utils";
@@ -17,8 +17,20 @@ import {default as fs} from "fs";
 import BaseDatabaseManager from "./Structures/BaseDBManager";
 import RegionalManager from "./Structures/RegionalManager";
 import LangManager from "./Structures/LangManager";
+import {Module as V2Module} from "./V2/Structures/Module";
+import {Command as V2Command} from "./V2/Structures/Command";
+import {IUtils} from "./V2/types";
+import utils from "./V2/Utils/index";
+import {manager as MongoGuildManager} from "./V2/Structures/MongoGuildManager";
+import {manager as MongoUserManager} from "./V2/Structures/MongoUserManager";
+import {default as MongoGuilduserManager} from "./V2/Structures/MongoGuildUserManager";
+import {manager as MongoModlogManager} from "./V2/Structures/MongoModLogManager";
+import {default as MongoEmbedManager} from "./V2/Structures/MongoEmbedManager";
+import {default as MongoModerationManager} from "./V2/Structures/MongoModerationManager";
+import {default as MongoStarManager} from "./V2/Structures/MongoStarManager";
 
 const config = require("../config.json");
+const version = require("../package.json").version as string;
 
 export type events = "messageCreate";
 
@@ -31,6 +43,51 @@ class InternalEvents extends EventEmitter{
 }
 
 export type roles = "guild" | "user" | "guilduser" | "embeds" | "tags" | "modlogs" | "moderations" | "stars" | "notes"
+const emotes = {
+    error: "<:error:732383200436813846>",
+    neutral: "<:Neutral:680442866354749444>",
+    success: "<:success:732383396432445470>",
+    fancySuccess: "<a:fancyCheck:746181287592722472>",
+    info: "<:info:747287441739612191>",
+    happyKitty: "<a:happykitty:734450859026546699>"
+};
+const colors = {
+    red: 15541248, 
+    yellow: 16771072, 
+    green: 65386, 
+    orange: 15234850, 
+    blue: 30719,
+    default: config.coreOptions.defaultColor
+};
+export interface V2Type {
+    modules: Collection<V2Module>;
+    commands: Collection<V2Command>;
+    utils: IUtils;
+    client: Client;
+    redis: IORedis.Redis;
+    emotes: typeof emotes;
+    colors: typeof colors;
+    global: GlobalType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    stars: any;
+    sentry: typeof sentry;
+    version: string;
+    adminPrefix: string;
+    devPrefix: string;
+    logger: typeof logger;
+    ipc: IPC;
+    build: string;
+    clusterID: number;
+    managers: {
+        guild: MongoGuildManager;
+        user: MongoUserManager;
+        guilduser: MongoGuilduserManager;
+        modlog: MongoModlogManager;
+        moderations: MongoModerationManager;
+        embeds: MongoEmbedManager;
+        stars: MongoStarManager;
+    };
+}
 
 export default class hyperion extends Base{
     modules = new Map<string, Module<unknown>>();
@@ -45,22 +102,8 @@ export default class hyperion extends Base{
     trueReady = false;
     sentry: typeof sentry;
     build: string;
-    colors = {
-        red: 15541248, 
-        yellow: 16771072, 
-        green: 65386, 
-        orange: 15234850, 
-        blue: 30719,
-        default: config.coreOptions.defaultColor
-    };
-    emotes = {
-        error: "<:error:732383200436813846>",
-        neutral: "<:Neutral:680442866354749444>",
-        success: "<:success:732383396432445470>",
-        fancySuccess: "<a:fancyCheck:746181287592722472>",
-        info: "<:info:747287441739612191>",
-        happyKitty: "<a:happykitty:734450859026546699>"
-    };
+    colors = colors;
+    emotes = emotes;
     logger = logger;
     redis!: IORedis.Redis;
     db!: mongoose.Connection;
@@ -72,6 +115,9 @@ export default class hyperion extends Base{
     globalModel!: Model<Document & GlobalType>;
     global!: GlobalType;
     name!: string;
+    version = version;
+    V2!: V2Type;
+    circleCIToken = config.coreOptions.circleCIToken
     constructor(setup: {client: Client; ipc: IPC; clusterID: number}){
         super(setup);
         this.sentry = require("@sentry/node");
@@ -120,6 +166,7 @@ export default class hyperion extends Base{
         this.loadEvents(config.coreOptions.eventlist);
         this.loadConfigManagers();
         this.loadDBManagers();
+        this.compatInit();
         this.name = this.client.user.username;
         this.trueReady = true;
     }
@@ -185,9 +232,13 @@ export default class hyperion extends Base{
             this.Hyperion.modules.forEach(mod => {
                 if(mod.subscribedEvents.includes(this.name)){(mod[this.name] as (...args: Array<unknown>) => void)(...args);}
             });
+            this.Hyperion.V2.modules.forEach(mod => {
+                if(mod.subscribedEvents.includes(this.name)){(mod[this.name] as (...args: Array<unknown>) => void)(...args);}
+            });
         }
         this.client.on(name, template.bind(payload));
     }
+
 
     loadEvents(list: Array<events>): void{
         list.forEach(event => this.loadEvent(event));
@@ -308,7 +359,15 @@ export default class hyperion extends Base{
                 disabledLogEvents: [],
                 disabledModules: [],
                 guildBlacklist: [],
-                userBlacklist: []
+                userBlacklist: [],
+                exp: {
+                    coeff: 0.1,
+                    cooldown: 120,
+                    offset: 0,
+                    min: 10,
+                    max: 15,
+                    div: 2
+                }
             };
         }
     }
@@ -321,6 +380,66 @@ export default class hyperion extends Base{
 
     updateGlobal(): void {
         this.globalModel.updateOne({}, this.global).exec();
+    }
+
+    compatInit(): void{
+        this.V2 = {
+            utils,
+            client: this.client,
+            redis: this.redis,
+            colors: this.colors,
+            emotes: this.emotes,
+            global: this.global,
+            stars: {},
+            sentry: this.sentry,
+            devPrefix: this.devPrefix,
+            adminPrefix: this.adminPrefix,
+            logger: this.logger,
+            ipc: this.ipc,
+            build: this.build,
+            clusterID: this.clusterID,
+            version,
+            managers: {
+                guild: new MongoGuildManager(this),
+                user: new MongoUserManager(this),
+                guilduser: new MongoGuilduserManager(this),
+                modlog: new MongoModlogManager(this),
+                moderations: new MongoModerationManager(this),
+                embeds: new MongoEmbedManager(this),
+                stars: new MongoStarManager(this)
+            },
+            modules: new Collection<V2Module>(V2Module),
+            commands: new Collection<V2Command>(V2Command)
+        } as V2Type;
+        this.loadV2Mods();
+    }
+
+    loadV2Mod(modname: string): V2Module | undefined{
+        try{
+            const mod = require(`./V2/Modules/${modname}/${modname}.js`).default;
+            return this.V2.modules.add(new mod(this.V2));
+        }catch(err){
+            this.logger.error("Hyperion", `Failed to load v2 module ${modname}, error: ${err}`, "Module Loading");
+        }
+    }
+
+    loadV2Mods(): void{
+        const modlist = ["CommandHandler", "Info", "Fun", "Starboard", "Social", "Manager", "Logging", "Mod", "Embeds", "Welcome", "Goodbye", "Quotes", "Highlights", "Reactionroles", "Levels", "VTL", "Suggestions"];
+        modlist.forEach(mod =>{
+            this.loadV2Mod(mod);
+        });
+        this.V2.modules.forEach(mod =>{
+            if(mod.needsLoad){
+                mod.loadMod();
+            }
+            if(mod.needsInit){
+                mod.init(this.V2);
+            }
+            if(mod.hasCommands){
+                mod.loadCommands();
+            }
+        });
+        
     }
 }
 
@@ -375,10 +494,31 @@ interface moduleMeta {
     friendlyName: string;
 }
 
+interface LogEvent {
+    enabled: boolean;
+    channel: string;
+    ignoredRoles: Array<string>;
+    ignoredChannels: Array<string>;
+}
+
+interface ReactionRole {
+    channel: string;
+    erMap: Map<string, string>;
+    linkedMessages: Array<string>;
+}
+
+interface Quote {
+    user: string;
+    link: string;
+    channel: string;
+    content: string;
+    image?: string;
+}
+
 export interface GuildType {
     guild: string;
     prefix: string;
-    modules: {[key: string]: boolean},
+    modules: {[key: string]: boolean | {enabled: boolean}},
     commands: {[key: string]: {
         enabled: boolean;
         allowedRoles: Array<string>,
@@ -391,7 +531,7 @@ export interface GuildType {
     deleted: boolean;
     updatedAt: number;
     deletedAt: number;
-    casulaPrefix: boolean;
+    casualPrefix: boolean;
     cantRunMessage: boolean;
     embedCommonResponses: boolean;
     ignoredChannels: Array<string>;
@@ -401,7 +541,7 @@ export interface GuildType {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
 
-    mod: {
+    new_mod: {
         caseNumber: number;
         modRoles: Array<string>;
         protectedRoles: Array<string>;
@@ -413,15 +553,145 @@ export interface GuildType {
         dmOnKick: boolean;
         dmOnMute: boolean;
         dmOnUmute: boolean;
-        banLogChannel?: string;
-        kickLogChannel?: string;
-        muteLogChannel?: string;
-        warnLogChannel?: string;
-        lockLogChannel?: string;
-        persistLogChannel?: string;
+        banLogChannel: string;
+        kickLogChannel: string;
+        muteLogChannel: string;
+        warnLogChannel: string;
+        lockLogChannel: string;
+        persistLogChannel: string;
         logPersists: boolean;
+        protectWarns: boolean;
     },
     lang: string;
+
+    //v2
+    mod: {
+        modRoles: Array<string>;
+        protectedRoles: Array<string>;
+        modLogChannel: string;
+        requireReason: boolean;
+        requireMuteTime: boolean;
+        deleteOnBan: boolean;
+        deleteCommand: boolean;
+        lastCase: number;
+        muteRole: string;
+        dmOnBan: boolean;
+        dmOnKick: boolean;
+        dmOnMute: boolean;
+        dmOnUnmute: boolean;
+        banLogChannel: string;
+        warnLogChannel: string;
+        muteLogChannel: string;
+        kickLogChannel: string;
+        protectWarns: boolean;
+        manageMuteRole: boolean;
+    };
+    starboard: {
+        starChannel: string;
+        ignoredChannels: Array<string>;
+        ignoredRoles: Array<string>;
+        selfStar: boolean;
+        customStar: string;
+        starCount: number;
+    };
+    logging: {
+        logChannel: string;
+        ghostReactTime: number;
+        ignoredChannels: Array<string>;
+        ignoredRoles: Array<string>;
+        specifyChannels: boolean;
+        newAccountAge: number;
+        showAvatar: boolean;
+        prevCasesOnJoin: boolean;
+        alwaysShowAge: boolean;
+        banAdd: LogEvent;
+        banRemove: LogEvent;
+        memberAdd: LogEvent;
+        memberRemove: LogEvent;
+        messageDelete: LogEvent;
+        messageEdit: LogEvent;
+        bulkDelete: LogEvent;
+        roleAdd: LogEvent;
+        roleUpdate: LogEvent;
+        roleDelete: LogEvent;
+        channelAdd: LogEvent;
+        channelUpdate: LogEvent;
+        channelDelete: LogEvent;
+        memberRoleAdd: LogEvent;
+        memberRoleUpdate: LogEvent;
+        memberRoleRemove: LogEvent;
+        memberNicknameChange: LogEvent;
+        voiceJoin: LogEvent;
+        voiceSwitch: LogEvent;
+        voiceLeave: LogEvent;
+        guildUpdate: LogEvent;
+        webhookUpdate: LogEvent;
+        ghostReact: LogEvent;
+        channelPermsUpdate: LogEvent
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        [index: string]: any
+    };
+    welcome: {
+        messageType: string;
+        content: string | Embed;
+        channel?: string;
+        dm: boolean;
+    };
+    goodbye: {
+        messageType: string;
+        content: string | Embed;
+        channel?: string;
+        dm: boolean;
+    };
+    reactionRoles: {
+        limitOne: boolean;
+        limitOnePerGroup: boolean;
+        rr: Map<string, ReactionRole>;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        rrGroups: any;
+        rrMessages: Map<string, string>
+    };
+    quotes: {
+        quoteLinks: boolean;
+        guildQuotes: Map<number, Quote>;
+    };
+    vtl: {
+        joinAnnouncements: boolean;
+        leaveAnnouncements: boolean;
+        links: {[key: string]: string}
+    };
+    levels: {
+        expRoles: {[key: number]: {role: string; global: boolean; exp: number}};
+        lvlRoles: {[key: number]: {role: string; global: boolean}; [key: string]: {role: string; global: boolean}};
+        lvlUpSetting: "none" | "current" | string;
+    };
+    suggestions: {
+        lastSuggestion: number;
+        suggestionChannel: string;
+        suggestions: {[key: number]: {
+            msg: string; 
+            status: "none" | "accepted" | "denied" | "considered" | "custom"; 
+            cStatus?: string; 
+            suggestor: string; 
+            description: string; 
+            reason?: string;
+            reviewer?: string;
+        }};
+        checkOtherSuggestions: boolean;
+        denyChannel: string;
+        approveChannel: string;
+        considerChannel: string;
+        anonReviews: boolean;
+        [key: string]: string | boolean | number | {[key: number]: {
+            msg: string; 
+            status: "none" | "accepted" | "denied" | "considered" | "custom"; 
+            cStatus?: string; 
+            suggestor: string; 
+            description: string; 
+            reason?: string;
+            reviewer?: string;
+        }} 
+    };
 }
 
 export interface CommandContext<T = Module<unknown>> {
@@ -458,36 +728,53 @@ export interface GlobalType {
     disabledModules: Array<string>;
     disabledLogEvents: Array<string>;
     globalCooldown: number;
+    exp: {
+        coeff: number;
+        offset: number;
+        div: number;
+        min: number;
+        max: number;
+        cooldown: number;
+    }
 }
 
 export interface modLogType {
     mid: string;
     user: string;
     guild: string;
-    mod: string;
+    moderator: string;
     caseNumber: number;
-    action: "ban" | "kick" | "softban" | "mute" | "unmute" | "unban" | "warn" | "persist" | "lock";
-    time: number;
-    length?: number;
+    moderationType: "ban" | "kick" | "softban" | "mute" | "unmute" | "unban" | "warn" | "persist" | "lock" | "unlock";
+    timeGiven: number;
+    duration?: number;
     logChannel?: string;
     logPost?: string;
     hidden?: boolean;
-    name: string;
+    name?: string;
     autoEnd: boolean;
     reason?: string;
+    stringLength?: string;
+    endTime?: number;
+    expired?: boolean;
+    auto: boolean;
+    role?: string;
+    removedRoles?: Array<string>;
+
 }
 
 export interface moderationType {
     mid: string;
     user: string;
     guild: string;
-    action: "ban" | "kick" | "softban" | "mute" | "unmute" | "unban" | "warn" | "persist" | "lock";
+    action: "ban" | "mute" | "persist" | "lock";
     roles?: Array<string>;
     start: number;
     end?: number;
     duration?: number;
     channels?: Array<string>;
     failCount?: number;
+    caseNum: number;
+    untimed: boolean;
 }
 
 export interface noteType {
@@ -497,4 +784,41 @@ export interface noteType {
     content: string;
     time: number;
     id: number;
+}
+
+export interface GuilduserType {
+    user: string;
+    guild: string;
+    level: number;
+    exp: number;
+    highlights: Array<string>
+}
+
+export interface UserType {
+    user: string;
+    rep: number;
+    repGiven: number;
+    money: number;
+    level: number;
+    exp: number;
+    lastRepTime: number;
+    lastDailyTime: number;
+    bio?: string;
+}
+
+interface CEmbed {
+    embed: Partial<Embed>;
+    randoms: Array<string>;
+    timestamp: boolean | number;
+}
+export interface EmbedType {
+    guild: string;
+    embeds: Map<string, CEmbed> | {[key: string]: CEmbed};
+    limit: number;
+}
+
+export interface StarType {
+    guild: string;
+    message: string;
+    starpost: string;
 }

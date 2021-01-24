@@ -1,7 +1,6 @@
 import Module from "../../Structures/Module";
 import hyperion from "../../main";
-import { Guild, Message } from "eris";
-import {inspect} from "util";
+import { Guild } from "eris";
 
 export default class Info extends Module<Record<string, never>> {
     constructor(Hyperion: hyperion){

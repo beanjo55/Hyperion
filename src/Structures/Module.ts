@@ -18,6 +18,7 @@ export default abstract class Module<T> {
     alwaysEnabled: boolean;
     defaultState: boolean;
     config?: (data: Partial<T>) => T;
+    save?: (data: Partial<T>) => T;
     configKeys?: Map<string, configKey>;
     constructor(data: Partial<Module<T>>, Hyperion: hyperion){
         if(!data.name || !data.path || !data.dir){throw new Error("Missing name or path");}
@@ -33,8 +34,10 @@ export default abstract class Module<T> {
         this.alwaysEnabled = data.alwaysEnabled ?? false;
         this.defaultState = data.defaultState ?? true;
         if(data.config){
+            if(!data.configKeys || !data.save){throw new Error("Config modules must specify configKeys and save");}
             this.config = data.config;
             this.configKeys = data.configKeys;
+            this.save = data.save;
         }
     }
 
@@ -46,6 +49,11 @@ export default abstract class Module<T> {
     updateConfig(newdata: Partial<T>, data: T): T{
         if(!this.config){throw new Error("Module has no config");}
         return this.config(this.Hyperion.utils.merge(data, newdata));
+    }
+
+    onSave(data: Partial<T>): T{
+        if(!this.save){throw new Error("Module has no save");}
+        return this.save(data);
     }
 
     get commandDir(): string {
@@ -103,7 +111,7 @@ export default abstract class Module<T> {
                         name: loaded.name,
                         alwaysEnabled: loaded.alwaysEnabled,
                         aliases: loaded.aliases,
-                        perms: loaded.perms,
+                        perms: loaded.perms ?? "none",
                         pro: loaded.pro,
                         private: loaded.private,
                         cooldown: loaded.cooldown
@@ -130,7 +138,12 @@ export default abstract class Module<T> {
         if(this.private && !config.dev){return false;}
         if(this.pro && !(config.dev || config.pro)){return false;}
         if(config.modules[this.name] !== undefined){
-            return config.modules[this.name];
+            if(typeof config.modules[this.name] === "object"){
+                config.modules[this.name] = (config.modules[this.name] as {enabled: boolean}).enabled;
+                this.Hyperion.manager.guild(config.guild).update(config);
+                return config.modules[this.name] as boolean;
+            }
+            return config.modules[this.name] as boolean;
         }
         return this.defaultState;
     }
@@ -142,7 +155,12 @@ export default abstract class Module<T> {
         if(this.private && !config.dev){return false;}
         if(this.pro && !(config.dev || config.pro)){return false;}
         if(config.modules[this.name] !== undefined){
-            return config.modules[this.name];
+            if(typeof config.modules[this.name] === "object"){
+                config.modules[this.name] = (config.modules[this.name] as {enabled: boolean}).enabled;
+                this.Hyperion.manager.guild(config.guild).update(config);
+                return config.modules[this.name] as boolean;
+            }
+            return config.modules[this.name] as boolean;
         }
         return this.defaultState;
     }

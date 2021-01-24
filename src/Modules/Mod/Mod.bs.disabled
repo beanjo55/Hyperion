@@ -1,0 +1,224 @@
+import Module, {configKey} from "../../Structures/Module";
+import hyperion, { moderationType, modLogType } from "../../main";
+import { Embed, Guild, User } from "eris";
+
+
+type actions = "ban" | "unban" | "kick" | "softban" | "mute" | "unmute" | "warn" | "lock" | "persist" | "unlock";
+
+interface actionOpts {
+    reason?: string
+}
+
+interface muteOpts extends actionOpts {
+    duration?: number;
+    roles?: Array<string>;
+}
+
+interface banOpts extends actionOpts {
+    duration?: number;
+}
+
+interface lockOpts extends actionOpts {
+    channels: Array<string>;
+    duration?: number;
+}
+
+interface persistOpts extends actionOpts {
+    roles: Array<string>;
+    duration?: number;
+    end?: true;
+}
+
+interface configType {
+    caseNumber: number;
+    modRoles: Array<string>;
+    protectedRoles: Array<string>;
+    muteRole: string;
+    manageMuteRole: boolean;
+    modLogChannel: string;
+    lockdownGroups: {[key: string]: Array<string>}
+    dmOnBan: boolean;
+    dmOnKick: boolean;
+    dmOnMute: boolean;
+    dmOnUmute: boolean;
+    banLogChannel: string;
+    kickLogChannel: string;
+    muteLogChannel: string;
+    warnLogChannel: string;
+    lockLogChannel: string;
+    persistLogChannel: string;
+    logPersists: boolean;
+    protectWarns: boolean;
+}
+
+const config = (data: Partial<configType>): configType => {
+    data.caseNumber ??= 0;
+    data.modRoles ??= [];
+    data.protectedRoles ??= [];
+    data.muteRole ??= "";
+    data.manageMuteRole ??= true;
+    data.modLogChannel ??= "";
+    data.lockdownGroups ??= {};
+    data.dmOnBan ??= false;
+    data.dmOnKick ??= false;
+    data.dmOnMute ??= false;
+    data.dmOnUmute ??= false;
+    data.banLogChannel ??= "";
+    data.kickLogChannel ??= "";
+    data.muteLogChannel ??= "";
+    data.warnLogChannel ??= "";
+    data.lockLogChannel ??= "";
+    data.persistLogChannel ??= "";
+    data.logPersists ??= true;
+    data.protectWarns ??= false;
+    return data as configType;
+};
+
+const save = (data: Partial<configType>): configType => {
+    const template = config({});
+    for(const key of Object.keys(data) as Array<keyof configType>){
+        if(data[key] === template[key] && key !== "caseNumber"){
+            delete data[key];
+        }
+    }
+    return data as configType;
+};
+
+export default class Mod extends Module<configType>{
+    sweepInterval!: NodeJS.Timeout;
+    constructor(Hyperion: hyperion){
+        const configKeys = new Map<string, configKey>();
+        super({
+            name: "mod",
+            dir: __dirname,
+            path: __dirname + "/Mod.js",
+            hasCommands: false,
+            alwaysEnabled: true,
+            subscribedEvents: [],
+            friendlyName: "Mod",
+            config,
+            configKeys,
+            save
+        }, Hyperion);
+    }
+
+    async onLoad(){
+        this.sweepInterval = setInterval(this.sweep.bind(this), 60000);
+        return true;
+    }
+
+    async onUnload(){
+        clearInterval(this.sweepInterval);
+        return true;
+    }
+
+    sweep(): void {
+        return;
+    }
+
+    async makeLog(user: User, guild: Guild, mod: User, action: "ban", options: banOpts): Promise<void>
+    async makeLog(user: User, guild: Guild, mod: User, action: "mute", options: muteOpts): Promise<void>
+    async makeLog(user: User, guild: Guild, mod: User, action: "lock" | "unlock", options: lockOpts): Promise<void>
+    async makeLog(user: User, guild: Guild, mod: User, action: "persist", options: persistOpts): Promise<void>
+    async makeLog(user: User, guild: Guild, mod: User, type: actions, options: actionOpts, auto = false): Promise<void> {
+        const config = await this.Hyperion.manager.guild(guild.id).get();
+        const caseNum = config.mod.caseNumber + 1;
+        try{
+            await this.Hyperion.manager.guild(guild.id).update({mod: this.updateConfig({caseNumber: caseNum}, config.mod)});
+        }catch(err){
+            throw new Error("mod.error.caseNumUpFail");
+        }
+        config.mod.caseNumber++;
+        const newcase: Partial<modLogType> = {
+            mid: `${guild.id}:${caseNum}`,
+            user: user.id,
+            guild: guild.id,
+            caseNumber: caseNum,
+            mod: mod.id,
+            name: user.friendlyName,
+            action: type,
+            autoEnd: auto,
+            time: Date.now()
+        };
+        if(options.reason){
+            newcase.reason = options.reason;
+        }
+        if(["ban", "mute", "lock", "persist"].includes(type) && (options as actionOpts & {duration?: number}).duration){
+            newcase.length = (options as actionOpts & {duration: number}).duration;
+        }
+
+        await this.Hyperion.manager.modlogs(newcase.mid!).create(newcase);
+        if(type === "mute" || type === "persist" || ((type === "ban" || type === "lock") && (options as actionOpts & {duration?: number}).duration)){
+            this.createModeration(newcase as modLogType, options);
+        }
+    }
+
+    async createModeration(data: modLogType, options: banOpts | muteOpts | lockOpts | persistOpts): Promise<void> {
+        if(!["persist", "mute"].includes(data.action) && !options.duration){return;}
+        const newmoderation: Partial<moderationType> = {
+            mid: data.mid,
+            user: data.user,
+            guild: data.guild,
+            action: (data.action as "ban" | "mute" | "persist" | "lock"),
+            start: data.time
+        };
+
+        switch (data.action){
+        case "ban": {
+            newmoderation.duration = options.duration!;
+            newmoderation.end = data.time + options.duration!;
+            break;
+        }
+        case "mute": {
+            if(options.duration){
+                newmoderation.duration = options.duration!;
+                newmoderation.roles = (options as muteOpts).roles;
+            }
+            break;
+        }
+        case "lock": {
+            if(options.duration){
+                newmoderation.duration = options.duration!;
+                newmoderation.end = data.time + options.duration!;
+            }
+            newmoderation.channels = (options as lockOpts).channels;
+            break;
+        }
+        case "persist": {
+            if(options.duration){
+                newmoderation.duration = options.duration!;
+                newmoderation.end = data.time + options.duration!;
+            }
+            newmoderation.roles = (options as persistOpts).roles;
+            break;
+        }
+        }
+        await this.Hyperion.manager.moderations(newmoderation.mid!).create(newmoderation);
+    }
+
+    makeEmbed(user: User, guild: Guild, mod: User, type: "ban", options: banOpts): Partial<Embed>
+    makeEmbed(user: User, guild: Guild, mod: User, type: "mute", options: muteOpts): Partial<Embed>
+    makeEmbed(user: User, guild: Guild, mod: User, type: "lock", options: lockOpts): Partial<Embed>
+    makeEmbed(user: User, guild: Guild, mod: User, type: "persist", options: persistOpts): Partial<Embed>
+    makeEmbed(user: User, guild: Guild, mod: User, type: actions, options: actionOpts): Partial<Embed> {
+        const data: Partial<Embed> = {
+
+        };
+        return data;
+    }
+
+}
+
+const actionInfo: {[K in actions]: "red" | "blue" | "green" | "orange" | "yellow"} = {
+    ban: "red",
+    unban: "green",
+    kick: "red",
+    softban: "red",
+    mute: "orange",
+    unmute: "green",
+    warn: "yellow",
+    lock: "red",
+    persist: "blue",
+    unlock: "green"
+    
+}

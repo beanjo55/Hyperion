@@ -8,7 +8,8 @@ export default class Test extends Command {
             name: "test",
             help: {detail: "test", usage: "test"},
             module: "dev",
-            aliases: ["wuper"]
+            aliases: ["wuper"],
+            specialPerms: "dev"
         }, Hyperion, path);
     }
 
