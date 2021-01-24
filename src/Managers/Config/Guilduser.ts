@@ -19,7 +19,7 @@ export default class GuilduserConfigManager extends BaseConfigManager<GuilduserT
     
     save(data: Partial<GuilduserType>): GuilduserType {
         data = this.format(data);
-        if(data.highlights === []){delete data.highlights;}
+        if(data.highlights!.length === 0){delete data.highlights;}
         if(!data.level){delete data.level;}
         if(!data.exp){delete data.exp;}
         return data as GuilduserType;

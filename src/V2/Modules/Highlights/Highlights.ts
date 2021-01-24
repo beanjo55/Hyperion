@@ -158,7 +158,7 @@ class Highlights extends Module{
     }
 
     async getUserHighlights(user: string, guild: string): Promise<Array<string>>{
-        if(!await this.Hyperion.managers.guilduser.raw().exists({guild: guild, user: user})){return ["No highlights set"];}
+        if(!(await this.Hyperion.managers.guilduser.raw().exists({guild: guild, user: user}))){return ["No highlights set"];}
         const data = await this.Hyperion.managers.guilduser.raw().findOne({guild: guild, user: user}).exec();
         let out = data?.highlights ?? ["No highlights set"];
         if(out.length === 0){out = ["No highlights set"];}
