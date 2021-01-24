@@ -9,8 +9,7 @@ export default class Build extends command {
             help: {detail: "test", usage: "test"},
             module: "dev",
             specialPerms: "dev",
-            aliases: ["update"],
-            hasSub: true
+            aliases: ["update"]
         }, Hyperion, path);
     }
 
