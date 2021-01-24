@@ -28,8 +28,8 @@ export default class GuildConfigManager extends BaseConfigManager<GuildType> {
             }
         });
         try{
-            this.validateModules(data as GuildType);
-            this.validateCommands(data as GuildType);
+            //this.validateModules(data as GuildType);
+            //this.validateCommands(data as GuildType);
         }catch(err){
             throw new Error("Validation Failed: " + err.message);
         }
