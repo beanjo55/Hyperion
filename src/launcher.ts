@@ -12,7 +12,8 @@ async function start(){
     const Harbringer = new Master(config.token, "/build/main.js", {
         clusters: 1,
         firstShardID: 0,
-        lastShardID: 0,
+        lastShardID: 1,
+        shards: 2,
         stats: true,
         webhooks: {
             cluster: {id: "730091355128332298", token: "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW"},
