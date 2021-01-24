@@ -10,10 +10,10 @@ const config = require("../config.json");
 async function start(){
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const Harbringer = new Master(config.token, "/build/main.js", {
-        clusters: 1,
+        clusters: config.clusterOptions.clusters,
         firstShardID: 0,
-        lastShardID: 1,
-        shards: 2,
+        lastShardID: config.clusterOptions.shards-1,
+        shards: config.clusterOptions.shards,
         stats: true,
         webhooks: {
             cluster: {id: "730091355128332298", token: "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW"},
