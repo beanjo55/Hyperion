@@ -259,7 +259,7 @@ export default class hyperion extends Base{
 
     async initMongo(): Promise<void>{
         const mongoOptions = config.mongoOptions;
-        mongoOptions.dbName = this.build + "3";
+        mongoOptions.dbName = this.build;
         
         mongoose.connection.on("error", () => this.logger.error("MongoDB", "Failed to connect to MongoDB", "Connection"));
         mongoose.connection.on("open", () => this.logger.success("MongoDB", "Connected to MongoDB", "Connection"));
