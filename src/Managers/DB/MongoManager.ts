@@ -106,8 +106,8 @@ NotesType = nt
         this.guildSchema = new Schema(guildBase, {autoIndex: true});
         this.guild = model<GuildType & Document>("guild", this.guildSchema);
         this.user = model<UserType & Document>("user", this.userSchema);
-        this.guilduser = model<GuilduserType & Document>("guilduser", this.guilduserSchema);
-        this.stars = model<StarsType & Document>("stars", this.starSchema);
+        this.guilduser = model<GuilduserType & Document>("guilduserdatas", this.guilduserSchema);
+        this.stars = model<StarsType & Document>("starreds", this.starSchema);
         this.modlogSchema.index({guild: 1, user: 1});
         this.modlogSchema.index({guild: 1, mod: 1});
         this.modlogSchema.index({guild: 1, caseNumber: 1});
