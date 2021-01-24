@@ -81,6 +81,10 @@ export default class CommandHandler extends Module<Record<string, never>> {
         const channel = msg.channel;
         if(!(channel.type === 5 || channel.type === 0)){return;}
         const guild = channel.guild;
+        if(!(guild as Guild & {fetched: true}).fetched){
+            (guild as Guild & {fetched: true}).fetched = true;
+            guild.fetchAllMembers().catch(() => undefined);
+        }
         if(this.Hyperion.global.userBlacklist.includes(msg.author.id)){return;}
         if(this.Hyperion.global.guildBlacklist.includes(guild.id)){return;}
         const config = await this.Hyperion.manager.guild(guild.id).getOrCreate();
@@ -304,7 +308,7 @@ export default class CommandHandler extends Module<Record<string, never>> {
                 const t = this.Hyperion.lang.getLang(data.config.lang).format;
                 const coolmsg = await data.channel.createMessage(t("slowDown", [data.member.friendlyName])).catch(() => undefined);
                 if(coolmsg){
-                    setTimeout(delCool.bind(coolmsg as Message<GuildTextableChannel>), 3000);
+                    setTimeout(delCool.bind(coolmsg as Message<GuildTextableChannel>), 5000);
                 }
             }
             return;
