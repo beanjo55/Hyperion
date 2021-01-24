@@ -20,7 +20,7 @@ export default {
     "supportHere": "Join the support server here",
     "docsHere": "Read the docs here",
     "helpFor": "Help for",
-    "slowdown": "Slow down {1}, you're doing that too fast!",
+    "slowDown": "Slow down {1}, you're doing that too fast!",
     
     
     //%config
