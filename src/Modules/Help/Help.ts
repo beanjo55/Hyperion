@@ -28,8 +28,8 @@ export default class Help extends Module<Record<string, never>> {
         const config = await this.Hyperion.manager.guild(guild.id).getOrCreate();
         const t = this.Hyperion.lang.getLang(config.lang).format;
         const opts: {pro?: boolean; dev?: boolean} = {};
-        if(config.pro){opts.pro = true;}
-        if(config.dev){opts.dev = true;}
+        if(config.pro === true){opts.pro = true;}
+        if(config.dev === true){opts.dev = true;}
 
         if(acks.dev && msg.content.startsWith(this.Hyperion.devPrefix)){
             if(msg.content.toLowerCase() === `${this.Hyperion.devPrefix}help`){
