@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import {Module, ConfigKey} from "../../Structures/Module";
-import { IModerationContext, ModConfig, IHyperion} from "../../types";
+import { IModerationContext, IHyperion} from "../../types";
 import { Guild, Member, Collection, User, Message, Role, Embed } from "eris";
 import { moderationType, modLogType } from "../../../main";
+import { ModConfig} from "../../Structures/MongoGuildManager";
 
 
 
@@ -365,9 +366,10 @@ class Mod extends Module{
 
     async checkMuteRole(guild: Guild): Promise<Role | string>{
         const data = await this.Hyperion.managers.guild.getConfig(guild.id);
+        data.mod = new ModConfig(data.mod ?? {});
         const id = (data?.mod as ModConfig)?.muteRole;
         if(!id){
-            if(data?.mod.manageMuteRole){
+            if(data?.mod?.manageMuteRole ?? true){
                 const newRole = await this.makeMuteRole(guild);
                 await this.Hyperion.managers.guild.updateModuleConfig(guild.id, this.name, {muteRole: newRole.id});
                 return newRole;
@@ -375,13 +377,13 @@ class Mod extends Module{
         }
         const role = guild.roles.get(id);
         if(!role){
-            if(data?.mod.manageMuteRole){
+            if(data?.mod?.manageMuteRole ?? true){
                 const newRole = await this.makeMuteRole(guild);
                 await this.Hyperion.managers.guild.updateModuleConfig(guild.id, this.name, {muteRole: newRole.id});
                 return newRole;
             }else{return "The set mute role was invalid, please set it again";}
         }
-        if(data?.mod.manageMuteRole){await this.updateMuteRole(guild, role.id);}
+        if(data?.mod?.manageMuteRole ?? true){await this.updateMuteRole(guild, role.id);}
         return role;
     }
 

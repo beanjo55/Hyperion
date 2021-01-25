@@ -162,7 +162,8 @@ export default class CommandHandler extends Module<Record<string, never>> {
         let commandSettings = data.config.commands[data.parent ? data.parent.name : data.command.name];
         commandSettings ??= {enabled: true, allowedRoles: [], allowedChannels: [], disabledRoles: [], disabledChannels: []};
         const isManager = data.member.permissions.has("manageGuild");
-        const isMod = this.Hyperion.utils.arrayShared(data.member.roles, data.config.mod?.modRoles ?? []);
+        let isMod = this.Hyperion.utils.arrayShared(data.member.roles, data.config.mod?.modRoles ?? []);
+        if(isManager){isMod = true;}
         const hasAllowedRole = this.Hyperion.utils.arrayShared(data.member.roles, commandSettings.allowedRoles);
         const hasDisabledRole = this.Hyperion.utils.arrayShared(data.member.roles, commandSettings.disabledRoles);
         const isDisabledChannel = commandSettings.disabledChannels.includes(data.channel.id);
@@ -180,7 +181,8 @@ export default class CommandHandler extends Module<Record<string, never>> {
                 return false;
             }
         } else {
-            if(data.command.perms && data.command.perms === "manager"){return false;}
+            if(data.command.perms && data.command.perms === "manager" && !isManager){return false;}
+            if(data.command.perms && data.command.perms === "mod" && !isMod){return false;}
         }
         return true;
     }
