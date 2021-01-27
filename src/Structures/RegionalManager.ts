@@ -37,11 +37,29 @@ export default class RegionalManager {
             return await this.createToAll<T>(role, id, data);
         }
         const results =  await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.update<T>(role, id, data)));
+        if(results[0].status === "rejected"){
+            this.Hyperion.logger.error("Hyperion", `Failed to update ${role} config, error: ${results[0].reason}`, "Database Update");
+            const err = new Error(results[0].reason);
+            this.Hyperion.sentry.captureException(err, {
+                tags: {db_role: role},
+                extra: {"Primary Key": id.length === 2 ? id.join(":") : id[0]}
+            });
+            throw err;
+        }
         return (results[0] as PromiseFulfilledResult<T>)?.value ?? {} as T;
     }
 
     async createToAll<T>(role: roles, id: Array<string>, data?: Partial<T>){
         const results = await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.create<T>(role, id, data)));
+        if(results[0].status === "rejected"){
+            this.Hyperion.logger.error("Hyperion", `Failed to create ${role} config, error: ${results[0].reason}`, "Database Create");
+            const err = new Error(results[0].reason);
+            this.Hyperion.sentry.captureException(err, {
+                tags: {db_role: role},
+                extra: {"Primary Key": id.length === 2 ? id.join(":") : id[0]}
+            });
+            throw err;
+        }
         return (results[0] as PromiseFulfilledResult<T>)?.value ?? {} as T;
     }
 
