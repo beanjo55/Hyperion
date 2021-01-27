@@ -52,6 +52,9 @@ export default class RegionalManager {
     async createToAll<T>(role: roles, id: Array<string>, data?: Partial<T>){
         const results = await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.create<T>(role, id, data)));
         if(results[0].status === "rejected"){
+            if(results[0].reason.message.startsWith("E11000")){
+                return await this.getPrimaryDb().get<T>(role, id);
+            }
             this.Hyperion.logger.error("Hyperion", `Failed to create ${role} config, error: ${results[0].reason}`, "Database Create");
             const err = new Error(results[0].reason);
             this.Hyperion.sentry.captureException(err, {

@@ -104,7 +104,7 @@ NotesType = nt
                 guildBase[mod.name] = {type: Object, default: mod.formatConfig({})};
             }
         });*/
-        this.guildSchema = new Schema(guildBase, {autoIndex: true});
+        this.guildSchema = new Schema(guildBase, {autoIndex: true, minimize: false});
         this.guild = model<GuildType & Document>("guild", this.guildSchema);
         this.user = model<UserType & Document>("user", this.userSchema);
         this.guilduser = model<GuilduserType & Document>("guilduserdatas", this.guilduserSchema);
@@ -134,13 +134,11 @@ NotesType = nt
                 (data as any).user = pKey[1];
             }
         }
-        try{
-            //@ts-ignore
-            const created = await this[role].create(data);
-            return created as unknown as T;
-        }catch(err){
-            throw new Error("Failed to create new " + role + " Primary key: " + pKey);
-        }
+        
+        //@ts-ignore
+        const created = await this[role].create(data);
+        return created as unknown as T;
+        
     }
 
     async get<T>(role: roles, pKey: Array<string>): Promise<T>{
@@ -156,7 +154,7 @@ NotesType = nt
             const created = await this[role].findOne(data as any).lean<T>().exec();
             return created as unknown as T;
         }catch(err){
-            throw new Error("Failed to create new " + role + " Primary key: " + pKey);
+            throw new Error("Failed to update " + role + " Primary key: " + pKey);
         }
     }
 
