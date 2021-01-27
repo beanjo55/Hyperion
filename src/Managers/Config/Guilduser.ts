@@ -10,7 +10,12 @@ export default class GuilduserConfigManager extends BaseConfigManager<GuilduserT
 
     format(data: Partial<GuilduserType>): GuilduserType {
         if(data === null){return null as unknown as  GuilduserType;}
-        if(data.guild === undefined || data.user === undefined){throw new Error("Guilduser must supply guild and user properties");}
+        if(!data.user){
+            throw new Error("Guilduser user must be supplied");
+        }
+        if(!data.guild){
+            throw new Error("Guilduser guild must be supplied");
+        }
         data.level ??= 0;
         data.exp ??= 0;
         data.highlights ??= [];
