@@ -1,5 +1,6 @@
 import Module, { configKey } from "../../Structures/Module";
 import hyperion from "../../main";
+import { Guild } from "eris";
 interface devConfig {sally: number; friends: Array<string>}
 
 const keys: {[key: string]: configKey} = {
@@ -37,6 +38,7 @@ export default class Dev extends Module<devConfig> {
             path: __dirname + "/Dev.js",
             hasCommands: true,
             config,
+            subscribedEvents: ["guildCreate", "guildDelete"],
             save: (data: Partial<devConfig>): devConfig => {
                 const template = config({});
                 for(const key of Object.keys(data) as Array<keyof devConfig>){
@@ -53,5 +55,41 @@ export default class Dev extends Module<devConfig> {
 
     async onLoad(){
         return true;
+    }
+
+    async guildCreate(...args: [Guild]): Promise<void> {
+        const guild = args[0];
+        const exists = await this.Hyperion.manager.guild(guild.id).exists();
+        if(!exists){
+            this.Hyperion.manager.guild(guild.id).create();
+        }else{
+            this.Hyperion.manager.guild(guild.id).update({deleted: false});
+        }
+        this.Hyperion.client.editStatus(undefined, {name: `%help | ${this.Hyperion.client.guilds.size} servers`, type: 0});
+        this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
+            embeds: [
+                {
+                    color: this.Hyperion.colors.default,
+                    timestamp: new Date,
+                    title: `Joined ${guild.name} - ${this.Hyperion.client.guilds.size} Guilds`,
+                    description: `ID: ${guild.id}\nSize: ${guild.memberCount}\nShard: ${guild.shard.id}`
+                }
+            ]
+        });
+    }
+
+    async guildDelete(...args: [Guild]): Promise<void> {
+        const guild = args[0];
+        this.Hyperion.manager.guild(guild.id).update({deleted: true, deletedAt: Date.now()});
+        this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
+            embeds: [
+                {
+                    color: this.Hyperion.colors.default,
+                    timestamp: new Date,
+                    title: `Left ${guild.name} - ${this.Hyperion.client.guilds.size} Guilds`,
+                    description: `ID: ${guild.id}\nSize: ${guild.memberCount}\nShard: ${guild.shard.id}`
+                }
+            ]
+        });
     }
 }
