@@ -52,7 +52,8 @@ export const sallys = [
     "https://cdn.discordapp.com/attachments/225182513465786369/764322144321536070/image0.jpg",
     "https://cdn.discordapp.com/attachments/513025490760630272/763745447960641536/image0.jpg",
     "https://cdn.discordapp.com/attachments/513025490760630272/763745448611545118/image1.jpg",
-    "https://cdn.discordapp.com/attachments/513025490760630272/763745449084715048/image2.jpg"
+    "https://cdn.discordapp.com/attachments/513025490760630272/763745449084715048/image2.jpg",
+    "https://cdn.discordapp.com/attachments/513025490760630272/803667039188418669/image0.jpg"
 ];
 
 export default class Sally extends Command {
