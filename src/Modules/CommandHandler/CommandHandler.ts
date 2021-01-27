@@ -137,7 +137,7 @@ export default class CommandHandler extends Module<Record<string, never>> {
     }
 
     async enabled(data: identifyResult): Promise<boolean> {
-        const modEnabled = await data.module.guildCommandEnabled(data.config, data.admin);
+        const modEnabled = await data.module.guildCommandEnabled(data.config, data.acks.dev || data.admin);
         if(!modEnabled){return false;}
         if(this.Hyperion.global.disabledCommands.includes(data.parent ? data.parent.name : data.command.name) && !(data.admin || data.dev)){return false;}
         if(data.parent){
