@@ -424,7 +424,7 @@ export default class hyperion extends Base{
     }
 
     loadV2Mods(): void{
-        const modlist = ["CommandHandler", "Info", "Fun", "Starboard", "Social", "Manager", "Logging", "Mod", "Embeds", "Welcome", "Goodbye", "Quotes", "Highlights", "Reactionroles", "Levels", "VTL", "Suggestions"];
+        const modlist = ["CommandHandler", "Info", "Fun", "Social", "Manager", "Logging", "Mod", "Embeds", "Welcome", "Goodbye", "Quotes", "Highlights", "Reactionroles", "Levels", "VTL", "Suggestions"];
         modlist.forEach(mod =>{
             this.loadV2Mod(mod);
         });
