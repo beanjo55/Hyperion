@@ -98,11 +98,12 @@ NotesType = nt
     }
 
     generateGuildSchema(){
+        /*
         this.Hyperion.modules.forEach(mod => {
             if(mod.config){
                 guildBase[mod.name] = {type: Object, default: mod.formatConfig({})};
             }
-        });
+        });*/
         this.guildSchema = new Schema(guildBase, {autoIndex: true});
         this.guild = model<GuildType & Document>("guild", this.guildSchema);
         this.user = model<UserType & Document>("user", this.userSchema);
