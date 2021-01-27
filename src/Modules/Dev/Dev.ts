@@ -28,27 +28,19 @@ const config = (data: Partial<devConfig>): devConfig => {
     out.sally = data.sally ?? 3;
     return out as devConfig;
 };
-export default class Dev extends Module<devConfig> {
+
+export default class Dev extends Module<Record<string, never>> {
+    guildJoinEvent: {[key: string]: 1} = {};
+    guildLeaveEvent: {[key: string]: 1} = {};
     constructor(Hyperion: hyperion){
-        const configKeys = new Map<string, configKey>(Object.entries(keys));
+        //const configKeys = new Map<string, configKey>(Object.entries(keys));
 
         super({
             name: "dev",
             dir: __dirname,
             path: __dirname + "/Dev.js",
             hasCommands: true,
-            config,
             subscribedEvents: ["guildCreate", "guildDelete"],
-            save: (data: Partial<devConfig>): devConfig => {
-                const template = config({});
-                for(const key of Object.keys(data) as Array<keyof devConfig>){
-                    if(data[key] === template[key]){
-                        delete data[key];
-                    }
-                }
-                return data as devConfig;
-            },
-            configKeys,
             private: true
         }, Hyperion);
     }
@@ -59,37 +51,51 @@ export default class Dev extends Module<devConfig> {
 
     async guildCreate(...args: [Guild]): Promise<void> {
         const guild = args[0];
-        const exists = await this.Hyperion.manager.guild(guild.id).exists();
-        if(!exists){
-            this.Hyperion.manager.guild(guild.id).create();
-        }else{
-            this.Hyperion.manager.guild(guild.id).update({deleted: false});
+        if(this.guildJoinEvent[guild.id] !== 1){
+            this.guildJoinEvent[guild.id] = 1;
+            const clear = () => {
+                delete this.guildJoinEvent[guild.id];
+            };
+            setTimeout(clear.bind(this), 1000);
+            const exists = await this.Hyperion.manager.guild(guild.id).exists();
+            if(!exists){
+                this.Hyperion.manager.guild(guild.id).create();
+            }else{
+                this.Hyperion.manager.guild(guild.id).update({deleted: false});
+            }
+            this.Hyperion.client.editStatus(undefined, {name: `%help | ${this.Hyperion.client.guilds.size} servers`, type: 0});
+            this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
+                embeds: [
+                    {
+                        color: this.Hyperion.colors.default,
+                        timestamp: new Date,
+                        title: `Joined ${guild.name} - ${this.Hyperion.client.guilds.size} Guilds`,
+                        description: `ID: ${guild.id}\nSize: ${guild.memberCount}\nShard: ${guild.shard.id}`
+                    }
+                ]
+            });
         }
-        this.Hyperion.client.editStatus(undefined, {name: `%help | ${this.Hyperion.client.guilds.size} servers`, type: 0});
-        this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
-            embeds: [
-                {
-                    color: this.Hyperion.colors.default,
-                    timestamp: new Date,
-                    title: `Joined ${guild.name} - ${this.Hyperion.client.guilds.size} Guilds`,
-                    description: `ID: ${guild.id}\nSize: ${guild.memberCount}\nShard: ${guild.shard.id}`
-                }
-            ]
-        });
     }
 
     async guildDelete(...args: [Guild]): Promise<void> {
         const guild = args[0];
-        this.Hyperion.manager.guild(guild.id).update({deleted: true, deletedAt: Date.now()});
-        this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
-            embeds: [
-                {
-                    color: this.Hyperion.colors.default,
-                    timestamp: new Date,
-                    title: `Left ${guild.name} - ${this.Hyperion.client.guilds.size} Guilds`,
-                    description: `ID: ${guild.id}\nSize: ${guild.memberCount}\nShard: ${guild.shard.id}`
-                }
-            ]
-        });
+        if(this.guildLeaveEvent[guild.id] !== 1){
+            this.guildLeaveEvent[guild.id] = 1;
+            const clear = () => {
+                delete this.guildLeaveEvent[guild.id];
+            };
+            setTimeout(clear.bind(this), 1000);
+            this.Hyperion.manager.guild(guild.id).update({deleted: true, deletedAt: Date.now()});
+            this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
+                embeds: [
+                    {
+                        color: this.Hyperion.colors.default,
+                        timestamp: new Date,
+                        title: `Left ${guild.name} - ${this.Hyperion.client.guilds.size} Guilds`,
+                        description: `ID: ${guild.id}\nSize: ${guild.memberCount}\nShard: ${guild.shard.id}`
+                    }
+                ]
+            });
+        }
     }
 }
