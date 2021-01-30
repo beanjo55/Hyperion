@@ -189,17 +189,14 @@ NotesType = nt
             query.guild = pKey[0],
             query.user = pKey[1];
         }
-        try{
-            // @ts-ignore
-            await this[role].updateOne(query as any, data as any).exec();
-        }catch(err){
-            this.Hyperion.logger.error("Hyperion", `DB Update Failed, err: ${err.message}`);
-            this.Hyperion.sentry.captureException(err);
+        if(role === "guild"){
+            (data as Partial<gt>).updatedAt = Date.now();
         }
         try{
-            return await this.get<T>(role, pKey);
+            // @ts-ignore
+            return await this[role].findOneAndUpdate(query as any, data as any, {new: true, upsert: true, lean: true}).exec();
         }catch(err){
-            this.Hyperion.logger.error("Hyperion", `DB Pst-Update Get Failed, err: ${err.message}`);
+            this.Hyperion.logger.error("Hyperion", `DB Update Failed, err: ${err.message}`);
             this.Hyperion.sentry.captureException(err);
             return {} as unknown as T;
         }
