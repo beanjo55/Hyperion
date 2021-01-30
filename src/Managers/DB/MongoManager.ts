@@ -136,7 +136,7 @@ NotesType = nt
         }
         
         //@ts-ignore
-        const created = await this[role].create(data);
+        const created = await new this[role](data).save({w: 1, j: true});
         return created as unknown as T;
         
     }

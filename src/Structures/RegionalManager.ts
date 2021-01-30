@@ -86,27 +86,7 @@ export default class RegionalManager {
             }
             break;
         }
-        case "getOrCreate": {
-            if(cache){
-                await this.Hyperion.redis.expire(`ConfigCache:${toProcess.pKey[0]}`, 15 * 60);
-                toProcess.res(cache);
-            }
-            try{
-                const exists = await db.exists("guild", toProcess.pKey);
-                if(exists){
-                    const result = await db.get<GuildType>("guild", toProcess.pKey);
-                    await this.Hyperion.redis.set(`ConfigCache:${toProcess.pKey[0]}`, JSON.stringify(result), "EX", 15 * 60);
-                    toProcess.res(result);
-                }else{
-                    const result = await this._createToAll<GuildType>("guild", toProcess.pKey);
-                    await this.Hyperion.redis.set(`ConfigCache:${toProcess.pKey[0]}`, JSON.stringify(result), "EX", 15 * 60);
-                    toProcess.res(result);
-                }
-            }catch(e){
-                toProcess.rej(e);
-            }
-            break;
-        }
+        case "getOrCreate":
         case "create": {
             if(cache){
                 await this.Hyperion.redis.expire(`ConfigCache:${toProcess.pKey[0]}`, 15 * 60);
@@ -154,21 +134,7 @@ export default class RegionalManager {
             }
             break;
         }
-        case "getOrCreate": {
-            try{
-                const exists = await db.exists("user", toProcess.pKey);
-                if(exists){
-                    const result = await db.get<UserType>("user", toProcess.pKey);
-                    toProcess.res(result);
-                }else{
-                    const result = await this._createToAll<UserType>("user", toProcess.pKey);
-                    toProcess.res(result);
-                }
-            }catch(e){
-                toProcess.rej(e);
-            }
-            break;
-        }
+        case "getOrCreate":
         case "create": {
             try{
                 const exists = await db.exists("user", toProcess.pKey);
@@ -209,21 +175,7 @@ export default class RegionalManager {
             }
             break;
         }
-        case "getOrCreate": {
-            try{
-                const exists = await db.exists("guilduser", toProcess.pKey);
-                if(exists){
-                    const result = await db.get<GuilduserType>("guilduser", toProcess.pKey);
-                    toProcess.res(result);
-                }else{
-                    const result = await this._createToAll<GuilduserType>("guilduser", toProcess.pKey);
-                    toProcess.res(result);
-                }
-            }catch(e){
-                toProcess.rej(e);
-            }
-            break;
-        }
+        case "getOrCreate":
         case "create": {
             try{
                 const exists = await db.exists("guilduser", toProcess.pKey);
@@ -264,21 +216,7 @@ export default class RegionalManager {
             }
             break;
         }
-        case "getOrCreate": {
-            try{
-                const exists = await db.exists("embeds", toProcess.pKey);
-                if(exists){
-                    const result = await db.get<EmbedType>("embeds", toProcess.pKey);
-                    toProcess.res(result);
-                }else{
-                    const result = await this._createToAll<EmbedType>("embeds", toProcess.pKey);
-                    toProcess.res(result);
-                }
-            }catch(e){
-                toProcess.rej(e);
-            }
-            break;
-        }
+        case "getOrCreate":
         case "create": {
             try{
                 const exists = await db.exists("embeds", toProcess.pKey);
@@ -319,21 +257,7 @@ export default class RegionalManager {
             }
             break;
         }
-        case "getOrCreate": {
-            try{
-                const exists = await db.exists("stars", toProcess.pKey);
-                if(exists){
-                    const result = await db.get<StarType>("stars", toProcess.pKey);
-                    toProcess.res(result);
-                }else{
-                    const result = await this._createToAll<StarType>("stars", toProcess.pKey);
-                    toProcess.res(result);
-                }
-            }catch(e){
-                toProcess.rej(e);
-            }
-            break;
-        }
+        case "getOrCreate":
         case "create": {
             try{
                 const exists = await db.exists("stars", toProcess.pKey);
@@ -374,21 +298,7 @@ export default class RegionalManager {
             }
             break;
         }
-        case "getOrCreate": {
-            try{
-                const exists = await db.exists("modlogs", toProcess.pKey);
-                if(exists){
-                    const result = await db.get<modLogType>("modlogs", toProcess.pKey);
-                    toProcess.res(result);
-                }else{
-                    const result = await this._createToAll<modLogType>("modlogs", toProcess.pKey);
-                    toProcess.res(result);
-                }
-            }catch(e){
-                toProcess.rej(e);
-            }
-            break;
-        }
+        case "getOrCreate":
         case "create": {
             try{
                 const exists = await db.exists("modlogs", toProcess.pKey);
@@ -429,21 +339,7 @@ export default class RegionalManager {
             }
             break;
         }
-        case "getOrCreate": {
-            try{
-                const exists = await db.exists("moderations", toProcess.pKey);
-                if(exists){
-                    const result = await db.get<moderationType>("moderations", toProcess.pKey);
-                    toProcess.res(result);
-                }else{
-                    const result = await this._createToAll<moderationType>("moderations", toProcess.pKey);
-                    toProcess.res(result);
-                }
-            }catch(e){
-                toProcess.rej(e);
-            }
-            break;
-        }
+        case "getOrCreate":
         case "create": {
             try{
                 const exists = await db.exists("moderations", toProcess.pKey);
@@ -484,21 +380,7 @@ export default class RegionalManager {
             }
             break;
         }
-        case "getOrCreate": {
-            try{
-                const exists = await db.exists("notes", toProcess.pKey);
-                if(exists){
-                    const result = await db.get<noteType>("notes", toProcess.pKey);
-                    toProcess.res(result);
-                }else{
-                    const result = await this._createToAll<noteType>("notes", toProcess.pKey);
-                    toProcess.res(result);
-                }
-            }catch(e){
-                toProcess.rej(e);
-            }
-            break;
-        }
+        case "getOrCreate":
         case "create": {
             try{
                 const exists = await db.exists("notes", toProcess.pKey);
@@ -560,16 +442,22 @@ export default class RegionalManager {
             });
             throw err;
         }
-        return (results[0] as PromiseFulfilledResult<T>)?.value ?? {} as T;
+        const fallback = {} as Partial<T>;
+        if(role === "guilduser"){
+            (fallback as Partial<GuilduserType>).guild = id[0];
+            (fallback as Partial<GuilduserType>).user = id[1];
+        }else{
+            (fallback as any)[rolePKey[role]] = id[0];
+        }
+        return (results[0] as PromiseFulfilledResult<T>)?.value ?? fallback as T;
     }
 
     async _createToAll<T>(role: roles, id: Array<string>, data?: Partial<T>){
         const results = await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.create<T>(role, id, data)));
         if(results[0].status === "rejected"){
-            /*
             if(results[0].reason.message.startsWith("E11000")){
                 return await this._getPrimaryDb().get<T>(role, id);
-            }*/
+            }
             this.Hyperion.logger.error("Hyperion", `Failed to create ${role} config, error: ${results[0].reason}`, "Database Create");
             const err = new Error(results[0].reason);
             this.Hyperion.sentry.captureException(err, {
@@ -578,7 +466,14 @@ export default class RegionalManager {
             });
             throw err;
         }
-        return (results[0] as PromiseFulfilledResult<T>)?.value ?? {} as T;
+        const fallback = {} as Partial<T>;
+        if(role === "guilduser"){
+            (fallback as Partial<GuilduserType>).guild = id[0];
+            (fallback as Partial<GuilduserType>).user = id[1];
+        }else{
+            (fallback as any)[rolePKey[role]] = id[0];
+        }
+        return (results[0] as PromiseFulfilledResult<T>)?.value ?? fallback as T;
     }
 
     async _deleteToAll(role: roles, id: Array<string>){
