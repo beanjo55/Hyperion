@@ -113,14 +113,16 @@ export default class RegionalManager {
                 toProcess.res(cache);
             }
             try{
-                let result: GuildType;
-                if(toProcess.data){
-                    result = await this._createToAll("guild", toProcess.pKey, toProcess.data);
+                const exists = await db.exists("guild", toProcess.pKey);
+                if(exists){
+                    const result = await db.get<GuildType>("guild", toProcess.pKey);
+                    await this.Hyperion.redis.set(`ConfigCache:${toProcess.pKey[0]}`, JSON.stringify(result), "EX", 15 * 60);
+                    toProcess.res(result);
                 }else{
-                    result = await this._createToAll("guild", toProcess.pKey);
+                    const result = await this._createToAll<GuildType>("guild", toProcess.pKey);
+                    await this.Hyperion.redis.set(`ConfigCache:${toProcess.pKey[0]}`, JSON.stringify(result), "EX", 15 * 60);
+                    toProcess.res(result);
                 }
-                await this.Hyperion.redis.set(`ConfigCache:${toProcess.pKey[0]}`, JSON.stringify(result), "EX", 15 * 60);
-                toProcess.res(result);
             }catch(e){
                 toProcess.rej(e);
             }
@@ -169,13 +171,14 @@ export default class RegionalManager {
         }
         case "create": {
             try{
-                let result: UserType;
-                if(toProcess.data){
-                    result = await this._createToAll("user", toProcess.pKey, toProcess.data);
+                const exists = await db.exists("user", toProcess.pKey);
+                if(exists){
+                    const result = await db.get<UserType>("user", toProcess.pKey);
+                    toProcess.res(result);
                 }else{
-                    result = await this._createToAll("user", toProcess.pKey);
+                    const result = await this._createToAll<UserType>("user", toProcess.pKey);
+                    toProcess.res(result);
                 }
-                toProcess.res(result);
             }catch(e){
                 toProcess.rej(e);
             }
@@ -223,13 +226,14 @@ export default class RegionalManager {
         }
         case "create": {
             try{
-                let result: GuilduserType;
-                if(toProcess.data){
-                    result = await this._createToAll("guilduser", toProcess.pKey, toProcess.data);
+                const exists = await db.exists("guilduser", toProcess.pKey);
+                if(exists){
+                    const result = await db.get<GuilduserType>("guilduser", toProcess.pKey);
+                    toProcess.res(result);
                 }else{
-                    result = await this._createToAll("guilduser", toProcess.pKey);
+                    const result = await this._createToAll<GuilduserType>("guilduser", toProcess.pKey);
+                    toProcess.res(result);
                 }
-                toProcess.res(result);
             }catch(e){
                 toProcess.rej(e);
             }
@@ -277,13 +281,14 @@ export default class RegionalManager {
         }
         case "create": {
             try{
-                let result: EmbedType;
-                if(toProcess.data){
-                    result = await this._createToAll("embeds", toProcess.pKey, toProcess.data);
+                const exists = await db.exists("embeds", toProcess.pKey);
+                if(exists){
+                    const result = await db.get<EmbedType>("embeds", toProcess.pKey);
+                    toProcess.res(result);
                 }else{
-                    result = await this._createToAll("embeds", toProcess.pKey);
+                    const result = await this._createToAll<EmbedType>("embeds", toProcess.pKey);
+                    toProcess.res(result);
                 }
-                toProcess.res(result);
             }catch(e){
                 toProcess.rej(e);
             }
@@ -331,13 +336,14 @@ export default class RegionalManager {
         }
         case "create": {
             try{
-                let result: StarType;
-                if(toProcess.data){
-                    result = await this._createToAll("stars", toProcess.pKey, toProcess.data);
+                const exists = await db.exists("stars", toProcess.pKey);
+                if(exists){
+                    const result = await db.get<StarType>("stars", toProcess.pKey);
+                    toProcess.res(result);
                 }else{
-                    result = await this._createToAll("stars", toProcess.pKey);
+                    const result = await this._createToAll<StarType>("stars", toProcess.pKey);
+                    toProcess.res(result);
                 }
-                toProcess.res(result);
             }catch(e){
                 toProcess.rej(e);
             }
@@ -385,13 +391,14 @@ export default class RegionalManager {
         }
         case "create": {
             try{
-                let result: modLogType;
-                if(toProcess.data){
-                    result = await this._createToAll("modlogs", toProcess.pKey, toProcess.data);
+                const exists = await db.exists("modlogs", toProcess.pKey);
+                if(exists){
+                    const result = await db.get<modLogType>("modlogs", toProcess.pKey);
+                    toProcess.res(result);
                 }else{
-                    result = await this._createToAll("modlogs", toProcess.pKey);
+                    const result = await this._createToAll<modLogType>("modlogs", toProcess.pKey);
+                    toProcess.res(result);
                 }
-                toProcess.res(result);
             }catch(e){
                 toProcess.rej(e);
             }
@@ -439,13 +446,14 @@ export default class RegionalManager {
         }
         case "create": {
             try{
-                let result: moderationType;
-                if(toProcess.data){
-                    result = await this._createToAll("moderations", toProcess.pKey, toProcess.data);
+                const exists = await db.exists("moderations", toProcess.pKey);
+                if(exists){
+                    const result = await db.get<moderationType>("moderations", toProcess.pKey);
+                    toProcess.res(result);
                 }else{
-                    result = await this._createToAll("moderations", toProcess.pKey);
+                    const result = await this._createToAll<moderationType>("moderations", toProcess.pKey);
+                    toProcess.res(result);
                 }
-                toProcess.res(result);
             }catch(e){
                 toProcess.rej(e);
             }
@@ -493,13 +501,14 @@ export default class RegionalManager {
         }
         case "create": {
             try{
-                let result: noteType;
-                if(toProcess.data){
-                    result = await this._createToAll("notes", toProcess.pKey, toProcess.data);
+                const exists = await db.exists("notes", toProcess.pKey);
+                if(exists){
+                    const result = await db.get<noteType>("notes", toProcess.pKey);
+                    toProcess.res(result);
                 }else{
-                    result = await this._createToAll("notes", toProcess.pKey);
+                    const result = await this._createToAll<noteType>("notes", toProcess.pKey);
+                    toProcess.res(result);
                 }
-                toProcess.res(result);
             }catch(e){
                 toProcess.rej(e);
             }
