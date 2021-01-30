@@ -52,16 +52,20 @@ export default class RegionalManager {
     }
 
     async _processQueues(): Promise<void> {
+        const promises = [];
         for(const key of Object.keys(this.queues) as Array<keyof typeof rolePKey>){
             if(this.queues[key].length === 0){continue;}
-            if(key === "guild"){this._gqh();}
-            if(key === "user"){this._uqh();}
-            if(key === "guilduser"){this._guqh();}
-            if(key === "embeds"){this._eqh();}
-            if(key === "stars"){this._sqh();}
-            if(key === "modlogs"){this._mlqh();}
-            if(key === "moderations"){this._mqh();}
-            if(key === "notes"){this._nqh();}
+            if(key === "guild"){promises.push(this._gqh());}
+            if(key === "user"){promises.push(this._uqh());}
+            if(key === "guilduser"){promises.push(this._guqh());}
+            if(key === "embeds"){promises.push(this._eqh());}
+            if(key === "stars"){promises.push(this._sqh());}
+            if(key === "modlogs"){promises.push(this._mlqh());}
+            if(key === "moderations"){promises.push(this._mqh());}
+            if(key === "notes"){promises.push(this._nqh());}
+        }
+        if(promises.length !== 0){
+            await Promise.allSettled(promises);
         }
         setImmediate(this._processQueues.bind(this));
     }
@@ -119,6 +123,7 @@ export default class RegionalManager {
             break;
         }
         }
+        return;
     }
 
     async _uqh(): Promise<void> {
@@ -160,6 +165,7 @@ export default class RegionalManager {
             break;
         }
         }
+        return;
     }
 
     async _guqh(): Promise<void> {
@@ -201,6 +207,7 @@ export default class RegionalManager {
             break;
         }
         }
+        return;
     }
 
     async _eqh(): Promise<void> {
@@ -242,6 +249,7 @@ export default class RegionalManager {
             break;
         }
         }
+        return;
     }
 
     async _sqh(): Promise<void> {
@@ -283,6 +291,7 @@ export default class RegionalManager {
             break;
         }
         }
+        return;
     }
 
     async _mlqh(): Promise<void> {
@@ -324,6 +333,7 @@ export default class RegionalManager {
             break;
         }
         }
+        return;
     }
 
     async _mqh(): Promise<void> {
@@ -365,6 +375,7 @@ export default class RegionalManager {
             break;
         }
         }
+        return;
     }
 
     async _nqh(): Promise<void> {
@@ -406,6 +417,7 @@ export default class RegionalManager {
             break;
         }
         }
+        return;
     }
 
     enqueue<T>(role: roles, pKey: Array<string>, op: "get" | "getOrCreate" | "create" | "update", data?: Partial<T>): Promise<T> {
@@ -455,9 +467,9 @@ export default class RegionalManager {
     async _createToAll<T>(role: roles, id: Array<string>, data?: Partial<T>){
         const results = await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.create<T>(role, id, data)));
         if(results[0].status === "rejected"){
-            if(results[0].reason.message.startsWith("E11000")){
+            /*if(results[0].reason.message.startsWith("E11000")){
                 return await this._getPrimaryDb().get<T>(role, id);
-            }
+            }*/
             this.Hyperion.logger.error("Hyperion", `Failed to create ${role} config, error: ${results[0].reason}`, "Database Create");
             const err = new Error(results[0].reason);
             this.Hyperion.sentry.captureException(err, {
