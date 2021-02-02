@@ -134,9 +134,17 @@ NotesType = nt
                 (data as any).user = pKey[1];
             }
         }
+
+        const query = {};
+        if(role !== "guilduser"){
+            (query as any)[rolePKey[role]] = pKey[0];
+        }else{
+            (query as any).guild = pKey[0],
+            (query as any).user = pKey[1];
+        }
         
         //@ts-ignore
-        const created = await new this[role](data).save({w: 1, j: true});
+        const created = await this[role].findOneAndUpdate(query, data, {upsert: true, new: true}).exec();
         return created as unknown as T;
         
     }
