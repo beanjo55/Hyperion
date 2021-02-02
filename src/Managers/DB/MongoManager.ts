@@ -125,6 +125,16 @@ NotesType = nt
         this.notes = model<NotesType & Document>("notes", this.notesSchema);
     }
 
+    clean<T>(data: Partial<T>): T {
+        delete (data as any).$__;
+        delete (data as any).isNew;
+        delete (data as any)["$locals"];
+        delete (data as any)["$op"];
+        delete (data as any)._doc;
+        delete (data as any)["$init"];
+        return data as T;
+    }
+
     async create<T>(role: roles, pKey: Array<string>, data?: Partial<T>): Promise<T>{
         if(!data){
             data = {};
@@ -145,7 +155,7 @@ NotesType = nt
         }
         
         //@ts-ignore
-        const created = await this[role].findOneAndUpdate(query, data, {upsert: true, new: true}).exec();
+        const created = await this[role].findOneAndUpdate(query, this.clean<T>(data), {upsert: true, new: true, lean: true}).exec();
         return created as unknown as T;
         
     }
@@ -203,7 +213,7 @@ NotesType = nt
         }
         try{
             // @ts-ignore
-            return await this[role].findOneAndUpdate(query as any, data as any, {new: true, upsert: true, lean: true}).exec();
+            return await this[role].findOneAndUpdate(query as any, this.clean<T>(data as any), {new: true, upsert: true, lean: true}).exec();
         }catch(err){
             this.Hyperion.logger.error("Hyperion", `DB Update Failed, err: ${err.message}`);
             this.Hyperion.logger.error("Hyperion", `DB Update Failed, payload: ${inspect(data)}`);
