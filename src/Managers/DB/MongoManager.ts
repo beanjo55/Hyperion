@@ -3,6 +3,7 @@
 import BaseDBManager from "../../Structures/BaseDBManager";
 import hyperion, {roles, GuildType as gt, moderationType as mt, modLogType as mlt, noteType as nt} from "../../main";
 import {Schema, model, Model, Document} from "mongoose";
+import {inspect} from "util";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 const guildBase: {[key: string]: {type: String | Object | Number | Boolean | Array<never>; unique?: boolean; index?: boolean; default?: unknown}} = {
@@ -205,6 +206,7 @@ NotesType = nt
             return await this[role].findOneAndUpdate(query as any, data as any, {new: true, upsert: true, lean: true}).exec();
         }catch(err){
             this.Hyperion.logger.error("Hyperion", `DB Update Failed, err: ${err.message}`);
+            this.Hyperion.logger.error("Hyperion", `DB Update Failed, payload: ${inspect(data)}`);
             this.Hyperion.sentry.captureException(err);
             return {} as unknown as T;
         }
