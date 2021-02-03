@@ -41,7 +41,7 @@ export default class Utils {
         if(!input){return;}
         input = input.trim().toLowerCase();
         if(input === "yes" || input === "true"){return true;}
-        if(input === "no" || input === "false"){return true;}
+        if(input === "no" || input === "false"){return false;}
     }
 
     arrayShared(arr1: Array<unknown>, arr2: Array<unknown>): boolean {
