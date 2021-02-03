@@ -77,7 +77,7 @@ export default class RegionalManager {
         return await Promise.allSettled([...this.Hyperion.dbManagers.values()].map(e => e.delete(role, id)));
     }
 
-    doOps<T>(role: roles, id: string, user?: string){
+    async doOps<T>(role: roles, id: string, user?: string){
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const blank: any = {};
         blank[rolePKey[role]] = id;
@@ -86,50 +86,62 @@ export default class RegionalManager {
             pKey.push(user);
             blank.user = user;
         }
-        const name = role === "guilduser" ? `${pKey[0]}:${pKey[1]}` : pKey[0];
+        let cache: null | GuildType = null;
+        if(role === "guild"){
+            const rawCache = await this.Hyperion.redis.get(`ConfigCache:${id[0]}`);
+            cache = rawCache !== null ? JSON.parse(rawCache) as GuildType : null;
+        }
         
         return {
             exists: async () => {
-                if(this.creating[name] !== undefined){await sleep(500);}
                 return await this.getPrimaryDb().exists(role, pKey);
             },
             create: async (data?: Partial<T>): Promise<T> => {
-                if(this.creating[name] !== undefined){
-                    await sleep(500);
-                    return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
+                if(role === "guild" && cache){
+                    await this.Hyperion.redis.expire(`ConfigCache:${id[0]}`, 15 * 60);
+                    return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
                 }
-                this.creating[name] = 1;
                 const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format((await this.createToAll<T>(role, pKey, data)));
-                await sleep(100);
-                delete this.creating[name];
+                if(role === "guild"){
+                    await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
+                }
                 return result;
             },
             delete: async () => {return await this.deleteToAll(role, pKey);},
             get: async () => {
-                if(this.creating[name] !== undefined){await sleep(500);}
-                return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
+                if(role === "guild" && cache){
+                    await this.Hyperion.redis.expire(`ConfigCache:${id[0]}`, 15 * 60);
+                    return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
+                }
+                const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
+                if(role === "guild"){
+                    await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
+                }
+                return result;
             },
             update: async (data: Partial<T>) => {
-                if(this.creating[name] !== undefined){await sleep(500);}
                 const oldData = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
                 data = this.merge<T>(oldData, data);
                 data = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.save(data);
-                return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.updateToAll(role, pKey, data), true);
+                const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.updateToAll(role, pKey, data), true);
+                if(role === "guild"){
+                    await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
+                }
+                return result;
             },
             getOrCreate: async () => {
-                if(this.creating[name] !== undefined){await sleep(500);}
+                if(role === "guild" && cache){
+                    await this.Hyperion.redis.expire(`ConfigCache:${id[0]}`, 15 * 60);
+                    return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
+                }
                 const result = await this.getPrimaryDb().get<T>(role, pKey);
                 if(!result){
-                    this.creating[name] = 1;
                     const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format((await this.createToAll<T>(role, pKey)));
-                    await sleep(100);
-                    delete this.creating[name];
+                    if(role === "guild"){
+                        await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
+                    }
                     return result;
                 }else{
-                    if(this.creating[name] !== undefined){
-                        await sleep(1000);
-                        return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
-                    }
                     return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(result);
                 }
             },
@@ -139,40 +151,40 @@ export default class RegionalManager {
         };
     }
 
-    guild(id: string){
-        return this.doOps<GuildType>("guild", id);
+    async guild(id: string){
+        return await this.doOps<GuildType>("guild", id);
     }
 
-    user(id: string){
-        return this.doOps<UserType>("user", id);
+    async user(id: string){
+        return await this.doOps<UserType>("user", id);
     }
 
-    guilduser(guild: string, user: string){
-        return this.doOps<GuilduserType>("guilduser", guild, user);
+    async guilduser(guild: string, user: string){
+        return await this.doOps<GuilduserType>("guilduser", guild, user);
     }
 
-    embeds(id: string){
-        return this.doOps<EmbedType>("embeds", id);
+    async embeds(id: string){
+        return await this.doOps<EmbedType>("embeds", id);
     }
 
-    tags<T>(id: string){
-        return this.doOps<T>("tags", id);
+    async tags<T>(id: string){
+        return await this.doOps<T>("tags", id);
     }
 
-    moderations(id: string){
-        return this.doOps<moderationType>("moderations", id);
+    async moderations(id: string){
+        return await this.doOps<moderationType>("moderations", id);
     }
 
-    modlogs(id: string){
-        return this.doOps<modLogType>("modlogs", id);
+    async modlogs(id: string){
+        return await this.doOps<modLogType>("modlogs", id);
     }
 
-    notes(id: string){
-        return this.doOps<noteType>("notes", id);
+    async notes(id: string){
+        return await this.doOps<noteType>("notes", id);
     }
 
-    stars(id: string){
-        return this.doOps<StarType>("stars", id);
+    async stars(id: string){
+        return await this.doOps<StarType>("stars", id);
     }
 
     merge<T>(oldData: T, newData: Partial<T>): T {
