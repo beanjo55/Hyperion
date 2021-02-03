@@ -131,6 +131,7 @@ NotesType = nt
         delete (data as any)["$locals"];
         delete (data as any)["$op"];
         delete (data as any)._doc;
+        delete (data as any)._id;
         delete (data as any)["$init"];
         return data as T;
     }
