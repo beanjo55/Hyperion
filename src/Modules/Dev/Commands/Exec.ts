@@ -1,5 +1,3 @@
-import { AdvancedMessageContent, Message } from "eris";
-import { inspect } from "util";
 import hyperion, {CommandContext, CommandResponse} from "../../../main";
 import Command from "../../../Structures/Command";
 import {exec} from "child_process";

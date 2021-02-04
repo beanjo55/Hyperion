@@ -441,6 +441,13 @@ export default class hyperion extends Base{
         });
         
     }
+
+    redact(input: string): string {
+        const tokenRx = new RegExp(config.token.split(" ")[1], "gmi");
+        const circleRx = new RegExp(config.coreOptions.circleCIToken, "gmi");
+        const mongoRx = new RegExp(config.mongoLogin, "gmi");
+        return input.replace(tokenRx, "No").replace(circleRx, "No").replace(mongoRx, "No");
+    }
 }
 
 //hi wuper
@@ -653,7 +660,7 @@ export interface GuildType {
     };
     quotes: {
         quoteLinks: boolean;
-        guildQuotes: Map<number, Quote>;
+        //guildQuotes: Map<number, Quote>;
     };
     vtl: {
         joinAnnouncements: boolean;

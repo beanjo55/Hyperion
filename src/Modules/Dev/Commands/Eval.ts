@@ -38,7 +38,7 @@ export default class Eval extends Command {
                 title: "Eval Results",
                 footer: {text: this.Hyperion.build + " V3"},
                 timestamp: new Date,
-                description: `\`\`\`js\n${evaled}\n\`\`\``
+                description: `\`\`\`js\n${this.Hyperion.redact(evaled)}\n\`\`\``
             }
         };
     }
