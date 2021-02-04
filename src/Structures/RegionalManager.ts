@@ -100,7 +100,9 @@ export default class RegionalManager {
                 }
                 if(role === "guild" && cache){
                     await this.Hyperion.redis.expire(`ConfigCache:${id[0]}`, 15 * 60);
-                    return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
+                    const toRetrun = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
+                    cache = null;
+                    return toRetrun;
                 }
                 const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format((await this.createToAll<T>(role, pKey, data)));
                 if(role === "guild"){
@@ -117,7 +119,9 @@ export default class RegionalManager {
                 }
                 if(role === "guild" && cache){
                     await this.Hyperion.redis.expire(`ConfigCache:${id[0]}`, 15 * 60);
-                    return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
+                    const toRetrun = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
+                    cache = null;
+                    return toRetrun;
                 }
                 const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
                 if(role === "guild"){
@@ -161,7 +165,9 @@ export default class RegionalManager {
                 }
                 if(role === "guild" && cache){
                     await this.Hyperion.redis.expire(`ConfigCache:${id[0]}`, 15 * 60);
-                    return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
+                    const toRetrun = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
+                    cache = null;
+                    return toRetrun;
                 }
                 let result = await this.getPrimaryDb().get<T>(role, pKey);
                 if(!result){

@@ -154,10 +154,16 @@ NotesType = nt
             (query as any).guild = pKey[0],
             (query as any).user = pKey[1];
         }
-        
-        //@ts-ignore
-        const created = await this[role].findOneAndUpdate(query, this.clean<T>(data), {upsert: true, new: true, lean: true}).exec();
-        return created as unknown as T;
+        try{
+            //@ts-ignore
+            const created = await this[role].findOneAndUpdate(query, this.clean<T>(data), {upsert: true, new: true, lean: true}).exec();
+            return created as unknown as T;
+        }catch(err){
+            if(err.message.includes("E11000")){
+                return await this.get<T>(role, pKey);
+            }
+            return query as unknown as T;
+        }
         
     }
 
@@ -216,10 +222,13 @@ NotesType = nt
             // @ts-ignore
             return await this[role].findOneAndUpdate(query as any, this.clean<T>(data as any), {new: true, upsert: true, lean: true}).exec();
         }catch(err){
+            if(err.message.includes("E11000")){
+                return await this.get<T>(role, pKey);
+            }
             this.Hyperion.logger.error("Hyperion", `DB Update Failed, err: ${err.message}`);
             this.Hyperion.logger.error("Hyperion", `DB Update Failed, payload: ${inspect(data)}`);
             this.Hyperion.sentry.captureException(err);
-            return {} as unknown as T;
+            return query as unknown as T;
         }
     }
 
