@@ -26,7 +26,7 @@ export default class Exec extends Command {
         try{
             exec(code, (stdout, stderr) => {
                 const out = stdout ?? stderr;
-                ctx.createMessage({content: "```xl\n" + inspect(out, {depth: 0}) + "```"});
+                ctx.createMessage({content: "```xl\n" + out + "```"});
             });
         }catch(e){
             ctx.createMessage({content: "```xl\n" + e.message + "```"});
