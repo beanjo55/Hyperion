@@ -93,6 +93,7 @@ export default class RegionalManager {
                 return await this.getPrimaryDb().exists(role, pKey);
             },
             create: async (data?: Partial<T>): Promise<T> => {
+                /*
                 let cache: null | GuildType = null;
                 if(role === "guild"){
                     const rawCache = await this.Hyperion.redis.get(`ConfigCache:${id[0]}`);
@@ -103,15 +104,17 @@ export default class RegionalManager {
                     const toRetrun = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
                     cache = null;
                     return toRetrun;
-                }
+                }*/
                 const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format((await this.createToAll<T>(role, pKey, data)));
+                /*
                 if(role === "guild"){
                     await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
-                }
+                }*/
                 return result;
             },
             delete: async () => {return await this.deleteToAll(role, pKey);},
             get: async () => {
+                /*
                 let cache: null | GuildType = null;
                 if(role === "guild"){
                     const rawCache = await this.Hyperion.redis.get(`ConfigCache:${id[0]}`);
@@ -122,11 +125,12 @@ export default class RegionalManager {
                     const toRetrun = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
                     cache = null;
                     return toRetrun;
-                }
+                }*/
                 const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
+                /*
                 if(role === "guild"){
                     await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
-                }
+                }*/
                 return result;
             },
             update: async (data: Partial<T>) => {
@@ -147,9 +151,10 @@ export default class RegionalManager {
                 const updateResult = await this.updateToAll(role, pKey, data);
                 try{
                     const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(updateResult, true);
+                    /*
                     if(role === "guild"){
                         await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
-                    }
+                    }*/
                     return result;
                 }catch(err){
                     this.Hyperion.logger.error("Hyperion", "Post Update Format failed");
@@ -158,6 +163,7 @@ export default class RegionalManager {
                 }
             },
             getOrCreate: async () => {
+                /*
                 let cache: null | GuildType = null;
                 if(role === "guild"){
                     const rawCache = await this.Hyperion.redis.get(`ConfigCache:${id[0]}`);
@@ -168,7 +174,7 @@ export default class RegionalManager {
                     const toRetrun = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
                     cache = null;
                     return toRetrun;
-                }
+                }*/
                 let result = await this.getPrimaryDb().get<T>(role, pKey);
                 if(!result){
                     try{
@@ -178,9 +184,10 @@ export default class RegionalManager {
                         this.Hyperion.logger.error("Hyperion", "Formatting failed after create path of getOrCreate");
                         this.Hyperion.logger.error("Hyperion", inspect(result));
                     }
+                    /*
                     if(role === "guild"){
                         await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
-                    }
+                    }*/
                     return result;
                 }else{
                     return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(result);
