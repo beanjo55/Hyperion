@@ -1,3 +1,4 @@
+import { inspect } from "util";
 import hyperion, {roles, GuildType, modLogType, moderationType, noteType, GuilduserType, UserType, EmbedType, StarType} from "../main";
 import BaseConfigManager from "./BaseConfigManager";
 
@@ -125,14 +126,29 @@ export default class RegionalManager {
                 return result;
             },
             update: async (data: Partial<T>) => {
-                const oldData = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
-                data = this.merge<T>(oldData, data);
-                data = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.save(data);
-                const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.updateToAll(role, pKey, data), true);
-                if(role === "guild"){
-                    await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
+                const oldDataFetch = await this.getPrimaryDb().get<T>(role, pKey);
+                let oldData;
+                try{
+                    oldData = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(oldDataFetch);
+                }catch(err){
+                    this.Hyperion.logger.error("Hyperion", "Old Data Update Fetch Format failed");
+                    this.Hyperion.logger.error("Hyperion", inspect(oldDataFetch));
+                    throw(err);
                 }
-                return result;
+                data = this.merge<T>((oldData as T), data);
+                data = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.save(data);
+                const updateResult = await this.updateToAll(role, pKey, data);
+                try{
+                    const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(updateResult, true);
+                    if(role === "guild"){
+                        await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
+                    }
+                    return result;
+                }catch(err){
+                    this.Hyperion.logger.error("Hyperion", "Post Update Format failed");
+                    this.Hyperion.logger.error("Hyperion", inspect(updateResult));
+                    throw(err);
+                }
             },
             getOrCreate: async () => {
                 let cache: null | GuildType = null;
@@ -144,9 +160,15 @@ export default class RegionalManager {
                     await this.Hyperion.redis.expire(`ConfigCache:${id[0]}`, 15 * 60);
                     return (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(cache as unknown as T);
                 }
-                const result = await this.getPrimaryDb().get<T>(role, pKey);
+                let result = await this.getPrimaryDb().get<T>(role, pKey);
                 if(!result){
-                    const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format((await this.createToAll<T>(role, pKey)));
+                    try{
+                        const createResult = (await this.createToAll<T>(role, pKey));
+                        result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(createResult);
+                    }catch(err){
+                        this.Hyperion.logger.error("Hyperion", "Formatting failed after create path of getOrCreate");
+                        this.Hyperion.logger.error("Hyperion", inspect(result));
+                    }
                     if(role === "guild"){
                         await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
                     }
