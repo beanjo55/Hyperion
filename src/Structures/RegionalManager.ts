@@ -126,7 +126,10 @@ export default class RegionalManager {
                 return result;
             },
             update: async (data: Partial<T>) => {
-                const oldDataFetch = await this.getPrimaryDb().get<T>(role, pKey);
+                let oldDataFetch = await this.getPrimaryDb().get<T>(role, pKey);
+                if(!oldDataFetch){
+                    oldDataFetch = await this.getPrimaryDb().create(role, pKey);
+                }
                 let oldData;
                 try{
                     oldData = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(oldDataFetch);
