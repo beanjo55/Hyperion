@@ -19,6 +19,7 @@ export default class Help extends Module<Record<string, never>> {
         return true;
     }
 
+    // eslint-disable-next-line complexity
     async messageCreate(...args: [Message]): Promise<void> {
         const msg = args[0];
         const channel = msg.channel;
@@ -67,6 +68,17 @@ export default class Help extends Module<Record<string, never>> {
                 channel.createMessage({embed: this.commandHelp(t, cmd, config.prefix, opts)}).catch(() => undefined);
                 return;
             }
+        }
+
+        if(msg.content.toLowerCase() === `<@${this.Hyperion.client.user.id}> help ` || msg.content.toLowerCase() === `<@!${this.Hyperion.client.user.id}> help `){
+            channel.createMessage({embed: this.generalHelp(t, opts)}).catch(() => undefined);
+            return;
+        }
+
+        if(msg.content.startsWith(`<@${this.Hyperion.client.user.id}> help`) || msg.content.startsWith(`<@!${this.Hyperion.client.user.id}> help`)){
+            const cmd = msg.content.split(" ")[2];
+            channel.createMessage({embed: this.commandHelp(t, cmd, config.prefix, opts)}).catch(() => undefined);
+            return;
         }
 
         if(msg.content.toLowerCase() === `${config.prefix}help `){
