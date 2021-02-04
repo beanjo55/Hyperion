@@ -170,8 +170,11 @@ NotesType = nt
             data.user = pKey[1];
         }
         try{
+            console.log(pKey)
+            console.log(data)
             // @ts-ignore
             const created = await this[role].findOne(data as any).lean<T>().exec();
+            console.log(created)
             return created as unknown as T;
         }catch(err){
             throw new Error("Failed to update " + role + " Primary key: " + pKey);
