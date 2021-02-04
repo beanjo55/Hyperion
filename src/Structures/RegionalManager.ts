@@ -127,6 +127,9 @@ export default class RegionalManager {
                     return toRetrun;
                 }*/
                 const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
+                if(role === "guild" && (result as unknown as GuildType).guild !== id){
+                    console.log("id mismatch")
+                }
                 /*
                 if(role === "guild"){
                     await this.Hyperion.redis.set(`ConfigCache:${id[0]}`, JSON.stringify(result), "EX", 15 * 60);
