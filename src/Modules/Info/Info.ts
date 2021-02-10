@@ -1,6 +1,5 @@
 import Module from "../../Structures/Module";
 import hyperion from "../../main";
-import { Guild } from "eris";
 
 export default class Info extends Module<Record<string, never>> {
     constructor(Hyperion: hyperion){
@@ -16,19 +15,5 @@ export default class Info extends Module<Record<string, never>> {
 
     async onLoad(){
         return true;
-    }
-
-    guildCreate(...args: [Guild]): void {
-        this.Hyperion.manager.guild(args[0].id).getOrCreate().then(data => {
-            this.Hyperion.manager.guild(args[0].id).update(data);
-        });
-    }
-
-    guildDelete(...args: [Guild]): void {
-        this.Hyperion.manager.guild(args[0].id).getOrCreate().then(data => {
-            data.deleted = true;
-            data.deletedAt = Date.now();
-            this.Hyperion.manager.guild(args[0].id).update(data);
-        });
     }
 }
