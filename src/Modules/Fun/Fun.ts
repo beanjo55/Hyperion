@@ -9,7 +9,7 @@ export default class Fun extends Module<Record<string, never>> {
             dir: __dirname,
             path: __dirname + "/Fun.js",
             hasCommands: true,
-            alwaysEnabled: true,
+            alwaysEnabled: false,
             subscribedEvents: [],
             friendlyName: "Fun"
         }, Hyperion);
