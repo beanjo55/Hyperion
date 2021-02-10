@@ -433,15 +433,15 @@ class MongoGuildManager{
     }
 
     async createConfig(guild: string): Promise<GuildType>{
-        return await this.Hyperion.manager.guild(guild).create();
+        return await this.Hyperion.manager.guild().get(guild);
     }
 
     async getConfig(guild: string): Promise<GuildType>{
-        return await this.Hyperion.manager.guild(guild).getOrCreate();
+        return await this.Hyperion.manager.guild().get(guild);
     }
 
     async exists(guild: string): Promise<boolean>{
-        return await this.Hyperion.manager.guild(guild).exists();
+        return Boolean(await this.Hyperion.manager.guild().get(guild));
     }
 
     async getPrefix(guild: string): Promise<string>{
@@ -457,7 +457,7 @@ class MongoGuildManager{
     }
 
     async setPrefix(guild: string, newPrefix: string): Promise<GuildType>{
-        return await this.Hyperion.manager.guild(guild).update({prefix: newPrefix});
+        return await this.Hyperion.manager.guild().update(guild, {prefix: newPrefix});
     }
 
     async getMods(guild: string): Promise<Array<string>>{
@@ -496,7 +496,7 @@ class MongoGuildManager{
         temp[newMod] = validated;
         const merged = this.merge(guilddata.modules, temp);
         guilddata.modules = merged;
-        return await this.Hyperion.manager.guild(guild).update(guilddata);
+        return await this.Hyperion.manager.guild().update(guild, guilddata);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async updateCommands(guild: string, newCmd: string, data: any, commands: Collection<Command>): Promise<string | GuildType>{
@@ -509,7 +509,7 @@ class MongoGuildManager{
         temp[newCmd] = validated;
         const merged = this.merge(guilddata.commands, temp);
         guilddata.commands = merged;
-        return await this.Hyperion.manager.guild(guild).update(guilddata);
+        return await this.Hyperion.manager.guild().update(guild, guilddata);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async updateModuleConfig(guild: string, mod: string, data: any): Promise<string | GuildType>{
@@ -526,12 +526,12 @@ class MongoGuildManager{
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const update: any = {};
         update[mod] = validated;
-        return await this.Hyperion.manager.guild(guild).update(update);
+        return await this.Hyperion.manager.guild().update(guild, update);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async update(guild: string, update: any): Promise<GuildType>{
-        return await this.Hyperion.manager.guild(guild).update(update);
+        return await this.Hyperion.manager.guild().update(guild, update);
     }
 
     async getCommandState(guild: string, command: string): Promise<CommandConfig>{

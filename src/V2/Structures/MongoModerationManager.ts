@@ -7,6 +7,6 @@ export default class MongoModerationManager {
     constructor(newHype: hyperion){this.Hyperion = newHype;}
 
     raw(): Model<moderationType & Document> {
-        return this.Hyperion.manager.moderations("dummy").raw() as Model<moderationType & Document>;
+        return this.Hyperion.manager.moderations().raw() as Model<moderationType & Document>;
     }
 }

@@ -57,11 +57,9 @@ export default class Dev extends Module<Record<string, never>> {
                 delete this.guildJoinEvent[guild.id];
             };
             setTimeout(clear.bind(this), 1000);
-            const exists = await this.Hyperion.manager.guild(guild.id).exists();
-            if(!exists){
-                this.Hyperion.manager.guild(guild.id).create();
-            }else{
-                this.Hyperion.manager.guild(guild.id).update({deleted: false});
+            const exists = await this.Hyperion.manager.guild().get(guild.id);
+            if(exists.deleted){
+                this.Hyperion.manager.guild().update(guild.id, {deleted: false});
             }
             this.Hyperion.client.editStatus(undefined, {name: `%help | ${this.Hyperion.client.guilds.size} servers`, type: 0});
             this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
@@ -85,7 +83,7 @@ export default class Dev extends Module<Record<string, never>> {
                 delete this.guildLeaveEvent[guild.id];
             };
             setTimeout(clear.bind(this), 1000);
-            this.Hyperion.manager.guild(guild.id).update({deleted: true, deletedAt: Date.now()});
+            this.Hyperion.manager.guild().update(guild.id, {deleted: true, deletedAt: Date.now()});
             this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
                 embeds: [
                     {

@@ -26,7 +26,7 @@ export default class Help extends Module<Record<string, never>> {
         if(!(channel.type === 0 || channel.type === 5)){return;}
         const guild = channel.guild;
         const acks = await this.Hyperion.utils.getAcks(msg.author.id);
-        const config = await this.Hyperion.manager.guild(guild.id).getOrCreate();
+        const config = await this.Hyperion.manager.guild().get(guild.id);
         const t = this.Hyperion.lang.getLang(config.lang).format;
         const opts: {pro?: boolean; dev?: boolean} = {};
         if(config.pro === true){opts.pro = true;}

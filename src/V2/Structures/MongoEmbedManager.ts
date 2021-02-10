@@ -7,6 +7,6 @@ export default class MongoEmbedManager {
     constructor(newHype: hyperion){this.Hyperion = newHype;}
 
     raw(): Model<EmbedType & Document> {
-        return this.Hyperion.manager.embeds("dummy").raw() as Model<EmbedType & Document>;
+        return this.Hyperion.manager.embeds().raw() as Model<EmbedType & Document>;
     }
 }

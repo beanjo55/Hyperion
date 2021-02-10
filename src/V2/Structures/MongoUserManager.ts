@@ -12,17 +12,17 @@ class MongoUserManager{
         this.Hyperion = newHype;
     }
     async createConfig(user: string): Promise<UserType>{
-        return await this.Hyperion.manager.user(user).create();
+        return await this.Hyperion.manager.user().get(user);
     }
 
     async getUserConfig(user: string): Promise<UserType>{
-        return await this.Hyperion.manager.user(user).getOrCreate();
+        return await this.Hyperion.manager.user().get(user);
     }
     async gotRep(user: string): Promise<UserType>{
         const data = await this.getUserConfig(user);
         data.rep++;
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
 
     async getRep(user: string): Promise<number>{
@@ -41,13 +41,13 @@ class MongoUserManager{
         const data = await this.getUserConfig(user);
         data.rep = amount;
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
     async gaveRep(user: string): Promise<UserType>{
         const data = await this.getUserConfig(user);
         data.repGiven++;
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
 
     async getGivenRep(user: string): Promise<number>{
@@ -59,13 +59,13 @@ class MongoUserManager{
         const data = await this.getUserConfig(user);
         data.repGiven = amount;
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
     async changeMoney(user: string, amount: number): Promise<UserType>{
         const data = await this.getUserConfig(user);
         data.money = amount;
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
 
     async getRepTime(user: string): Promise<number>{
@@ -83,25 +83,25 @@ class MongoUserManager{
         const data = await this.getUserConfig(user);
         data.lastRepTime = Date.now();
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
     async setDailyTime(user: string): Promise<UserType>{
         const data = await this.getUserConfig(user);
         data.lastDailyTime = Date.now();
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
     async resetRepTime(user: string): Promise<UserType>{
         const data = await this.getUserConfig(user);
         data.lastRepTime = 0;
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
     async resetDailyTime(user: string): Promise<UserType>{
         const data = await this.getUserConfig(user);
         data.lastDailyTime = 0;
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
     async setAcks(user: string, data: Partial<ack>): Promise<ack>{
         const oldData = await this.Hyperion.utils.getAcks(user);
@@ -134,15 +134,15 @@ class MongoUserManager{
         const data = await this.getUserConfig(user);
         data.bio = bio;
         if(!data.user){data.user = user;}
-        return await this.Hyperion.manager.user(user).update(data);
+        return await this.Hyperion.manager.user().update(user, data);
     }
 
     async addExp(user: string, exp: number, levelFunc: (exp: number)=> number): Promise<{data: UserType; lvlUp: boolean}>{
         let lvlUp = false;
-        let data = await this.Hyperion.manager.user(user).get();
+        let data = await this.Hyperion.manager.user().get(user);
         if(data === null){
             data = {level: 0, exp: 0, user, rep: 0, repGiven: 0, lastRepTime: 0, lastDailyTime: 0, money: 0};
-            const result = await this.Hyperion.manager.user(user).create(data);
+            const result = await this.Hyperion.manager.user().get(user);
             const level = levelFunc(exp);
             if(level > 0){lvlUp = true;}
             return {data: result, lvlUp};
@@ -155,7 +155,7 @@ class MongoUserManager{
         data.level = level;
         if(!data.user){data.user = user;}
         sleep(1000);
-        data = await this.Hyperion.manager.user(user).update(data);
+        data = await this.Hyperion.manager.user().update(user, data);
         return {data: data, lvlUp};
 
     }
@@ -169,7 +169,7 @@ class MongoUserManager{
     }
 
     raw(): Model<UserType & Document> {
-        return this.Hyperion.manager.user("dummy").raw() as Model<UserType & Document>;
+        return this.Hyperion.manager.user().raw();
     }
         
 }

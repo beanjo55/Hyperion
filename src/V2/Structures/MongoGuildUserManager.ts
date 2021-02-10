@@ -14,10 +14,10 @@ export default class MongoGuildUserManager{
 
     async addExp(user: string, guild: string, exp: number, levelFunc: (exp: number)=> number): Promise<levelUpdateResult>{
         let lvlUp = false;
-        let data = await this.Hyperion.manager.guilduser(guild, user).get();
+        let data = await this.Hyperion.manager.guilduser().get(guild, user);
         if(data === null){
             data = {level: 0, exp: 0, guild, user, highlights: []};
-            const result = await this.Hyperion.manager.guilduser(guild, user).create(data);
+            const result = await this.Hyperion.manager.guilduser().get(guild, user);
             const level = levelFunc(exp);
             if(level > 0){lvlUp = true;}
             return {data: result, lvlUp};
@@ -31,16 +31,16 @@ export default class MongoGuildUserManager{
         if(!data.user){data.user = user;}
         if(!data.guild){data.guild = guild;}
         await sleep(1000);
-        data = await this.Hyperion.manager.guilduser(guild, user).update(data);
+        data = await this.Hyperion.manager.guilduser().get(guild, user);
         return {data, lvlUp};
 
     }
     async createConfig(user: string, guild: string): Promise<GuilduserType>{
-        return await this.Hyperion.manager.guilduser(guild, user).create();
+        return await this.Hyperion.manager.guilduser().get(guild, user);
     }
 
     async getUserConfig(user: string, guild: string): Promise<GuilduserType>{
-        return await this.Hyperion.manager.guilduser(guild, user).getOrCreate();
+        return await this.Hyperion.manager.guilduser().get(guild, user);
     }
 
     async getExpData(user: string, guild: string): Promise<{exp: number; level: number}>{
@@ -52,6 +52,6 @@ export default class MongoGuildUserManager{
     }
 
     raw(): Model<GuilduserType & Document> {
-        return this.Hyperion.manager.guilduser("dummy", "dummy").raw() as Model<GuilduserType & Document>;
+        return this.Hyperion.manager.guilduser().raw() as Model<GuilduserType & Document>;
     }
 }

@@ -1,3 +1,4 @@
+import { Model, Document } from "mongoose";
 import { inspect } from "util";
 import hyperion, {roles, GuildType, modLogType, moderationType, noteType, GuilduserType, UserType, EmbedType, StarType} from "../main";
 import BaseConfigManager from "./BaseConfigManager";
@@ -14,21 +15,10 @@ const rolePKey = {
     guilduser: "guild"
 };
 
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 
 export default class RegionalManager {
     Hyperion: hyperion;
-    creating: {[key: string]: 1} = {};
-    pendingGuildOpts: {[key: string]: Array<{
-        id: string;
-        op: "get" | "create" | "getOrCreate" | "update";
-        data?: Partial<GuildType>;
-        res: (value: GuildType | PromiseLike<GuildType>) => void;
-        rej: (reason?: any) => void;
-    }>} = {};
     constructor(Hyperion: hyperion){
         this.Hyperion = Hyperion;
     }
@@ -128,7 +118,7 @@ export default class RegionalManager {
                 }*/
                 const result = (this.Hyperion.configManagers.get(role) as BaseConfigManager<T>)!.format(await this.getPrimaryDb().get<T>(role, pKey));
                 if(role === "guild" && (result as unknown as GuildType).guild !== id){
-                    console.log("id mismatch")
+                    console.log("id mismatch");
                 }
                 /*
                 if(role === "guild"){
@@ -202,40 +192,196 @@ export default class RegionalManager {
         };
     }
 
-    guild(id: string){
-        return this.doOps<GuildType>("guild", id);
+    guild(){
+        const get = async function(this: RegionalManager, id: string): Promise<GuildType> {
+            const result = await this.getPrimaryDb().getGuild(id);
+            return (this.Hyperion.configManagers.get("guild") as BaseConfigManager<GuildType>).format(result);
+        };
+        const update = async function(this: RegionalManager, id: string, data: Partial<GuildType>): Promise<GuildType> {
+            const result = await this.getPrimaryDb().updateGuild(id, data);
+            return (this.Hyperion.configManagers.get("guild") as BaseConfigManager<GuildType>).format(result);
+        };
+        const raw = function(this: RegionalManager): Model<GuildType & Document> {
+            return this.getPrimaryDb().rawGuild() as Model<GuildType & Document>;
+        };
+        return {
+            get: get.bind(this),
+            update: update.bind(this),
+            raw: raw.bind(this)
+        };
     }
 
-    user(id: string){
-        return this.doOps<UserType>("user", id);
+    user(){
+        const get = async function(this: RegionalManager, id: string): Promise<UserType> {
+            const result = await this.getPrimaryDb().getUser(id);
+            return (this.Hyperion.configManagers.get("user") as BaseConfigManager<UserType>).format(result);
+        };
+        const update = async function(this: RegionalManager, id: string, data: Partial<UserType>): Promise<UserType> {
+            const result = await this.getPrimaryDb().updateUser(id, data);
+            return (this.Hyperion.configManagers.get("user") as BaseConfigManager<UserType>).format(result);
+        };
+        const raw = function(this: RegionalManager): Model<UserType & Document> {
+            return this.getPrimaryDb().rawUser() as Model<UserType & Document>;
+        };
+        return {
+            get: get.bind(this),
+            update: update.bind(this),
+            raw: raw.bind(this)
+        };
     }
 
-    guilduser(guild: string, user: string){
-        return this.doOps<GuilduserType>("guilduser", guild, user);
+    guilduser(){
+        const get = async function(this: RegionalManager, guild: string, user: string): Promise<GuilduserType> {
+            const result = await this.getPrimaryDb().getGuilduser(guild, user);
+            return (this.Hyperion.configManagers.get("guilduser") as BaseConfigManager<GuilduserType>).format(result);
+        };
+        const update = async function(this: RegionalManager, guild: string, user: string, data: Partial<GuilduserType>): Promise<GuilduserType> {
+            const result = await this.getPrimaryDb().updateGuilduser(guild, user, data);
+            return (this.Hyperion.configManagers.get("guilduser") as BaseConfigManager<GuilduserType>).format(result);
+        };
+        const raw = function(this: RegionalManager): Model<GuilduserType & Document> {
+            return this.getPrimaryDb().rawGuildUser() as Model<GuilduserType & Document>;
+        };
+        return {
+            get: get.bind(this),
+            update: update.bind(this),
+            raw: raw.bind(this)
+        };
     }
 
-    embeds(id: string){
-        return this.doOps<EmbedType>("embeds", id);
+    embeds(){
+        const get = async function(this: RegionalManager, id: string): Promise<EmbedType> {
+            const result = await this.getPrimaryDb().getEmbed(id);
+            return (this.Hyperion.configManagers.get("embed") as BaseConfigManager<EmbedType>).format(result);
+        };
+        const update = async function(this: RegionalManager, id: string, data: Partial<EmbedType>): Promise<EmbedType> {
+            const result = await this.getPrimaryDb().updateEmbed(id, data);
+            return (this.Hyperion.configManagers.get("embed") as BaseConfigManager<EmbedType>).format(result);
+        };
+        const raw = function(this: RegionalManager): Model<EmbedType & Document> {
+            return this.getPrimaryDb().rawEmbed() as Model<EmbedType & Document>;
+        };
+        return {
+            get: get.bind(this),
+            update: update.bind(this),
+            raw: raw.bind(this)
+        };
     }
 
     tags<T>(id: string){
         return this.doOps<T>("tags", id);
     }
 
-    moderations(id: string){
-        return this.doOps<moderationType>("moderations", id);
+    moderations(){
+        const get = async function(this: RegionalManager, id: string): Promise<moderationType | null> {
+            const result = await this.getPrimaryDb().getModeration(id);
+            if(!result){return null;}
+            return (this.Hyperion.configManagers.get("moderations") as BaseConfigManager<moderationType>).format(result);
+        };
+        const update = async function(this: RegionalManager, id: string, data: Partial<moderationType>): Promise<moderationType> {
+            const result = await this.getPrimaryDb().updateModeration(id, data);
+            return (this.Hyperion.configManagers.get("moderations") as BaseConfigManager<moderationType>).format(result);
+        };
+        const raw = function(this: RegionalManager): Model<moderationType & Document> {
+            return this.getPrimaryDb().rawModeration() as Model<moderationType & Document>;
+        };
+        const create = async function(this: RegionalManager, data: Partial<moderationType>): Promise<moderationType> {
+            const result =  await this.getPrimaryDb().createModeration(data);
+            return (this.Hyperion.configManagers.get("moderations") as BaseConfigManager<moderationType>).format(result);
+        };
+        return {
+            get: get.bind(this),
+            update: update.bind(this),
+            raw: raw.bind(this),
+            create: create.bind(this)
+        };
     }
 
-    modlogs(id: string){
-        return this.doOps<modLogType>("modlogs", id);
+    modlogs(){
+        const get = async function(this: RegionalManager, id: string): Promise<modLogType | null> {
+            const result = await this.getPrimaryDb().getModlog(id);
+            if(!result){return null;}
+            return (this.Hyperion.configManagers.get("modlogs") as BaseConfigManager<modLogType>).format(result);
+        };
+        const update = async function(this: RegionalManager, id: string, data: Partial<modLogType>): Promise<modLogType> {
+            const result = await this.getPrimaryDb().updateModlog(id, data);
+            return (this.Hyperion.configManagers.get("modlogs") as BaseConfigManager<modLogType>).format(result);
+        };
+        const raw = function(this: RegionalManager): Model<modLogType & Document> {
+            return this.getPrimaryDb().rawModlog() as Model<modLogType & Document>;
+        };
+        const create = async function(this: RegionalManager, data: Partial<modLogType>): Promise<modLogType> {
+            const result =  await this.getPrimaryDb().createModlog(data);
+            return (this.Hyperion.configManagers.get("modlogs") as BaseConfigManager<modLogType>).format(result);
+        };
+        return {
+            get: get.bind(this),
+            update: update.bind(this),
+            raw: raw.bind(this),
+            create: create.bind(this)
+        };
     }
 
-    notes(id: string){
-        return this.doOps<noteType>("notes", id);
+    notes(){
+        const getOne = async function(this: RegionalManager, guild: string, user: string, id: number): Promise<noteType | null> {
+            const result = await this.getPrimaryDb().getNote(guild, user, id);
+            if(!result){return null;}
+            return (this.Hyperion.configManagers.get("notes") as BaseConfigManager<noteType>).format(result);
+        };
+        const getAll = async function(this: RegionalManager, guild: string, user: string): Promise<Array<noteType> | null> {
+            const result = await this.getPrimaryDb().getNotes(guild, user);
+            if(!result){return null;}
+            return result.map(n => (this.Hyperion.configManagers.get("notes") as BaseConfigManager<noteType>).format(n));
+        };
+        const update = async function(this: RegionalManager, guild: string, user: string, id: number, data: Partial<noteType>): Promise<noteType> {
+            const result = await this.getPrimaryDb().updateNote(guild, user, id, data);
+            return (this.Hyperion.configManagers.get("notes") as BaseConfigManager<noteType>).format(result);
+        };
+        const raw = function(this: RegionalManager): Model<noteType & Document> {
+            return this.getPrimaryDb().rawNote() as Model<noteType & Document>;
+        };
+        const create = async function(this: RegionalManager, data: Partial<noteType>): Promise<noteType> {
+            const result =  await this.getPrimaryDb().createNote(data);
+            return (this.Hyperion.configManagers.get("notes") as BaseConfigManager<noteType>).format(result);
+        };
+        return {
+            getOne: getOne.bind(this),
+            getAll: getAll.bind(this),
+            update: update.bind(this),
+            raw: raw.bind(this),
+            create: create.bind(this)
+        };
     }
 
-    stars(id: string){
-        return this.doOps<StarType>("stars", id);
+    stars(){
+        const getByMessage = async function(this: RegionalManager, guild: string, id: string): Promise<StarType | null> {
+            const result = await this.getPrimaryDb().getStarByMessage(guild, id);
+            if(!result){return null;}
+            return (this.Hyperion.configManagers.get("stars") as BaseConfigManager<StarType>).format(result);
+        };
+        const getStarByStarpost = async function(this: RegionalManager, guild: string, id: string): Promise<StarType | null> {
+            const result = await this.getPrimaryDb().getStarByStarpost(guild, id);
+            if(!result){return null;}
+            return (this.Hyperion.configManagers.get("stars") as BaseConfigManager<StarType>).format(result);
+        };
+        const update = async function(this: RegionalManager, guild: string, message: string, data: Partial<StarType>): Promise<StarType> {
+            const result = await this.getPrimaryDb().updateStar(guild, message, data);
+            return (this.Hyperion.configManagers.get("stars") as BaseConfigManager<StarType>).format(result);
+        };
+        const raw = function(this: RegionalManager): Model<StarType & Document> {
+            return this.getPrimaryDb().rawStar() as Model<StarType & Document>;
+        };
+        const create = async function(this: RegionalManager, data: Partial<StarType>): Promise<StarType> {
+            const result =  await this.getPrimaryDb().createStar(data);
+            return (this.Hyperion.configManagers.get("stars") as BaseConfigManager<StarType>).format(result);
+        };
+        return {
+            getByMessage: getByMessage.bind(this),
+            getByStarpost: getStarByStarpost.bind(this),
+            update: update.bind(this),
+            raw: raw.bind(this),
+            create: create.bind(this)
+        };
     }
 
     merge<T>(oldData: T, newData: Partial<T>): T {

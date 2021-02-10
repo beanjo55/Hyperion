@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import BaseDBManager from "../../Structures/BaseDBManager";
-import hyperion, {roles, GuildType as gt, moderationType as mt, modLogType as mlt, noteType as nt} from "../../main";
+import hyperion, {roles, GuildType, moderationType, modLogType, noteType, UserType, EmbedType, GuilduserType, StarType} from "../../main";
 import {Schema, model, Model, Document} from "mongoose";
 import {inspect} from "util";
 
+type TagType = unknown;
+
 // eslint-disable-next-line @typescript-eslint/ban-types
-const guildBase: {[key: string]: {type: String | Object | Number | Boolean | Array<never>; unique?: boolean; index?: boolean; default?: unknown}} = {
-    guild: {type: String, unique: true, index: true},
+const guildBase: {[key: string]: {type: String | Object | Number | Boolean | Array<never>; unique?: boolean; index?: boolean; default?: unknown, immutable?: boolean}} = {
+    guild: {type: String, unique: true, index: true, immutable: true},
     prefix: {type: String},
     updatedAt: {type: Number},
     ignoredChannels: {type: Array},
@@ -46,17 +48,7 @@ const rolePKey = {
     notes: "guild"
 };
 
-export default class MongoManager<
-GuildType = gt, // gonna give you up
-UserType = never, // gonna let you down
-GuilduserType = {guild: string; user: string}, // gonna run around and desert you
-StarsType = never, // gonna make you cry
-ModlogType = mlt, // gonna say goodbye 
-ModerationsType = mt, // gonna tell a lie and hurt you
-EmbedsType = never,
-TagsType = never,
-NotesType = nt
-> extends BaseDBManager{
+export default class MongoManager extends BaseDBManager{
     guildSchema!: Schema;
     guild!: Model<GuildType & Document>;
 
@@ -67,22 +59,22 @@ NotesType = nt
     guilduser!: Model<GuilduserType & Document>;
 
     starSchema = new Schema(starData, {autoIndex: true});
-    stars!: Model<StarsType & Document>;
+    stars!: Model<StarType & Document>;
 
     modlogSchema = new Schema(modlogData, {autoIndex: true});
-    modlogs!: Model<ModlogType & Document>;
+    modlogs!: Model<modLogType & Document>;
 
     moderationsSchema = new Schema(moderationsData, {autoIndex: true});
-    moderations!: Model<ModerationsType & Document>;
+    moderations!: Model<moderationType & Document>;
 
     tagSchema = new Schema(tagsData, {autoIndex: true});
-    tags!: Model<TagsType & Document>;
+    tags!: Model<TagType & Document>;
 
     embedsSchema = new Schema(embedsData, {autoIndex: true});
-    embeds!: Model<EmbedsType & Document>;
+    embeds!: Model<EmbedType & Document>;
 
     notesSchema = new Schema(noteData, {autoIndex: true});
-    notes!: Model<NotesType & Document>;
+    notes!: Model<noteType & Document>;
     constructor(Hyperion: hyperion, path: string){
         super({
             db: "mongo",
@@ -91,38 +83,32 @@ NotesType = nt
     }
 
     onLoad(){
-        this.generateGuildSchema();
+        this._generateModels();
     }
 
     onUnload(){
         return;
     }
 
-    generateGuildSchema(){
-        /*
-        this.Hyperion.modules.forEach(mod => {
-            if(mod.config){
-                guildBase[mod.name] = {type: Object, default: mod.formatConfig({})};
-            }
-        });*/
+    _generateModels(){
         this.guildSchema = new Schema(guildBase, {autoIndex: true, minimize: false});
         this.guild = model<GuildType & Document>("guild", this.guildSchema);
         this.user = model<UserType & Document>("user", this.userSchema);
         this.guilduser = model<GuilduserType & Document>("guilduserdatas", this.guilduserSchema);
-        this.stars = model<StarsType & Document>("starreds", this.starSchema);
+        this.stars = model<StarType & Document>("starreds", this.starSchema);
         this.modlogSchema.index({guild: 1, user: 1});
         this.modlogSchema.index({guild: 1, mod: 1});
         this.modlogSchema.index({guild: 1, caseNumber: 1});
         this.modlogSchema.index({guild: 1, user: 1, action: 1});
         this.modlogSchema.index({guild: 1, user: 1, autoEnd: 1});
-        this.modlogs = model<ModlogType & Document>("modlog", this.modlogSchema);
+        this.modlogs = model<modLogType & Document>("modlog", this.modlogSchema);
         this.moderationsSchema.index({guild: 1, user: 1});
         this.moderationsSchema.index({guild: 1, user: 1, action: 1});
         this.moderationsSchema.index({end: 1, untimed: 1});
-        this.moderations = model<ModerationsType & Document>("moderations", this.moderationsSchema);
-        this.tags = model<TagsType & Document>("tags", this.tagSchema);
-        this.embeds = model<EmbedsType & Document>("embeds", this.embedsSchema);
-        this.notes = model<NotesType & Document>("notes", this.notesSchema);
+        this.moderations = model<moderationType & Document>("moderations", this.moderationsSchema);
+        this.tags = model<TagType & Document>("tags", this.tagSchema);
+        this.embeds = model<EmbedType & Document>("embeds", this.embedsSchema);
+        this.notes = model<noteType & Document>("notes", this.notesSchema);
     }
 
     clean<T>(data: Partial<T>): T {
@@ -216,7 +202,7 @@ NotesType = nt
             query.user = pKey[1];
         }
         if(role === "guild"){
-            (data as Partial<gt>).updatedAt = Date.now();
+            (data as Partial<GuildType>).updatedAt = Date.now();
         }
         try{
             // @ts-ignore
@@ -235,10 +221,224 @@ NotesType = nt
     raw<T>(role: roles){
         return this[role] as unknown as  Model<Document & T>;
     }
+
+    merge<T>(oldData: T, newData: Partial<T>): T {
+        for(const key of Object.keys(newData)){
+            oldData[key as keyof T] = newData[key as keyof T]!;
+        }
+        return oldData;
+    }
+
+    async getGuild(id: string): Promise<GuildType> {
+        const cached = await this.Hyperion.redis.get(`ConfigCache:${id}`);
+        if(cached){
+            this.Hyperion.redis.expire(`ConfigCache:${id}`, 1800);
+            return JSON.parse(cached) as GuildType;
+        }
+        const adata = await this.guild.findOne({guild: id}).lean<GuildType>().exec();
+        if(!adata){
+            try {
+                const data = await this.guild.create({guild: id});
+                await this.Hyperion.redis.set(`ConfigCache:${id}`, JSON.stringify(data), "EX", 1800);
+                return data;
+            }catch(err){
+                if(err.message.includes("E11000")){
+                    const data2 = await this.guild.findOne({guild: id}).lean<GuildType>().exec();
+                    if(!data2){throw new Error("Data null after dupe key error fallback");}
+                    return data2;
+                }
+                throw err;
+            }
+        }
+        await this.Hyperion.redis.set(`ConfigCache:${id}`, JSON.stringify(adata), "EX", 1800);
+        return adata;
+    }
+
+    async updateGuild(id: string, data: Partial<GuildType>): Promise<GuildType> {
+        const oldData = await this.getGuild(id);
+        const update = this.clean<GuildType>(this.merge<GuildType>(oldData, data));
+        try {
+            const result = await this.guild.findOneAndUpdate({guild: id}, update, {new: true, upsert: true, lean: true}).exec();
+            await this.Hyperion.redis.set(`ConfigCache:${id}`, JSON.stringify(result), "EX", 1800);
+            return result;
+        }catch(err){
+            if(err.message.includes("E11000")){
+                const result = await this.guild.findOneAndUpdate({guild: id}, update, {new: true, upsert: true, lean: true}).exec();
+                await this.Hyperion.redis.set(`ConfigCache:${id}`, JSON.stringify(result), "EX", 1800);
+                return result;
+            }
+            throw(err);
+        }
+    }
+
+    rawGuild(): Model<Document & GuildType> {
+        return this.guild;
+    }
+
+    async getUser(id: string): Promise<UserType> {
+        const data = await this.user.findOne({user: id}).lean<UserType>().exec();
+        if(!data){
+            try {
+                const created = await this.user.create({user: id});
+                return created;
+            }catch(err){
+                if(err.message.includes("E11000")){
+                    const data2 = await this.user.findOne({user: id}).lean<UserType>().exec();
+                    if(!data2){throw new Error("Data null after dupe key error fallback");}
+                    return data2;
+                }
+                throw err;
+            }
+        }
+        return data;
+    }
+
+    async updateUser(id: string, data: Partial<UserType>): Promise<UserType> {
+        data.user = id;
+        return await this.user.findOneAndUpdate({user: id}, data, {new: true, lean: true, upsert: true});
+    }
+
+    rawUser(): Model<UserType & Document> {
+        return this.user;
+    }
+
+    async getEmbed(id: string): Promise<EmbedType> {
+        const data = await this.embeds.findOne({guild: id}).lean<EmbedType>().exec();
+        if(!data){
+            try {
+                const created = await this.embeds.create({guild: id});
+                return created;
+            }catch(err){
+                if(err.message.includes("E11000")){
+                    const data2 = await this.embeds.findOne({guild: id}).lean<EmbedType>().exec();
+                    if(!data2){throw new Error("Data null after dupe key error fallback");}
+                    return data2;
+                }
+                throw err;
+            }
+        }
+        return data;
+    }
+
+    async updateEmbed(id: string, data: Partial<EmbedType>): Promise<EmbedType> {
+        data.guild = id;
+        return await this.embeds.findOneAndUpdate({guild: id}, data, {upsert: true, new: true, lean: true});
+    }
+
+    rawEmbed(): Model<EmbedType & Document> {
+        return this.embeds;
+    }
+
+    async getGuilduser(guild: string, user: string): Promise<GuilduserType> {
+        const data = await this.guilduser.findOne({user, guild}).lean<GuilduserType>().exec();
+        if(!data){
+            try {
+                const created = await this.guilduser.create({user, guild});
+                return created;
+            }catch(err){
+                if(err.message.includes("E11000")){
+                    const data2 = await this.guilduser.findOne({user, guild}).lean<GuilduserType>().exec();
+                    if(!data2){throw new Error("Data null after dupe key error fallback");}
+                    return data2;
+                }
+                throw err;
+            }
+        }
+        return data;
+    }
+
+    async updateGuildUser(guild: string, user: string, data: Partial<GuilduserType>): Promise<GuilduserType> {
+        data.guild = guild;
+        data.user = user;
+        return await this.guilduser.findOneAndUpdate({guild, user}, data, {new: true, upsert: true, lean: true});
+    }
+
+    rawGuildUser(): Model<GuilduserType & Document> {
+        return this.guilduser;
+    }
+
+
+    async getStarByMessage(guild: string, id: string): Promise<StarType | null> {
+        return await this.stars.findOne({guild, message: id}).lean<StarType>().exec();
+    }
+
+    async getStarByStarpost(guild: string, id: string): Promise<StarType | null> {
+        return await this.stars.findOne({guild, starPost: id}).lean<StarType>().exec();
+    }
+
+    async updateStar(guild: string, message: string, data: Partial<StarType>): Promise<StarType> {
+        return (await this.stars.findOneAndUpdate({guild, message}, data, {new: true, lean: true}))!;
+    }
+
+    rawStar(): Model<StarType & Document> {
+        return this.stars;
+    }
+    async createstar(data: Partial<StarType>): Promise<StarType> {
+        return await this.stars.create(data);
+    }
+
+    async createModlog(data: Partial<modLogType>): Promise<modLogType> {
+        const result = await this.modlogs.create(data);
+        return result;
+    }
+
+    async createModeration(data: Partial<moderationType>): Promise<moderationType> {
+        return this.clean<moderationType>(await this.moderations.create(data));
+    }
+
+    async createNote(data: Partial<noteType>): Promise<noteType> {
+        return await this.notes.create(data);
+    }
+
+    async getModlog(id: string): Promise<modLogType | null> {
+        return await this.modlogs.findOne({mid: id}).lean<modLogType>().exec();
+    }
+
+    async getModlogs(guild: string, user: string): Promise<Array<modLogType>> {
+        return await this.modlogs.find({guild, user}).lean<modLogType>().exec();
+    }
+
+    async getModeration(id: string): Promise<moderationType | null> {
+        return await this.moderations.findOne({mid: id}).lean<moderationType>().exec();
+    }
+
+    async getNotes(guild: string, user: string): Promise<Array<noteType>> {
+        return await this.notes.find({guild, user}).lean<noteType>().exec();
+    }
+
+    async getNote(guild: string, user: string, id: number): Promise<noteType | null> {
+        return await this.notes.findOne({guild, user, id}).lean<noteType>().exec();
+    }
+
+    async updateModlog(id: string, data: Partial<modLogType>): Promise<modLogType> {
+        return (await this.modlogs.findOneAndUpdate({mid: id}, data, {new: true, lean: true}))!;
+    }
+
+    async updateModeration(id: string, data: Partial<moderationType>): Promise<moderationType> {
+        return (await this.moderations.findOneAndUpdate({mid: id}, data, {new: true, lean: true}))!;
+    }
+
+    async updateNote(guild: string, user: string, id: number, data: Partial<noteType>): Promise<noteType> {
+        return (await this.notes.findOneAndUpdate({guild, user, id}, data, {new: true, lean: true}))!;
+    }
+
+    rawNote(): Model<noteType & Document> {
+        return this.notes;
+    }
+
+    rawModeration(): Model<moderationType & Document> {
+        return this.moderations;
+    }
+
+    rawModlog(): Model<modLogType & Document> {
+        return this.modlogs;
+    }
+
+
 }
 
 const userData = {
-    user: {type: String, unique: true, required: true},
+    user: {type: String, unique: true, required: true, immutable: true},
     rep: {type: Number, default: 0},
     repGiven: {type: Number, default: 0},
     money: {type: Number, default: 0},
@@ -250,21 +450,21 @@ const userData = {
 };
 
 const guildUserData = {
-    user: {type: String, required: true},
-    guild: {type: String, required: true},
+    user: {type: String, required: true, immutable: true},
+    guild: {type: String, required: true, immutable: true},
     highlights: {type: Array, default: []},
     level: {type: Number, default: 0},
     exp: {type: Number, default: 0}
 };
 
 const embedsData = {
-    guild: {type: String, unique: true, required: true},
+    guild: {type: String, unique: true, required: true, immutable: true},
     embeds: {type: Object},
     limit: {type: Number}
 };
 
 const tagsData = {
-    guild: {type: String, unique: true, required: true},
+    guild: {type: String, unique: true, required: true, immutable: true},
     tags: {type: Object}
 };
 
@@ -276,25 +476,34 @@ const starData = {
 */
 
 const starData = {
-    guild: {type: String, required: true},
-    message: {type: String, required: true, unique: true},
-    starpost: {type: String, required: true}
+    guild: {type: String, required: true, immutable: true},
+    channel: {type: String, required: true, immutable: true},
+    message: {type: String, required: true, immutable: true},
+    count: {type: Number, default: 1},
+
+    starChannel: {type: String},
+    starPost: {type: String},
+
+    origStars: {type: Array},
+
+    deleted: {type: Boolean},
+    locked: {type: Boolean}
 };
 
 const modlogData = {
-    mid: {type: String, unique: true, required: true},
-    user: {type: String, required: true},
-    guild: {type: String, required: true},
-    caseNumber: {type: Number, required: true},
-    moderator: {type: String, required: true}, //v2 name, v3 name is mod
-    moderationType: {type: String, required: true}, //v2 name, v3 name is action
+    mid: {type: String, unique: true, required: true, immutable: true},
+    user: {type: String, required: true, immutable: true},
+    guild: {type: String, required: true, immutable: true},
+    caseNumber: {type: Number, required: true, immutable: true},
+    moderator: {type: String, required: true, immutable: true}, //v2 name, v3 name is mod
+    moderationType: {type: String, required: true, immutable: true}, //v2 name, v3 name is action
     hidden: {type: Boolean},
     reason: {type: String},
     duration: {type: Number}, //v2 name, v3 name is duration
     autoEnd: {type: Boolean},
     logChannel: {type: String},
     logPost: {type: String},
-    timeGiven: {type: Number, required: true}, //v2 name, v3 name is time
+    timeGiven: {type: Number, required: true, immutable: true}, //v2 name, v3 name is time
     name: {type: String, required: false}, //v2, required should be true
     expired: {type: Boolean, default: false}, //v2
     endTime: {type: Number}, //v2
@@ -305,23 +514,23 @@ const modlogData = {
 };
 
 const moderationsData = {
-    mid: {type: String, unique: true, required: true},
-    guild: {type: String, required: true},
-    user: {type: String, required: true},
-    action: {type: String, required: true},
+    mid: {type: String, unique: true, required: true, immutable: true},
+    guild: {type: String, required: true, immutable: true},
+    user: {type: String, required: true, immutable: true},
+    action: {type: String, required: true, immutable: true},
     duration: {type: Number, required: true},
-    start: {type: Number},
+    start: {type: Number, immutable: true, default: Date.now()},
     end: {type: Number, index: true},
     roles: {type: Array},
     channels: {type: Array},
     failCount: {type: Number, default: 0},
-    caseNum: {type: Number, required: true}, //v2
+    caseNum: {type: Number, required: true, immutable: true}, //v2
     untimed: {type: Boolean, required: true} //v2
 };
 
 const noteData = {
-    guild: {type: String, required: true},
-    user: {type: String, required: true},
+    guild: {type: String, required: true, immutable: true},
+    user: {type: String, required: true, immutable: true},
     mod: {type: String, required: true},
     content: {type: String, required: true},
     time: {type: Number, required: true},

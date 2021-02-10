@@ -37,27 +37,27 @@ class MongoModLogManager{
         if(ctx.removedRoles){
             data.removedRoles = ctx.removedRoles;
         }
-        return await this.Hyperion.manager.modlogs(ctx.mid!).create(data);
+        return await this.Hyperion.manager.modlogs().create(data);
     }
 
     async removeModerationTime(mid: string): Promise<void>{
-        await this.Hyperion.manager.modlogs(mid).update({duration: 0, stringLength: ""});
+        await this.Hyperion.manager.modlogs().update(mid, {duration: 0, stringLength: ""});
     }
 
     async updateModerationTime(mid: string, length: number, stringLength: string): Promise<void>{
-        await this.Hyperion.manager.modlogs(mid).update({duration: length, stringLength});
+        await this.Hyperion.manager.modlogs().update(mid, {duration: length, stringLength});
     }
 
     async addMessageID(mid: string, id: string, channelID: string): Promise<void>{
-        await this.Hyperion.manager.modlogs(mid).update({logPost: id, logChannel: channelID});
+        await this.Hyperion.manager.modlogs().update(mid, {logPost: id, logChannel: channelID});
     }
 
     async markExpired(mid: string): Promise<void>{
-        await this.Hyperion.manager.modlogs(mid).update({expired: true});
+        await this.Hyperion.manager.modlogs().update(mid, {expired: true});
     }
 
     async markMutesExpired(user: string, guild: string): Promise<void>{
-        await (this.Hyperion.manager.modlogs("dummy").raw() as unknown as Model<Document & modLogType>).updateMany({guild: guild, user: user, expired: false, moderationType: "mute"}, {expired: true});
+        await this.Hyperion.manager.modlogs().raw().updateMany({guild: guild, user: user, expired: false, moderationType: "mute"}, {expired: true});
     }
 
     /*
@@ -79,25 +79,25 @@ class MongoModLogManager{
 
     async getCaseByMID(MID: string): Promise<modLogType | null>{
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        return await this.Hyperion.manager.modlogs(MID).get().catch(_c => null);
+        return await this.Hyperion.manager.modlogs().get(MID).catch(_c => null);
     }
 
     async getCaseByCasenumber(guild: string, caseNum: number): Promise<modLogType | null>{
-        return await (this.Hyperion.manager.modlogs("dummy").raw() as unknown as Model<Document & modLogType>).findOne({guild: guild, caseNumber: caseNum}).lean<modLogType>().exec();
+        return await (this.Hyperion.manager.modlogs().raw() as unknown as Model<Document & modLogType>).findOne({guild: guild, caseNumber: caseNum}).lean<modLogType>().exec();
     }
 
     async getMIDByCase(guild: string, caseNum: number): Promise<string | null>{
-        const found: modLogType | null =  await (this.Hyperion.manager.modlogs("dummy").raw() as unknown as Model<Document & modLogType>).findOne({guild: guild, caseNumber: caseNum}).lean<modLogType>().exec();
+        const found: modLogType | null =  await (this.Hyperion.manager.modlogs().raw() as unknown as Model<Document & modLogType>).findOne({guild: guild, caseNumber: caseNum}).lean<modLogType>().exec();
         if(found?.mid){return found.mid;}
         return null;
     }
     
     async updateReason(mid: string, reason: string): Promise<modLogType>{
-        return await this.Hyperion.manager.modlogs(mid).update({reason});
+        return await this.Hyperion.manager.modlogs().update(mid, {reason});
     }
 
     async getUserModLogs(guild: string, user: string, options: {hideAuto: boolean; filter?: string; page: number, limit?: number}): Promise<Array<modLogType> | null>{
-        const query = (this.Hyperion.manager.modlogs("dummy").raw() as unknown as Model<Document & modLogType>).find({guild: guild, user: user});
+        const query = (this.Hyperion.manager.modlogs().raw() as unknown as Model<Document & modLogType>).find({guild: guild, user: user});
         
         if(options.hideAuto !== undefined && options.hideAuto === true){
             query.where({auto: false});
@@ -116,7 +116,7 @@ class MongoModLogManager{
     }
 
     async getModActions(guild: string, user: string, options: {hideAuto: boolean; filter?: string; page: number, limit?: number}): Promise<Array<modLogType> | null>{
-        const query = (this.Hyperion.manager.modlogs("dummy").raw() as unknown as Model<Document & modLogType>).find({guild: guild, moderator: user});
+        const query = (this.Hyperion.manager.modlogs().raw() as unknown as Model<Document & modLogType>).find({guild: guild, moderator: user});
         
         if(options.hideAuto !== undefined && options.hideAuto === true){
             query.where({auto: false});
@@ -135,13 +135,13 @@ class MongoModLogManager{
     }
 
     async moderationCount(guild: string, user: string): Promise<Array<number>>{
-        const total = await (this.Hyperion.manager.modlogs("dummy").raw() as unknown as Model<Document & modLogType>).find({guild: guild, user: user}).countDocuments().exec();
-        const auto = await (this.Hyperion.manager.modlogs("dummy").raw() as unknown as Model<Document & modLogType>).find({guild: guild, user: user, auto: true}).countDocuments().exec();
+        const total = await (this.Hyperion.manager.modlogs().raw() as unknown as Model<Document & modLogType>).find({guild: guild, user: user}).countDocuments().exec();
+        const auto = await (this.Hyperion.manager.modlogs().raw() as unknown as Model<Document & modLogType>).find({guild: guild, user: user, auto: true}).countDocuments().exec();
         return [total, total - auto, auto];
     }
 
     raw(): Model<modLogType & Document> {
-        return this.Hyperion.manager.modlogs("dummy").raw() as Model<modLogType & Document>;
+        return this.Hyperion.manager.modlogs().raw() as Model<modLogType & Document>;
     }
 }
 

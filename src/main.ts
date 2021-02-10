@@ -27,7 +27,6 @@ import {default as MongoGuilduserManager} from "./V2/Structures/MongoGuildUserMa
 import {manager as MongoModlogManager} from "./V2/Structures/MongoModLogManager";
 import {default as MongoEmbedManager} from "./V2/Structures/MongoEmbedManager";
 import {default as MongoModerationManager} from "./V2/Structures/MongoModerationManager";
-import {default as MongoStarManager} from "./V2/Structures/MongoStarManager";
 
 const config = require("../config.json");
 const version = require("../package.json").version as string;
@@ -85,7 +84,6 @@ export interface V2Type {
         modlog: MongoModlogManager;
         moderations: MongoModerationManager;
         embeds: MongoEmbedManager;
-        stars: MongoStarManager;
     };
 }
 
@@ -169,6 +167,18 @@ export default class hyperion extends Base{
         this.compatInit();
         this.name = this.client.user.username;
         this.trueReady = true;
+        const cfgSweeper = function(this: hyperion): void {
+            this.client.guilds.forEach((g)=> {
+                const rg = g as Guild & {cfg?: GuildType, lastUsed?: number};
+                if(rg.cfg){
+                    if(rg.lastUsed! >= Date.now() + (900000)){
+                        delete rg.cfg;
+                        delete rg.lastUsed;
+                    }
+                }
+            });
+        };
+        setInterval(cfgSweeper.bind(this), 60000);
     }
 
     async loadMod(name: string): Promise<void>{
@@ -236,7 +246,23 @@ export default class hyperion extends Base{
                 if(mod.subscribedEvents.includes(this.name)){(mod[this.name] as (...args: Array<unknown>) => void)(...args);}
             });
         }
-        this.client.on(name, template.bind(payload));
+        async function messageTemplate(this: {name: events; Hyperion: hyperion}, ...args: Array<unknown>){
+            if(!this.Hyperion.trueReady){return;}
+            const guild = ((args[0] as Message).channel as GuildTextableChannel).guild as Guild & {cfg: GuildType, lastUsed: number};
+            if(!guild){return;}
+            if(!guild.cfg){
+                const config = await this.Hyperion.manager.guild().get(guild.id);
+                guild.cfg = config;
+            }
+            guild.lastUsed = Date.now();
+            this.Hyperion.modules.forEach(mod => {
+                if(mod.subscribedEvents.includes(this.name)){(mod[this.name] as (...args: Array<unknown>) => void)(...args);}
+            });
+            this.Hyperion.V2.modules.forEach(mod => {
+                if(mod.subscribedEvents.includes(this.name)){(mod[this.name] as (...args: Array<unknown>) => void)(...args);}
+            });
+        }
+        this.client.on(name, name === "messageCreate" ? messageTemplate.bind(payload) : template.bind(payload));
     }
 
 
@@ -405,8 +431,7 @@ export default class hyperion extends Base{
                 guilduser: new MongoGuilduserManager(this),
                 modlog: new MongoModlogManager(this),
                 moderations: new MongoModerationManager(this),
-                embeds: new MongoEmbedManager(this),
-                stars: new MongoStarManager(this)
+                embeds: new MongoEmbedManager(this)
             },
             modules: new Collection<V2Module>(V2Module),
             commands: new Collection<V2Command>(V2Command)
@@ -826,6 +851,12 @@ export interface EmbedType {
 
 export interface StarType {
     guild: string;
+    channel: string;
     message: string;
-    starpost: string;
+    count: number;
+    starPost?: string;
+    starChannel?: string;
+    origStars?: Array<string>;
+    deleted?: true;
+    locked?: true;
 }

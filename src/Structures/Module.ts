@@ -140,7 +140,7 @@ export default abstract class Module<T> {
         if(config.modules[this.name] !== undefined){
             if(typeof config.modules[this.name] === "object"){
                 config.modules[this.name] = (config.modules[this.name] as {enabled: boolean}).enabled;
-                this.Hyperion.manager.guild(config.guild).update(config);
+                this.Hyperion.manager.guild().update(config.guild, config);
                 return config.modules[this.name] as boolean;
             }
             return config.modules[this.name] as boolean;
@@ -157,7 +157,7 @@ export default abstract class Module<T> {
         if(config.modules[this.name] !== undefined){
             if(typeof config.modules[this.name] === "object"){
                 config.modules[this.name] = (config.modules[this.name] as {enabled: boolean}).enabled;
-                this.Hyperion.manager.guild(config.guild).update(config);
+                this.Hyperion.manager.guild().update(config.guild, config);
                 return config.modules[this.name] as boolean;
             }
             return config.modules[this.name] as boolean;
@@ -178,7 +178,13 @@ export interface configKey {
     format?: (data: unknown) => string;
     key: string;
     needsBind?: boolean;
-    type: "role" | "channel" | "user" | "number" | "string",
+    type: "role" | "channel" | "user" | "number" | "string" | "boolean",
     langName: string;
     aliases?: Array<string>;
+    channelTypes?: {
+        voice?: true;
+        text?: true;
+        cat?: true;
+        announce?: true
+    }
 }
