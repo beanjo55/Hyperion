@@ -87,7 +87,11 @@ export default class CommandHandler extends Module<Record<string, never>> {
         }
         if(this.Hyperion.global.userBlacklist.includes(msg.author.id)){return;}
         if(this.Hyperion.global.guildBlacklist.includes(guild.id)){return;}
-        const config = await this.Hyperion.manager.guild(guild.id).getOrCreate();
+        let pconfig = (guild as Guild & {cfg?: GuildType}).cfg;
+        if(!pconfig){
+            pconfig = await this.Hyperion.manager.guild().get(guild.id);
+        }
+        const config = pconfig!;
         const acks = await this.Hyperion.utils.getAcks(msg.author.id);
         if(!msg.member){return;}
         if(!msg.content || msg.content === ""){return;}
