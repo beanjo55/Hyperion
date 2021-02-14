@@ -480,11 +480,11 @@ const starData = {
 const starData = {
     guild: {type: String, required: true, immutable: true},
     channel: {type: String, required: true, immutable: true},
-    message: {type: String, required: true, immutable: true},
+    message: {type: String, required: true, immutable: true, index: true},
     count: {type: Number, default: 1},
 
     starChannel: {type: String},
-    starPost: {type: String},
+    starPost: {type: String, index: true},
 
     origStars: {type: Array},
 
