@@ -269,7 +269,7 @@ export default class Utils {
         const sorted = this.sortRoles(colored, guildRoles);
         if(!sorted){return 0;}
         if(!sorted[0]){return 0;}
-        return this.sortRoles(colored, guildRoles)[0].color;
+        return sorted[0].color;
     }
     
 }
