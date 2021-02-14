@@ -867,6 +867,7 @@ export interface StarType {
     origStars?: Array<string>;
     deleted?: true;
     locked?: true;
+    user: string;
 }
 
 export interface CGuild extends Guild {

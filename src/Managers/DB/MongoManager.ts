@@ -95,6 +95,8 @@ export default class MongoManager extends BaseDBManager{
         this.guild = model<GuildType & Document>("guild", this.guildSchema);
         this.user = model<UserType & Document>("user", this.userSchema);
         this.guilduser = model<GuilduserType & Document>("guilduserdatas", this.guilduserSchema);
+        this.starSchema.index({guild: 1, user: 1, starPost: 1, deleted: 1});
+        this.starSchema.index({guild: 1, channel: 1, starPost: 1, deleted: 1});
         this.stars = model<StarType & Document>("starreds", this.starSchema);
         this.modlogSchema.index({guild: 1, user: 1});
         this.modlogSchema.index({guild: 1, mod: 1});
@@ -487,7 +489,9 @@ const starData = {
     origStars: {type: Array},
 
     deleted: {type: Boolean},
-    locked: {type: Boolean}
+    locked: {type: Boolean},
+
+    user: {type: String, required: true, immutable: true}
 };
 
 const modlogData = {
