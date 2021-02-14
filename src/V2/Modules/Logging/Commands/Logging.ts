@@ -357,7 +357,7 @@ class Logging extends Command{
                 title: "Logging Configuration",
                 color: Hyperion.colors.default,
                 timestamp: new Date,
-                description: `The current logging settings for the server are:\n**Default Log Channel:** ${channelName}\n**Ignored Channels:** ${ignoredChannels}\n**Show Avatar:** ${showAv}\n**Ghost React Time:** ${config.ghostReactTime} seconds\n**New Account Age:** ${config.newAccountAge ?? 5} days\n**Always Show Account Age:** ${config.alwaysShowAge ? "Yes" : "No"}\n**Show Previous Cases:** ${config.prevCasesOnJoin ? "Yes" : "No"}`,
+                description: `The current logging settings for the server are:\n**Default Log Channel:** ${channelName}\n**Ignored Channels:** ${ignoredChannels}\n**Show Avatar:** ${showAv}\n**Ghost React Time:** ${config.ghostReactTime} seconds\n**New Account Age:** ${(config.newAccountAge * 86400000) ?? 5} days\n**Always Show Account Age:** ${config.alwaysShowAge ? "Yes" : "No"}\n**Show Previous Cases:** ${config.prevCasesOnJoin ? "Yes" : "No"}`,
                 fields: [
                     {
                         name: "Enabled Events",
