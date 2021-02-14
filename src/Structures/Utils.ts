@@ -271,5 +271,9 @@ export default class Utils {
         if(!sorted[0]){return 0;}
         return sorted[0].color;
     }
+
+    getRoles(member: Member): Array<Role> {
+        return member.roles.map(r => member.guild.roles.get(r)).filter(r => !!r) as Array<Role>;
+    }
     
 }
