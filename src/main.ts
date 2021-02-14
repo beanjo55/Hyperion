@@ -860,3 +860,8 @@ export interface StarType {
     deleted?: true;
     locked?: true;
 }
+
+export interface CGuild extends Guild {
+    cfg?: GuildType;
+    lastUsed?: number;
+}
