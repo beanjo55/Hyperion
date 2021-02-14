@@ -1,4 +1,4 @@
-import { CategoryChannel, Embed, Guild, Member, NewsChannel, TextChannel, User, VoiceChannel } from "eris";
+import { CategoryChannel, Collection, Embed, Guild, Member, NewsChannel, Role, TextChannel, User, VoiceChannel } from "eris";
 import hyperion from "../main";
 
 export interface ack {
@@ -252,6 +252,24 @@ export default class Utils {
             chan = (guild.channels.find(c => c.type === 4 && c.name.toLowerCase().startsWith(input)) as undefined | CategoryChannel);
         }
         return chan as undefined | CategoryChannel;
+    }
+
+    sortRoles(userRoles: Array<string>, guildRoles: Collection<Role>): Array<Role>{
+        const userRolesObject: Array<Role> = [];
+        if(userRoles === undefined){userRoles = [];}
+        userRoles.forEach((uRole: string) => {
+            const temp = guildRoles.get(uRole);
+            if(temp !== undefined){userRolesObject.push(temp);}
+        });
+        return userRolesObject.sort((a, b) => (b.position - a.position || (b.id as unknown as number) - (a.id as unknown as number)));
+    }
+    
+    getColor(roles: Array<Role>, guildRoles: Collection<Role>): number{
+        const colored = roles.filter((r: Role) => r.color !== 0).map((r: Role) => r.id);
+        const sorted = this.sortRoles(colored, guildRoles);
+        if(!sorted){return 0;}
+        if(!sorted[0]){return 0;}
+        return this.sortRoles(colored, guildRoles)[0].color;
     }
     
 }
