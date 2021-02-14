@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import hyperion, {GuildType} from "../main";
 import {default as fs} from "fs";
-import { Guild, Message } from "eris";
+import { Emoji, Guild, Member, Message, OldMessage, PossiblyUncachedMessage } from "eris";
 import Command from "./Command";
 
 
@@ -34,11 +34,11 @@ export default abstract class Module<T> {
         this.alwaysEnabled = data.alwaysEnabled ?? false;
         this.defaultState = data.defaultState ?? true;
         if(data.config){
-            if(!data.configKeys || !data.save){throw new Error("Config modules must specify configKeys and save");}
+            if(!data.save){throw new Error("Config modules must specify save");}
             this.config = data.config;
-            this.configKeys = data.configKeys;
             this.save = data.save;
         }
+        if(data.configKeys){this.configKeys = data.configKeys;}
     }
 
     formatConfig(data: Partial<T>): T{
@@ -166,6 +166,12 @@ export default abstract class Module<T> {
     }
 
     messageCreate(...args: [Message]): void {throw new Error("Unimplemented messageCreate");}
+    messageDelete(...args: [PossiblyUncachedMessage]): void {throw new Error("Unimplemented messageDelete");}
+    messageUpdate(...args: [Message, OldMessage | null]): void {throw new Error("Unimplemented messageUpdate");}
+    messageReactionAdd(...args: [PossiblyUncachedMessage, Emoji, Member | {id: string}]): void {throw new Error("Unimplemented messageReactionAdd");}
+    messageReactionRemove(...args: [PossiblyUncachedMessage, Emoji, string]): void {throw new Error("Unimplemented messageReactionRemove");}
+    messageReactionRemoveAll(...args: [PossiblyUncachedMessage]): void {throw new Error("Unimplemented messageReactionRemoveAll");}
+    messageDeleteBulk(...args: [Array<PossiblyUncachedMessage>]): void {throw new Error("Unimplemented messageDeleteBulk");}
     guildCreate(...args: [Guild]): void {throw new Error("Unimplemented guildCreate");}
     guildDelete(...args: [Guild]): void {throw new Error("Unimplemented guildDelete");}
 }
@@ -181,10 +187,11 @@ export interface configKey {
     type: "role" | "channel" | "user" | "number" | "string" | "boolean",
     langName: string;
     aliases?: Array<string>;
+    //category will never be used with other types
     channelTypes?: {
         voice?: true;
         text?: true;
         cat?: true;
-        announce?: true
+        news?: true
     }
 }
