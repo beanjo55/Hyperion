@@ -8,8 +8,7 @@ export default class Info extends Module<Record<string, never>> {
             dir: __dirname,
             path: __dirname + "/Info.js",
             hasCommands: true,
-            alwaysEnabled: true,
-            subscribedEvents: ["guildCreate", "guildDelete", "ready"]
+            alwaysEnabled: true
         }, Hyperion);
     }
 
