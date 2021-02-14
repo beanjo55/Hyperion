@@ -619,12 +619,20 @@ export interface GuildType {
         manageMuteRole: boolean;
     };
     starboard: {
-        starChannel: string;
-        ignoredChannels: Array<string>;
         ignoredRoles: Array<string>;
-        selfStar: boolean;
-        customStar: string;
         starCount: number;
+
+        emote: string;
+        starChannel: string;
+        thresholds: {[key: string]: number};
+        defaultThreshold: number;
+        splitChannels: {[key: string]: string};
+        removeSelfStars: boolean;
+        removeOnUnreact: boolean;
+        color: {preferRole: boolean; value: number | "random"};
+        ignoredChannels: Array<string>;
+        ignoredPosterRoles: Array<string>;
+        ignoredStarRoles: Array<string>;
     };
     logging: {
         logChannel: string;
