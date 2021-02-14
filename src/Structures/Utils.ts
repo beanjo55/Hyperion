@@ -1,4 +1,4 @@
-import { Embed, Guild, Member, TextChannel, User } from "eris";
+import { CategoryChannel, Embed, Guild, Member, NewsChannel, TextChannel, User, VoiceChannel } from "eris";
 import hyperion from "../main";
 
 export interface ack {
@@ -200,6 +200,58 @@ export default class Utils {
         }
 
         return output;
+    }
+
+    resolveTextChannel(input: string, guild: Guild): NewsChannel | TextChannel | undefined {
+        input = input.trim().replace(new RegExp(" ", "gmi"), "-").toLowerCase();
+        let chan = guild.channels.get(input);
+        if(chan && ([0, 5].includes(chan.type))){return chan as TextChannel | NewsChannel;}
+        if(!chan){
+            chan = (guild.channels.find(c => (c.type === 0 || c.type === 5) && c.name === input) as undefined | NewsChannel | TextChannel);
+        }
+        if(!chan){
+            chan = (guild.channels.find(c => (c.type === 0 || c.type === 5) && c.name.startsWith(input)) as undefined | NewsChannel | TextChannel);
+        }
+        return chan as undefined | TextChannel | NewsChannel;
+    }
+
+    resolveVoiceChannel(input: string, guild: Guild): VoiceChannel | undefined {
+        input = input.trim().toLowerCase();
+        let chan = guild.channels.get(input);
+        if(chan?.type === 2){return chan as VoiceChannel;}
+        if(!chan){
+            chan = (guild.channels.find(c => c.type === 2 && c.name.toLowerCase() === input) as undefined | VoiceChannel);
+        }
+        if(!chan){
+            chan = (guild.channels.find(c => c.type === 2 && c.name.toLowerCase().startsWith(input)) as undefined | VoiceChannel);
+        }
+        return chan as undefined | VoiceChannel;
+    }
+
+    resolveCategoryChannel(input: string, guild: Guild): CategoryChannel | undefined {
+        input = input.trim().toLowerCase();
+        let chan = guild.channels.get(input);
+        if(chan?.type === 4){return chan as CategoryChannel;}
+        if(!chan){
+            chan = (guild.channels.find(c => c.type === 4 && c.name.toLowerCase() === input) as undefined | CategoryChannel);
+        }
+        if(!chan){
+            chan = (guild.channels.find(c => c.type === 4 && c.name.toLowerCase().startsWith(input)) as undefined | CategoryChannel);
+        }
+        return chan as undefined | CategoryChannel;
+    }
+
+    resolveAnyChannel(input: string, guild: Guild): CategoryChannel | NewsChannel | TextChannel | VoiceChannel | undefined {
+        input = input.trim().toLowerCase();
+        let chan = guild.channels.get(input);
+        if(chan?.type === 4){return chan;}
+        if(!chan){
+            chan = (guild.channels.find(c => c.type === 4 && c.name.toLowerCase() === input) as undefined | CategoryChannel);
+        }
+        if(!chan){
+            chan = (guild.channels.find(c => c.type === 4 && c.name.toLowerCase().startsWith(input)) as undefined | CategoryChannel);
+        }
+        return chan as undefined | CategoryChannel;
     }
     
 }
