@@ -97,8 +97,19 @@ export default class Config extends Command {
         return {success: true, content: data, literal: true};
     }
 
-    updateKey(ctx: CommandContext, mod: Module<unknown>, key: configKey): CommandResponse {
-        return {success: true, content: "sally", literal: true, status: "fancySuccess"}
+    async updateKey(ctx: CommandContext, mod: Module<unknown>, key: configKey): Promise<CommandResponse> {
+        const ogData = ctx.config[mod.name][key.key];
+        if(["reset", "clear"].includes(ctx.args[2].toLowerCase())){
+            return await this.doUpdate(ctx, mod, key, key.default as string | number | Array<string> | Array<number> | boolean);
+        }
+        const input = key.type === "number" ?  Number(ctx.args.slice(2).join(" ").trim()) : ctx.args.slice(2).join(" ").trim();
+        if(key.validate){
+            const validationResult = this.runValidation(ctx, key, ogData, input);
+            if(!validationResult){
+                return {status: "error", success: false, content: ctx.t("config.valid.fail")};
+            }
+        }
+        return {success: true, content: "sally", literal: true, status: "fancySuccess"};
     }
 
     runValidation(ctx: CommandContext, key: configKey, data: string | number | Array<string> | Array<number>, input: number | string): boolean {
@@ -110,6 +121,18 @@ export default class Config extends Command {
             if(Array.isArray(data)){throw new Error("Array data was passed to non-array key");}
         }
         return true;
+    }
+
+    async doUpdate(ctx: CommandContext, mod: Module<unknown>, key: configKey, input: string | number | Array<string> | Array<number> | boolean): Promise<CommandResponse> {
+        ctx.config[mod.name][key.key] = input;
+        try{
+            await this.Hyperion.manager.guild().update(ctx.guild.id, ctx.config);
+            return {success: true, status: "fancySuccess", content: ctx.t("config.update.success")};
+        }catch(e){
+            this.Hyperion.logger.warn("Hyperion", `Failed to update guild config: ${e.message}`);
+            this.Hyperion.sentry.captureException(e, {extra: {guild: ctx.guild.id, module: mod.name, key: key.name}});
+            return {success: true, status: "fancySuccess", content: ctx.t("error")};
+        }
     }
 
     resolveModule(ctx: CommandContext): {newArgs: Array<string>; mod: Module<unknown>} | null {
@@ -158,7 +181,7 @@ export default class Config extends Command {
         return `<@${input}>`;
     }
 
-    defaultFormatter(input: string | number, type: "number" | "string" | "role" | "user" | "channel"): string {
+    defaultFormatter(input: string | number | boolean, type: "number" | "string" | "role" | "user" | "channel" | "boolean"): string {
         switch(type){
         case "role": {
             return this.defaultRoleFormatter(input as string);
@@ -172,6 +195,9 @@ export default class Config extends Command {
         case "number": {
             return input.toString();
         }
+        case "boolean": {
+            return (input as boolean) ? "Yes" : "No";
+        }
         case "string":
         default: {
             return input as string;
@@ -179,7 +205,7 @@ export default class Config extends Command {
         }
     }
 
-    defaultArrayFormatter(input: Array<string | number>, type: "number" | "string" | "role" | "user" | "channel"): string {
+    defaultArrayFormatter(input: Array<string | number | boolean>, type: "number" | "string" | "role" | "user" | "channel" | "boolean"): string {
         if(!input || input.length === 0){return "None";}
         switch(type){
         case "role": {
@@ -193,6 +219,9 @@ export default class Config extends Command {
         }
         case "number": {
             return (input as Array<number>).map(ele => ele.toString()).join(", ");
+        }
+        case "boolean": {
+            return (input as Array<boolean>).map(ele => ele ? "Yes" : "No").join(", ");
         }
         case "string":
         default: {

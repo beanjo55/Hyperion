@@ -37,5 +37,6 @@ export default {
     "config.keylist.title": "{1} Configuration Keys",
     "config.keylist.header": "Listed below are the config keys for {1}\n you can run `{2}config {1} [key name]` to see the current value and to see more details",
     "config.keyinfo.title": "Config Key: {1}",
-    "config.keyinfo.cv": "Current Value"
+    "config.keyinfo.cv": "Current Value",
+    "config.valid.fail": "The given value was invalid"
 };
