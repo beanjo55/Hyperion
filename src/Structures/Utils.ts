@@ -275,5 +275,11 @@ export default class Utils {
     getRoles(member: Member): Array<Role> {
         return member.roles.map(r => member.guild.roles.get(r)).filter(r => !!r) as Array<Role>;
     }
+
+    randomColor(): number {
+        const num = Math.ceil(Math.random() * 16777215);
+        if(num === 0){return 1;}
+        return num;
+    }
     
 }
