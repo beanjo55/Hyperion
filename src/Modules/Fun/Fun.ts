@@ -19,4 +19,8 @@ export default class Fun extends Module<Record<string, never>> {
         return true;
     }
 
+    async onUnload(){
+        return true;
+    }
+
 }

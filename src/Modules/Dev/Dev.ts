@@ -49,6 +49,10 @@ export default class Dev extends Module<Record<string, never>> {
         return true;
     }
 
+    async onUnload(){
+        return true;
+    }
+
     async guildCreate(...args: [Guild]): Promise<void> {
         const guild = args[0];
         if(this.guildJoinEvent[guild.id] !== 1){

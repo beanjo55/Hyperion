@@ -60,13 +60,8 @@ export default abstract class Module<T> {
         return this.dir + "/Commands";
     }
 
-    async onLoad(): Promise<boolean> {
-        throw new Error("Unimplemented onLoad");
-    }
-
-    async onUnload(): Promise<boolean> {
-        throw new Error("Unimplemented onUnoad");
-    }
+    abstract onLoad(): Promise<boolean>;
+    abstract onUnload(): Promise<boolean>;
 
     loadCommands(): void {
         try{

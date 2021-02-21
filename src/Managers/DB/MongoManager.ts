@@ -372,10 +372,14 @@ export default class MongoManager extends BaseDBManager{
         return (await this.stars.findOneAndUpdate({guild, message}, data, {new: true, lean: true}))!;
     }
 
+    async deleteStar(guild: string, message: string): Promise<void> {
+        await this.stars.deleteOne({guild, message}).exec();
+    }
+
     rawStar(): Model<StarType & Document> {
         return this.stars;
     }
-    async createstar(data: Partial<StarType>): Promise<StarType> {
+    async createStar(data: Partial<StarType>): Promise<StarType> {
         return await this.stars.create(data);
     }
 

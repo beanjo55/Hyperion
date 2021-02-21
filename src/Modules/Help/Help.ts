@@ -19,6 +19,10 @@ export default class Help extends Module<Record<string, never>> {
         return true;
     }
 
+    async onUnload(){
+        return true;
+    }
+
     // eslint-disable-next-line complexity
     async messageCreate(...args: [Message]): Promise<void> {
         const msg = args[0];

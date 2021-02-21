@@ -21,7 +21,7 @@ export default class StarConfigManager extends BaseConfigManager<StarType> {
             throw new Error("Message must be specified for star data");
         }
 
-        if(!data.count){
+        if(data.count === undefined){
             throw new Error("Count must be specified for star data");
         }
         return data as StarType;
@@ -40,7 +40,7 @@ export default class StarConfigManager extends BaseConfigManager<StarType> {
             throw new Error("Message must be specified for star data");
         }
 
-        if(!data.count){
+        if(data.count === undefined){
             throw new Error("Count must be specified for star data");
         }
         if(data.starPost === ""){delete data.starPost;}

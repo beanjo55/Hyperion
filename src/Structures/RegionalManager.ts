@@ -375,12 +375,16 @@ export default class RegionalManager {
             const result =  await this.getPrimaryDb().createStar(data);
             return (this.Hyperion.configManagers.get("stars") as BaseConfigManager<StarType>).format(result);
         };
+        const del = async function(this: RegionalManager, guild: string, message: string): Promise<void> {
+            await this.getPrimaryDb().deleteStar(guild, message);
+        };
         return {
             getByMessage: getByMessage.bind(this),
             getByStarpost: getStarByStarpost.bind(this),
             update: update.bind(this),
             raw: raw.bind(this),
-            create: create.bind(this)
+            create: create.bind(this),
+            delete: del.bind(this)
         };
     }
 

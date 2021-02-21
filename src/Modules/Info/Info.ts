@@ -15,4 +15,8 @@ export default class Info extends Module<Record<string, never>> {
     async onLoad(){
         return true;
     }
+
+    async onUnload(){
+        return true;
+    }
 }

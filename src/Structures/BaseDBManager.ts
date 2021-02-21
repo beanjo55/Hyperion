@@ -104,6 +104,10 @@ export default abstract class BaseDatabaseManager {
         throw new Error("unimplemented updateStar");
     }
 
+    async deleteStar(guild: string, message: string): Promise<void> {
+        throw new Error("unimplemented deleteStar");
+    }
+
     rawStar(): unknown {
         throw new Error("unimplemented rawStar");
     }

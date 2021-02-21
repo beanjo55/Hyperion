@@ -39,9 +39,6 @@ export default abstract class Command {
         this.pro = data.pro ?? false;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async execute(ctx: CommandContext): Promise<CommandResponse> {
-        throw new Error("Unimplemented execute!");
-    }
+    abstract execute(ctx: CommandContext): Promise<CommandResponse>;
     
 }

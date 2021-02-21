@@ -189,7 +189,7 @@ export default class hyperion extends Base{
         this.modules.set(loaded.name, loaded);
         await loaded.onLoad();
         if(loaded.hasCommands){loaded.loadCommands();}
-        const exists = this.metadataModels.module.exists({name: loaded.name});
+        const exists = await this.metadataModels.module.exists({name: loaded.name});
         if(exists){
             this.metadataModels.module.updateOne({name: loaded.name}, {
                 alwaysEnabled: loaded.alwaysEnabled,
@@ -473,6 +473,14 @@ export default class hyperion extends Base{
         const mongoRx = new RegExp(config.mongoLogin, "gmi");
         return input.replace(tokenRx, "No").replace(circleRx, "No").replace(mongoRx, "No");
     }
+
+    async getCGuild(guild: Guild): Promise<CGuild> {
+        if(!(guild as CGuild).cfg){
+            (guild as CGuild).cfg = await this.manager.guild().get(guild.id);
+        }
+        (guild as CGuild).lastUsed = Date.now();
+        return guild as CGuild;
+    }
 }
 
 //hi wuper
@@ -633,6 +641,7 @@ export interface GuildType {
         ignoredChannels: Array<string>;
         ignoredPosterRoles: Array<string>;
         ignoredStarRoles: Array<string>;
+        addStarToBoard: boolean;
     };
     logging: {
         logChannel: string;
