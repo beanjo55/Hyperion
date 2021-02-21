@@ -1,5 +1,6 @@
 import {Command} from "../../../Structures/Command";
 import {ICommandContext, IHyperion} from "../../../types";
+import {AdvancedMessageContent} from "eris";
 
 class Bio extends Command{
     constructor(){
@@ -13,11 +14,11 @@ class Bio extends Command{
         });
     }
 
-    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string>{
+    async execute(ctx: ICommandContext, Hyperion: IHyperion): Promise<string | AdvancedMessageContent>{
         if(ctx.args.length === 0){
             const current = await Hyperion.managers.user.getBio(ctx.user.id);
             if(!current || current === ""){return "You dont have a bio set!";}
-            return `Your current bio is: ${current}`;
+            return {content: `Your current bio is: ${current}`, allowedMentions: {everyone: false, roles: false, users: false}};
         }
         const bio = ctx.args.join(" ");
         if(bio.length > 500){
