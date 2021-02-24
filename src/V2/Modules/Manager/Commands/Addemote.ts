@@ -8,7 +8,7 @@ class AddEmote extends Command{
             name: "addemote",
             module: "manager",
             userperms: ["manager"],
-            aliases: ["addemoji", "steal"],
+            aliases: ["addemoji", "steal", "acquire", "copyrightinfringe", "yoink"],
             cooldownTime: 10000,
             botperms: ["manageEmojis"],
 
