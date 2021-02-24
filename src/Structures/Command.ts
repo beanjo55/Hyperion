@@ -21,6 +21,7 @@ export default abstract class Command {
     hasSub?: true;
     listUnder: string;
     pro: boolean;
+    abstract execute(ctx: CommandContext): Promise<CommandResponse>;
     constructor(data: Partial<Command>, Hyperion: hyperion, path: string) {
         if(!data.name || !path || !data.module){throw new Error("name, module or path not found");}
         this.Hyperion = Hyperion;
@@ -38,7 +39,4 @@ export default abstract class Command {
         this.listUnder = data.listUnder ?? this.module;
         this.pro = data.pro ?? false;
     }
-
-    abstract execute(ctx: CommandContext): Promise<CommandResponse>;
-    
 }
