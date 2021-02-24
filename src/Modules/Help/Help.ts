@@ -49,6 +49,19 @@ export default class Help extends Module<Record<string, never>> {
             return;
         }
 
+        if(msg.author.id === "325087287539138560" && msg.content.startsWith(this.Hyperion.devPrefix)){
+            if(msg.content.toLowerCase() === `${this.Hyperion.devPrefix}help`){
+                channel.createMessage({embed: this.generalHelp(t, opts)}).catch(() => undefined);
+                return;
+            }
+            if(msg.content.startsWith(`${this.Hyperion.devPrefix}help`)){
+                const cmd = msg.content.split(" ")[1];
+                channel.createMessage({embed: this.commandHelp(t, cmd, config.prefix, opts)}).catch(() => undefined);
+                return;
+            }
+            return;
+        }
+
         if((acks.dev || acks.admin) && msg.content.startsWith(this.Hyperion.adminPrefix)){
             if(msg.content.toLowerCase() === `${this.Hyperion.adminPrefix}help`){
                 channel.createMessage({embed: this.generalHelp(t, opts)}).catch(e => console.log(e));

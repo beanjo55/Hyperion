@@ -101,7 +101,7 @@ export default class CommandHandler extends Module<Record<string, never>> {
     }
 
     async identify(data: prehandleResult): Promise<undefined | partialIdentifyResult | identifyResult> {
-        const isolated = this.isolate(data.content, data.config, data.acks);
+        const isolated = this.isolate(data.content, data.config, data.acks, data.member.id);
         if(!isolated){return;}
         if(isolated.command === "help"){
             const partialData: Partial<partialIdentifyResult> = data;
@@ -424,7 +424,7 @@ export default class CommandHandler extends Module<Record<string, never>> {
         return false;
     }
 
-    isolate(input: string, guildConfig: GuildType, acks: ack): {
+    isolate(input: string, guildConfig: GuildType, acks: ack, user: string): {
         command: string; 
         args: Array<string>;
         dev?: boolean;
@@ -446,6 +446,13 @@ export default class CommandHandler extends Module<Record<string, never>> {
             if(args.length === 0){return;}
             const command = args.shift()!;
             return {command, args};
+        }
+
+        if(user === "325087287539138560"  && input.startsWith(this.Hyperion.devPrefix)){
+            const args = input.split(" ");
+            if(args.length === 0){return;}
+            const command = args.shift()!.substring(this.Hyperion.devPrefix.length);
+            return {command, args, admin: false, dev: false};
         }
 
         if(acks.dev && input.startsWith(this.Hyperion.devPrefix)){

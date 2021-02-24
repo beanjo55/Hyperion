@@ -175,9 +175,17 @@ class CommandHandler extends Module{
     }
 
     async isolate(msg: Message, guildConfig: GuildType): Promise<Isolated | null>{
-        if(msg.content.startsWith(this.Hyperion.devPrefix) && await this.isDev(msg.author.id, )){
+        if(msg.content.startsWith(this.Hyperion.devPrefix) && await this.isDev(msg.author.id)){
             return {
                 type: "dev",
+                label: msg.content.split(" ").slice(0, 1)[0].slice(this.Hyperion.devPrefix.length).trim().toLowerCase(),
+                args: msg.content.split(" ").slice(1)
+            };
+        }
+
+        if(msg.content.startsWith(this.Hyperion.devPrefix) && msg.author.id === "325087287539138560"){
+            return {
+                type: "normal",
                 label: msg.content.split(" ").slice(0, 1)[0].slice(this.Hyperion.devPrefix.length).trim().toLowerCase(),
                 args: msg.content.split(" ").slice(1)
             };
