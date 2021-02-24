@@ -349,7 +349,7 @@ export default class MongoManager extends BaseDBManager{
         return data;
     }
 
-    async updateGuildUser(guild: string, user: string, data: Partial<GuilduserType>): Promise<GuilduserType> {
+    async updateGuilduser(guild: string, user: string, data: Partial<GuilduserType>): Promise<GuilduserType> {
         data.guild = guild;
         data.user = user;
         return await this.guilduser.findOneAndUpdate({guild, user}, data, {new: true, upsert: true, lean: true});

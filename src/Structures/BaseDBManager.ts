@@ -44,128 +44,42 @@ export default abstract class BaseDatabaseManager {
         throw new Error("unimplemented raw");
     }
 
-    async getGuild(id: string): Promise<GuildType> {
-        throw new Error("unimplemented getGuild");
-    }
+    abstract getGuild(id: string): Promise<GuildType>
+    abstract updateGuild(id: string, data: Partial<GuildType>): Promise<GuildType> 
+    abstract rawGuild(): unknown
 
-    async updateGuild(id: string, data: Partial<GuildType>): Promise<GuildType> {
-        throw new Error("unimplemented updateGuild");
-    }
+    abstract getGuilduser(guild: string, user: string): Promise<GuilduserType> 
+    abstract updateGuilduser(guild: string, user: string, data: Partial<GuilduserType>): Promise<GuilduserType> 
+    abstract rawGuildUser(): unknown
 
-    rawGuild(): unknown {
-        throw new Error("unimplemented rawGuild");
-    }
+    abstract getUser(id: string): Promise<UserType> 
+    abstract updateUser(id: string, data: Partial<UserType>): Promise<UserType> 
+    abstract rawUser(): unknown
 
-    async getGuilduser(guild: string, user: string): Promise<GuilduserType> {
-        throw new Error("unimplemented getGuilduser");
-    }
+    abstract getEmbed(id: string): Promise<EmbedType> 
+    abstract updateEmbed(id: string, data: Partial<EmbedType>): Promise<EmbedType> 
+    abstract rawEmbed(): unknown
 
-    async updateGuilduser(guild: string, user: string, data: Partial<GuilduserType>): Promise<GuilduserType> {
-        throw new Error("unimplemented updateGuilduser");
-    }
+    abstract getStarByMessage(guild: string, id: string): Promise<StarType | null>
+    abstract getStarByStarpost(guild: string, id: string): Promise<StarType | null>
+    abstract updateStar(guild: string, message: string,  data: Partial<StarType>): Promise<StarType>
+    abstract deleteStar(guild: string, message: string): Promise<void>
+    abstract rawStar(): unknown
+    abstract createStar(data: Partial<StarType>): Promise<StarType>
 
-    rawGuildUser(): unknown {
-        throw new Error("unimplemented rawGuilduser");
-    }
+    abstract getNote(guild: string, user: string, id: number): Promise<noteType | null>
+    abstract getNotes(guild: string, user: string): Promise<Array<noteType>>
+    abstract updateNote(guild: string, user: string, id: number, data: Partial<noteType>): Promise<noteType>
+    abstract createNote(data: Partial<noteType>): Promise<noteType>
+    abstract rawNote(): unknown
 
-    async getUser(id: string): Promise<UserType> {
-        throw new Error("unimplemented getUser");
-    }
+    abstract getModlog(id: string): Promise<modLogType | null>
+    abstract updateModlog(id: string, data: Partial<modLogType>): Promise<modLogType>
+    abstract rawModlog(): unknown
+    abstract createModlog(data: Partial<modLogType>): Promise<modLogType>
 
-    async updateUser(id: string, data: Partial<UserType>): Promise<UserType> {
-        throw new Error("unimplemented updateUser");
-    }
-
-    rawUser(): unknown {
-        throw new Error("unimplemented rawUser");
-    }
-
-    async getEmbed(id: string): Promise<EmbedType> {
-        throw new Error("unimplemented getEmbed");
-    }
-
-    async updateEmbed(id: string, data: Partial<EmbedType>): Promise<EmbedType> {
-        throw new Error("unimplemented updateEmbed");
-    }
-
-    rawEmbed(): unknown {
-        throw new Error("unimplemented rawEmbed");
-    }
-
-    async getStarByMessage(guild: string, id: string): Promise<StarType | null> {
-        throw new Error("unimplemented getStarByMessage");
-    }
-
-    async getStarByStarpost(guild: string, id: string): Promise<StarType | null> {
-        throw new Error("unimplemented getStarByStarpost");
-    }
-
-    async updateStar(guild: string, message: string,  data: Partial<StarType>): Promise<StarType> {
-        throw new Error("unimplemented updateStar");
-    }
-
-    async deleteStar(guild: string, message: string): Promise<void> {
-        throw new Error("unimplemented deleteStar");
-    }
-
-    rawStar(): unknown {
-        throw new Error("unimplemented rawStar");
-    }
-
-    async getNote(guild: string, user: string, id: number): Promise<noteType | null> {
-        throw new Error("unimplemented getNote");
-    }
-
-    async getNotes(guild: string, user: string): Promise<Array<noteType>> {
-        throw new Error("unimplemented getNotes");
-    }
-
-    async updateNote(guild: string, user: string, id: number, data: Partial<noteType>): Promise<noteType> {
-        throw new Error("unimplemented updateNote");
-    }
-
-
-    rawNote(): unknown {
-        throw new Error("unimplemented rawNote");
-    }
-
-    async getModlog(id: string): Promise<modLogType | null> {
-        throw new Error("unimplemented getModlog");
-    }
-
-    async updateModlog(id: string, data: Partial<modLogType>): Promise<modLogType> {
-        throw new Error("unimplemented updateModlog");
-    }
-
-    rawModlog(): unknown {
-        throw new Error("unimplemented rawModlog");
-    }
-
-    async getModeration(id: string): Promise<moderationType | null> {
-        throw new Error("unimplemented getModeration");
-    }
-
-    async updateModeration(id: string, data: Partial<moderationType>): Promise<moderationType> {
-        throw new Error("unimplemented updateModeration");
-    }
-
-    rawModeration(): unknown {
-        throw new Error("unimplemented rawModeration");
-    }
-
-    async createModlog(data: Partial<modLogType>): Promise<modLogType> {
-        throw new Error("unimplemented createModlog");
-    }
-
-    async createModeration(data: Partial<moderationType>): Promise<moderationType> {
-        throw new Error("unimplemented createModeration");
-    }
-
-    async createNote(data: Partial<noteType>): Promise<noteType> {
-        throw new Error("unimplemented createNote");
-    }
-
-    async createStar(data: Partial<StarType>): Promise<StarType> {
-        throw new Error("unimplemented createStar");
-    }
+    abstract getModeration(id: string): Promise<moderationType | null>
+    abstract updateModeration(id: string, data: Partial<moderationType>): Promise<moderationType>
+    abstract rawModeration(): unknown
+    abstract createModeration(data: Partial<moderationType>): Promise<moderationType>
 }
