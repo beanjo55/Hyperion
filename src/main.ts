@@ -1,7 +1,7 @@
 import {Base} from "./harbringer/index";
 import {IPC} from "./harbringer/structures/IPC";
 import {AdvancedMessageContent, Client, Guild, GuildTextableChannel, Member, Message, Collection, Embed} from "eris";
-import Module from "./Structures/Module";
+import Module, { configKey } from "./Structures/Module";
 import Command from "./Structures/Command";
 import Utils, { ack } from "./Structures/Utils";
 import {EventEmitter} from "events";
@@ -87,6 +87,363 @@ export interface V2Type {
     };
 }
 
+export class DataApi {
+    modules = new Map<string, Module<unknown>>();
+    commands = new Map<string, Command>();
+    configManagers = new Map<string, BaseConfigManager<unknown>>();
+    dbManagers = new Map<string, BaseDBManager>();
+    manager = new RegionalManager(this as unknown as hyperion);
+    utils: Utils;
+    internalEvents = null as unknown as InternalEvents;
+    devPrefix = config.coreOptions.devPrefix;
+    adminPrefix = config.coreOptions.adminPrefix;
+    trueReady = false;
+    sentry: typeof sentry;
+    build = config.coreOptions.build;
+    colors = colors;
+    emotes = emotes;
+    logger = logger;
+    redis!: IORedis.Redis;
+    db!: mongoose.Connection;
+    lang = new LangManager(this as unknown as hyperion);
+    metadataModels!: {
+        module: Model<Document & moduleMeta>;
+        command: Model<Document & commandMeta>;
+    }
+    globalModel!: Model<Document & GlobalType>;
+    global!: GlobalType;
+    name!: string;
+    version = version;
+    V2!: V2Type;
+    circleCIToken = config.coreOptions.circleCIToken
+    ipc = null as unknown as IPC;
+    clusterID = -1;
+    client = new Client("") ;
+    constructor(){
+        this.sentry = require("@sentry/node");
+        this.sentry.init({
+            dsn: config.coreOptions.sentryDSN,
+            environment: config.coreOptions.build
+        });
+        (process as NodeJS.EventEmitter).on("uncaughtException", (err: Error, origin: string) =>{
+            this.logger.fatal("Hyperion", "An uncaught execption was encountered", "Uncaught Exception");
+            this.logger.fatal("Hyperion", inspect(err.message.toString()), "Uncaught Exception Error");
+            this.logger.fatal("Hyperion", inspect(origin.toString()), "Uncaught Exception Origin");
+            this.sentry.captureException(inspect(err.message.toString()));
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (process as NodeJS.EventEmitter).on("unhandledRejection", (reason: Error | any) => {
+            this.logger.error("Hyperion", "Encountered unhandled rejection", "Unhandled Rejection");
+            this.logger.error("Hyperion", inspect(reason, {depth: 0}), "Unhandled Rejection");
+            this.sentry.captureException(reason);
+        });
+        this.utils = new Utils(this as unknown as hyperion);
+        this.initMongo();
+        this.initGlobal();
+        this.initRedis();
+        this.loadMods(config.coreOptions.modlist);
+        //this.loadEvents(config.coreOptions.eventlist);
+        this.loadConfigManagers();
+        this.loadDBManagers();
+        this.compatInit();
+    }
+
+    async loadMod(name: string): Promise<void>{
+        const path = `${__dirname}/Modules/${name}/${name}.js`;
+        const toLoad = require(path).default;
+        if(!toLoad){throw new Error("Loaded module was undefined");}
+        const loaded: Module<unknown> = new toLoad(this);
+        this.modules.set(loaded.name, loaded);
+        await loaded.onLoad();
+        if(loaded.hasCommands){loaded.loadCommands();}
+        const exists = await this.metadataModels.module.exists({name: loaded.name});
+        if(exists){
+            this.metadataModels.module.updateOne({name: loaded.name}, {
+                alwaysEnabled: loaded.alwaysEnabled,
+                defaultStatus: loaded.defaultState,
+                hasCommands: loaded.hasCommands,
+                pro: loaded.pro,
+                private: loaded.private,
+                friendlyName: loaded.friendlyName
+            });
+        }else{
+            this.metadataModels.module.create({
+                name: loaded.name,
+                alwaysEnabled: loaded.alwaysEnabled,
+                defaultStatus: loaded.defaultState,
+                hasCommands: loaded.hasCommands,
+                pro: loaded.pro,
+                private: loaded.private,
+                friendlyName: loaded.friendlyName
+            });
+        }
+    }
+
+    loadMods(list: Array<string>): void{
+        list.forEach(async name => {
+            await this.loadMod(name);
+        });
+    }
+
+    reloadMod(path: string): void{
+        delete require.cache[require.resolve(path)];
+        const toLoad = require(path).default;
+        if(!toLoad){throw new Error("Loaded module was undefined");}
+        const loaded = new toLoad(this);
+        this.modules.set(loaded.name, loaded);
+    }
+
+    async unloadMod(mod: Module<unknown>): Promise<void>{
+        delete require.cache[require.resolve(mod.path)];
+        this.commands.forEach(c => {
+            if(c.module === mod.name){this.commands.delete(c.name);}
+        });
+        await mod.onUnload();
+        this.modules.delete(mod.name);
+    }
+
+    loadEvent(name: events): void{
+        const payload = {name, Hyperion: this as unknown as hyperion};
+        function template(this: {name: events; Hyperion: hyperion}, ...args: Array<unknown>){
+            if(!this.Hyperion.trueReady){return;}
+            this.Hyperion.modules.forEach(mod => {
+                if(mod.subscribedEvents.includes(this.name)){(mod[this.name] as (...args: Array<unknown>) => void)(...args);}
+            });
+            this.Hyperion.V2.modules.forEach(mod => {
+                if(mod.subscribedEvents.includes(this.name)){(mod[this.name] as (...args: Array<unknown>) => void)(...args);}
+            });
+        }
+        async function messageTemplate(this: {name: events; Hyperion: hyperion}, ...args: Array<unknown>){
+            if(!this.Hyperion.trueReady){return;}
+            const guild = ((args[0] as Message).channel as GuildTextableChannel).guild as Guild & {cfg: GuildType, lastUsed: number};
+            if(!guild){return;}
+            if(!guild.cfg){
+                const config = await this.Hyperion.manager.guild().get(guild.id);
+                guild.cfg = config;
+            }
+            guild.lastUsed = Date.now();
+            this.Hyperion.modules.forEach(mod => {
+                if(mod.subscribedEvents.includes(this.name)){(mod[this.name] as (...args: Array<unknown>) => void)(...args);}
+            });
+            this.Hyperion.V2.modules.forEach(mod => {
+                if(mod.subscribedEvents.includes(this.name)){(mod[this.name] as (...args: Array<unknown>) => void)(...args);}
+            });
+        }
+        this.client.on(name, name === "messageCreate" ? messageTemplate.bind(payload) : template.bind(payload));
+    }
+
+
+    loadEvents(list: Array<events>): void{
+        list.forEach(event => this.loadEvent(event));
+    }
+
+    unloadEvent(name: events): void{
+        this.client.removeAllListeners(name);
+    }
+
+    initRedis(): void{
+        this.redis = new IORedis({keyPrefix: `${this.build}:`});
+        this.redis.on("connect", () => this.logger.success("Hyperion", "Connected to Redis", "Redis"));
+        this.redis.on("end", () => this.logger.fatal("Hyperion", "Failed to (re)connect to Redis", "Redis"));
+        this.redis.on("close", () => this.logger.warn("Hyperion", "The Redis connection was closed", "Redis"));
+        this.redis.on("reconnecting", (time) => this.logger.info("Hyperion", `Attmepting to reconnect to Redis in ${time}ms`, "Redis"));
+        this.redis.on("error", (err) => this.logger.error("Hyperion", `Redis encountered an error: ${err.message}`, "Redis"));
+    }
+
+    async initMongo(): Promise<void>{
+        const mongoOptions = config.mongoOptions;
+        mongoOptions.dbName = this.build;
+        
+        mongoose.connection.on("error", () => this.logger.error("MongoDB", "Failed to connect to MongoDB", "Connection"));
+        mongoose.connection.on("open", () => this.logger.success("MongoDB", "Connected to MongoDB", "Connection"));
+        await mongoose.connect(config.mongoLogin, mongoOptions);
+        this.db = mongoose.connection;
+    }
+
+    loadDBManagers(): void{
+        try{
+            const files = fs.readdirSync(`${__dirname}/Managers/DB`);
+            files.forEach(file => {
+                try{
+                    this.loadDBManager(`${__dirname}/Managers/DB/` + file);
+                }catch(err){
+                    //logger
+                }
+            });
+        }catch(err){
+            //logger
+        }
+    }
+
+    loadDBManager(path: string): void{
+        try{
+            const manager = require(path).default;
+            if(!manager){throw new Error("Could not load a DB manager at " + path);}
+            const loaded: BaseDatabaseManager = new manager(this, path);
+            this.dbManagers.set(loaded.db, loaded);
+            loaded.onLoad();
+        }catch(err){
+            //logger
+        }
+    }
+
+    reloadDBManager(path: string): void{
+        delete require.cache[require.resolve(path)];
+        this.loadDBManager(path);
+    }
+
+    loadConfigManagers(): void{
+        try{
+            const files = fs.readdirSync(`${__dirname}/Managers/Config`);
+            files.forEach(file => {
+                try{
+                    this.loadConfigManager(`${__dirname}/Managers/Config/` + file);
+                }catch(err){
+                    //logger
+                }
+            });
+        }catch(err){
+            //logger
+        }
+    }
+
+    loadConfigManager(path: string): void{
+        try{
+            const manager = require(path).default;
+            if(!manager){throw new Error("Could not load a config manager at " + path);}
+            const loaded: BaseConfigManager<unknown> = new manager(this, path);
+            this.configManagers.set(loaded.role, loaded);
+        }catch(err){
+            //logger
+        }
+    }
+
+    reloadConfigManager(path: string): void{
+        delete require.cache[require.resolve(path)];
+        this.loadConfigManager(path);
+    }
+
+    reloadUtils(): void{
+        delete require.cache[require.resolve("./Structures.Utils.js")];
+        const newUtils = require("./Structures/Utils.js").default;
+        if(!newUtils){throw new Error("Did not load new utils!");}
+        this.utils = new newUtils(this) as Utils;
+    }
+
+    async initGlobal(): Promise<void> {
+        this.globalModel = model("global", globalSchema);
+        await this.loadGlobal();
+    }
+
+    async loadGlobal(): Promise<void> {
+        const data = await this.globalModel.findOne({}).lean<GlobalType>().exec();
+        if(data){
+            this.global = data;
+        }else{
+            this.global = {
+                globalCooldown: 1,
+                disabledCommands: [],
+                disabledLogEvents: [],
+                disabledModules: [],
+                guildBlacklist: [],
+                userBlacklist: [],
+                exp: {
+                    coeff: 0.1,
+                    cooldown: 120,
+                    offset: 0,
+                    min: 10,
+                    max: 15,
+                    div: 2
+                }
+            };
+        }
+    }
+
+    async reloadGlobal(): Promise<void> {
+        const data = await this.globalModel.findOne({}).lean<GlobalType>().exec();
+        if(!data){throw new Error("Could not load new global!");}
+        this.global = data;
+    }
+
+    updateGlobal(): void {
+        this.globalModel.updateOne({}, this.global).exec();
+    }
+
+    compatInit(): void{
+        this.V2 = {
+            utils,
+            client: this.client,
+            redis: this.redis,
+            colors: this.colors,
+            emotes: this.emotes,
+            global: this.global,
+            stars: {},
+            sentry: this.sentry,
+            devPrefix: this.devPrefix,
+            adminPrefix: this.adminPrefix,
+            logger: this.logger,
+            ipc: this.ipc,
+            build: this.build,
+            clusterID: this.clusterID,
+            version,
+            managers: {
+                guild: new MongoGuildManager(this as unknown as hyperion),
+                user: new MongoUserManager(this as unknown as hyperion),
+                guilduser: new MongoGuilduserManager(this as unknown as hyperion),
+                modlog: new MongoModlogManager(this as unknown as hyperion),
+                moderations: new MongoModerationManager(this as unknown as hyperion),
+                embeds: new MongoEmbedManager(this as unknown as hyperion)
+            },
+            modules: new Collection<V2Module>(V2Module),
+            commands: new Collection<V2Command>(V2Command)
+        } as V2Type;
+        this.loadV2Mods();
+    }
+
+    loadV2Mod(modname: string): V2Module | undefined{
+        try{
+            const mod = require(`./V2/Modules/${modname}/${modname}.js`).default;
+            return this.V2.modules.add(new mod(this.V2));
+        }catch(err){
+            this.logger.error("Hyperion", `Failed to load v2 module ${modname}, error: ${err}`, "Module Loading");
+        }
+    }
+
+    loadV2Mods(): void{
+        const modlist = ["CommandHandler", "Info", "Fun", "Social", "Manager", "Logging", "Mod", "Embeds", "Welcome", "Goodbye", "Quotes", "Highlights", "Reactionroles", "Levels", "VTL", "Suggestions"];
+        modlist.forEach(mod =>{
+            this.loadV2Mod(mod);
+        });
+        this.V2.modules.forEach(mod =>{
+            if(mod.needsLoad){
+                mod.loadMod();
+            }
+            if(mod.needsInit){
+                mod.init(this.V2);
+            }
+            if(mod.hasCommands){
+                mod.loadCommands();
+            }
+        });
+        
+    }
+
+    redact(input: string): string {
+        const tokenRx = new RegExp(config.token.split(" ")[1], "gmi");
+        const circleRx = new RegExp(config.coreOptions.circleCIToken, "gmi");
+        const mongoRx = new RegExp(config.mongoLogin, "gmi");
+        return input.replace(tokenRx, "No").replace(circleRx, "No").replace(mongoRx, "No");
+    }
+
+    async getCGuild(guild: Guild): Promise<CGuild> {
+        if(!(guild as CGuild).cfg){
+            (guild as CGuild).cfg = await this.manager.guild().get(guild.id);
+        }
+        (guild as CGuild).lastUsed = Date.now();
+        return guild as CGuild;
+    }
+}
+
 export default class hyperion extends Base{
     modules = new Map<string, Module<unknown>>();
     commands = new Map<string, Command>();
@@ -95,11 +452,11 @@ export default class hyperion extends Base{
     manager = new RegionalManager(this);
     utils: Utils;
     internalEvents: InternalEvents;
-    devPrefix: string;
-    adminPrefix: string;
+    devPrefix = config.coreOptions.devPrefix;
+    adminPrefix = config.coreOptions.adminPrefix;
     trueReady = false;
     sentry: typeof sentry;
-    build: string;
+    build = config.coreOptions.build;
     colors = colors;
     emotes = emotes;
     logger = logger;
@@ -137,9 +494,6 @@ export default class hyperion extends Base{
         });
         this.utils = new Utils(this);
         this.internalEvents = new InternalEvents(this);
-        this.devPrefix = config.coreOptions.devPrefix;
-        this.adminPrefix = config.coreOptions.adminPrefix;
-        this.build = config.coreOptions.build;
     }
 
     async launch(): Promise<void>{
