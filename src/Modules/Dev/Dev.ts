@@ -66,7 +66,7 @@ export default class Dev extends Module<Record<string, never>> {
                 this.Hyperion.manager.guild().update(guild.id, {deleted: false});
             }
             this.Hyperion.client.editStatus(undefined, {name: `%help | ${this.Hyperion.client.guilds.size} servers`, type: 0});
-            this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
+            this.Hyperion.client.executeWebhook("", "", {
                 embeds: [
                     {
                         color: this.Hyperion.colors.default,
@@ -88,7 +88,7 @@ export default class Dev extends Module<Record<string, never>> {
             };
             setTimeout(clear.bind(this), 1000);
             this.Hyperion.manager.guild().update(guild.id, {deleted: true, deletedAt: Date.now()});
-            this.Hyperion.client.executeWebhook("707305665500151818", "v7riuTIwaFjVy88iC9LsFyj8vjvbv5CV2mdXQPpL_gZwJ8Fn140VMO2nYChMA11Y-Jiq", {
+            this.Hyperion.client.executeWebhook("", "", {
                 embeds: [
                     {
                         color: this.Hyperion.colors.default,

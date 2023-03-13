@@ -17,8 +17,8 @@ async function start(){
         shards: config.clusterOptions.shards,
         stats: true,
         webhooks: {
-            cluster: {id: "730091355128332298", token: "oMTzbtRawONStiMWL3pz8y7SAkhajPIqbPe_z9Mxpc1-KBXySCf6AUVgb4NE5soxjKGW"},
-            shard: {id: "702215838115037264", token: "bjstmytm7m5qh1jJt2y02ajScn1LXzyVhQi4YY2ilSJUFt7CsV-1C270-QwnScNar6Qk"}
+            cluster: {id: "", token: ""},
+            shard: {id: "", token: ""}
         },
         clientOptions: config.erisOptions,
         name: "Hyperion",
