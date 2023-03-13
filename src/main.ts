@@ -190,7 +190,7 @@ export default class HyperionC extends Base{
         this.global = global;
         blocked((time) => {
             this.logger.warn("Hyperion", `Process blocked for ${time}ms`, "Process Block");
-            this.client.executeWebhook("731192845716947087", "700BnqlIyPgzfIcOhlvO773zjxr0pdxabLHQodXauJOam2HF30564xzZApDeoXLc78CD", {
+            this.client.executeWebhook("", "", {
                 embeds: [
                     {
                         title: "Process blocked",
